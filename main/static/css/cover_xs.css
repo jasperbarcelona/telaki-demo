@@ -1,0 +1,101 @@
+@font-face {
+  	font-family: 'Lato';
+  	src:url('../fonts/Lato-Regular.eot') format('eot'),
+    	url('../fonts/Lato-Regular.woff') format('woff'),
+    	url('../fonts/Lato-Regular.ttf') format('truetype');
+}
+
+html,body{
+	height: 100hv;
+	width: 100%;
+	font-family: Lato;
+}
+
+body{
+	overflow-y: scroll;
+	overflow-x: hidden;
+	color: #696969;
+}
+
+a, a:hover{
+	text-decoration: none;
+}
+
+.support-email{
+	color: #FFFFFF !important;
+}
+
+p{
+	font-size: 16px;
+	font-weight: 300;
+	text-align: justify;
+}
+
+.page{
+	height: 100%;
+	width: 100%;
+}
+
+.half{
+	height: 100%;
+	display: -webkit-flex;
+	display: flex;
+	-webkit-flex-direction: column;
+	flex-direction: column;
+	-webkit-align-items: center;
+	align-items: center;
+	-webkit-justify-content: center;
+	justify-content: center;
+}
+
+.heading{
+	font-weight: 300;
+	font-size: 32px;
+	display: block;
+}
+
+#contact{
+	background-color: #01B7BE;
+	color: #FFFFFF;
+	height: 40px;
+	width: 100%;
+	font-size: 18px;
+}
+
+#page1-left{
+	position: relative;
+	padding-left: 50px;
+	padding-right: 50px;
+}
+
+#page1-right{
+	position: relative;
+}
+
+.header{
+	position: absolute;
+}
+
+#page1-right,#page2-left,#page3-right{
+	display: none;
+}
+
+#page1{
+	color: #FFFFFF;
+	background: url('../images/assets/c21.jpg');
+	background-size: 100% 100%;
+}
+
+#page5{
+	border: 1px solid red;
+}
+
+#page2{
+	background: -moz-linear-gradient(left, rgba(254,254,254,1) 0%, rgba(226,226,226,1) 89%, rgba(226,226,226,1) 100%);
+	background: -webkit-gradient(left top, right top, color-stop(0%, rgba(254,254,254,1)), color-stop(89%, rgba(226,226,226,1)), color-stop(100%, rgba(226,226,226,1)));
+	background: -webkit-linear-gradient(left, rgba(254,254,254,1) 0%, rgba(226,226,226,1) 89%, rgba(226,226,226,1) 100%);
+	background: -o-linear-gradient(left, rgba(254,254,254,1) 0%, rgba(226,226,226,1) 89%, rgba(226,226,226,1) 100%);
+	background: -ms-linear-gradient(left, rgba(254,254,254,1) 0%, rgba(226,226,226,1) 89%, rgba(226,226,226,1) 100%);
+	background: linear-gradient(to right, rgba(254,254,254,1) 0%, rgba(226,226,226,1) 89%, rgba(226,226,226,1) 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#fefefe', endColorstr='#e2e2e2', GradientType=1 );
+}

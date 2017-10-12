@@ -1,0 +1,303 @@
+@font-face
+	{
+		font-family: OpenSans;
+		src:url('../fonts/OpenSans-Regular.ttf');
+	}
+
+@font-face {
+  	font-family: 'Lato';
+  	src:url('../fonts/Lato-Regular.eot') format('eot'),
+    	url('../fonts/Lato-Regular.woff') format('woff'),
+    	url('../fonts/Lato-Regular.ttf') format('truetype');
+}
+
+
+html{
+	height: 100%;
+}
+
+body{
+	height: 100%;
+	width: 100%;
+	color: #373A3C !important;
+	font-family: Lato;
+	background-color: #DCDBDB;
+	-webkit-user-select: none;  /* Chrome all / Safari all */
+  	-moz-user-select: none;     /* Firefox all */
+  	-ms-user-select: none;
+}
+
+span:hover{
+	cursor: pointer;
+}
+
+textarea{
+	width: 100%;
+	height: 100%;
+	padding: 11px;
+	resize: none;
+	border: none !important;
+	margin: 0 !important;
+}
+
+textarea:focus{
+	outline: none;
+}
+
+select:required:invalid {
+  color: #999;
+}
+option[value=""][disabled] {
+  display: none;
+}
+option {
+  color: black;
+}
+
+a, a:hover, a:active, a:focus{
+	text-decoration: none;
+	color: inherit;
+}
+
+#header{
+	background-color: #337ab7;
+	height: 70px;
+	width: 100%;
+	min-width: 800px;
+	padding-left: 2.5%;
+	padding-right: 2.5%;
+}
+
+#header-left, #header-right{
+	float: left;
+	height: 100%;
+	width: 50%;
+}
+
+#header-left{
+	display: -webkit-flex;
+	display: flex;
+	-webkit-flex-direction: row;
+	flex-direction: row;
+	-webkit-align-items: center;
+	align-items: center;
+	-webkit-justify-content: left;
+	justify-content: left;
+}
+
+#header-right{
+	text-align: right;
+	float: right;
+	position: relative;
+}
+
+#user-icon-container{
+	float: right;
+	height: 100%;
+	display: -webkit-flex;
+	display: flex;
+	-webkit-flex-direction: row;
+	flex-direction: row;
+	-webkit-align-items: center;
+	align-items: center;
+	-webkit-justify-content: left;
+	justify-content: left;
+}
+
+#header-logo{
+	height: 100%;
+	margin-right: 10px;
+}
+
+#header-school-name{
+	color: #FFFFFF;
+	font-size: 24px;
+}
+
+#header-user-name{
+	margin-top: 3px;
+	color: #FFFFFF;
+	font-size: 14px;
+	text-transform: uppercase;
+}
+
+#header-display-pic{
+	border-radius: 0;
+	margin-left: 10px;
+	height: 38px;
+}
+
+#profile-options{
+	position: absolute;
+	right: 0;
+	height: 100%;
+	padding-top: 3px;
+	color: #FFFFFF;
+	font-size: 14px;
+	display: -webkit-flex;
+	display: flex;
+	-webkit-flex-direction: row;
+	flex-direction: row;
+	-webkit-align-items: center;
+	align-items: center;
+	-webkit-justify-content: left;
+	justify-content: left;
+}
+
+#separator{
+	margin-left: 5px;
+	margin-right: 5px;
+}
+
+.container{
+	margin-top: 30px;
+	background-color: #FFFFFF;
+}
+
+.accounts-label{
+	float: left;
+	color: #337ab7;
+}
+
+.table{
+	margin-top: 70px;
+	font-size: 16px;
+}
+
+.action-td{
+	text-align: center;
+	font-size: 8px;
+}
+
+.action-th{
+	text-align: center;
+}
+
+.edit-icon{
+	color: #337ab7;
+}
+
+#add-admin-btn{
+	float: right;
+	margin-top: 22px;
+	background-color: transparent;
+	font-size: 14px;
+	color: #337ab7;
+	display: -webkit-flex;
+	display: flex;
+	-webkit-flex-direction: row;
+	flex-direction: row;
+	-webkit-align-items: center;
+	align-items: center;
+	-webkit-justify-content: center;
+	justify-content: center;
+	padding: 0;
+	border: none !important;
+	outline: none !important;
+	box-shadow: none !important;
+}
+
+#add-admin-btn:focus, #add-admin-btn:active, #add-admin-btn:hover{
+	border: none !important;
+	outline: none !important;
+	box-shadow: none !important;
+}
+
+.add-admin-modal-body, .add-admin-midal-footer{
+	float: left !important;
+	width: 100%;
+	background-color: #FFFFFF;
+}
+
+.md-30{
+	font-size: 30px;
+}
+
+.add-icon{
+	margin-bottom: 2px;
+}
+
+.add-admin-modal-body .form-control, .edit-admin-modal-body .form-control{
+	outline: none !important;
+	height: 45px !important;
+	margin-bottom: 15px;
+	border-top: 0 !important;
+	border-left: 0 !important;
+	border-right: 0 !important;
+	border-bottom: 1px solid #999 !important;
+	box-shadow: none !important;
+	font-size: 15px;
+}
+
+.add-admin-modal-dialog{
+	width: 500px;
+}
+
+.add-admin-footer-left{
+	width: 50%;
+	height: 35px;
+	float: left;
+	text-align: left;
+	display: -webkit-flex;
+	display: flex;
+	-webkit-flex-direction: row;
+	flex-direction: row;
+	-webkit-align-items: center;
+	align-items: center;
+	-webkit-justify-content: center;
+	justify-content: center;
+}
+
+#save-admin, .done-btn{
+	width: 80px;
+	position: relative;
+}
+
+.btn{
+	border-radius: 0 !important;
+}
+
+.modal-header{
+	background-color: #337ab7;
+	color: #FFFFFF;
+	font-size: 18px;
+}
+
+.form-control{
+	border-radius: 0 !important;
+}
+
+.save-status-success{
+	color: #337ab7;
+	margin-top: -2px;
+}
+
+.input-label{
+	font-family: Lato, sans-serif !important;
+	font-weight: normal !important;
+	padding-left: 4px;
+	font-size: 12px !important;
+	color: #337ab7 !important;
+}
+
+#add-admin-error{
+	text-align: center;
+	margin-top: 20px;
+	float: left;
+	width: 100%;
+	color: red;
+}
+
+#is_super_admin{
+	float: left;
+	height: 18px !important;
+	width: 18px !important;
+	margin-left: 5px;
+}
+
+#is-super-admin-label{
+	float: left;
+	margin-top: 2px;
+	font-size: 16px;
+	margin-left: 5px;
+}

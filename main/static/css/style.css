@@ -1,0 +1,89 @@
+@font-face{
+	font-family: OpenSans;
+	src:url('../fonts/OpenSans-Regular.ttf');
+}
+
+@font-face {
+  	font-family: 'Lato';
+  	src:url('../fonts/Lato-Regular.eot') format('eot'),
+    	url('../fonts/Lato-Regular.woff') format('woff'),
+    	url('../fonts/Lato-Regular.ttf') format('truetype');
+}
+
+html, body {
+	height: 100%;
+	width: 100%;
+	padding: 0;
+	margin: 0;
+}
+
+body {
+	background-color: #2868B7;
+	font-family: Lato;
+}
+
+.main {
+	height: calc(100% - 60px);
+	width: 100%;
+	display: -webkit-flex;
+	display: flex;
+	-webkit-flex-direction: column;
+	flex-direction: column;
+	-webkit-align-items: center;
+	align-items: center;
+	-webkit-justify-content: center;
+}
+
+a, a:hover, a:active, a:focus {
+	text-decoration: none;
+	color: #FFFFFF;
+}
+
+.poc-header {
+	height: 60px;
+	width: 100%;
+	text-align: right;
+	padding-right: 30px;
+	padding-top: 20px;
+	color: #FFFFFF;
+	font-size: 16px;
+}
+
+.poc-username, .poc-username:hover, .poc-username:active, .poc-username:focus {
+	text-decoration: underline;
+}
+
+.separator {
+	margin-left: 10px;
+	margin-right: 10px;
+}
+
+#uploadFileForm {
+	text-align: center;
+}
+
+#uploadBtn {
+	height: 50px;
+	width: 200px;
+	background-color: #2868B7;
+	border-radius: 0;
+	color: #FFFFFF;
+	border: 2px solid #FFFFFF;
+	text-transform: uppercase;
+	font-weight: bold;
+}
+
+#uploadBtn:hover,
+#uploadBtn:active {
+	background-color: #FFFFFF;
+	color: #2868B7;
+}
+
+#file {
+	display: none;
+}
+
+.poc-status {
+	color: #FFFFFF;
+	font-size: 20px;
+}

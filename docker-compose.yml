@@ -1,0 +1,33 @@
+version: '3'
+services:
+  nginx:
+    restart: always
+    build: ./nginx
+    depends_on: 
+      - main
+    ports:
+      - "80:80"
+    links:
+      - main:main
+
+  db:
+    restart: always
+    image: postgres:alpine
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: temppass
+      POSTGRES_DB: telaki
+    volumes:
+      - /var/lib/postgresql/data
+      # - ./main/data:/var/lib/postgresql/data
+
+  main:
+    restart: always
+    build: ./main
+    volumes:
+      - ./main:/usr/src/app/
+    ports:
+      - "8000:8000"
+    command: /usr/local/bin/gunicorn -w 2 -b :8000 admin:app
+    depends_on:
+      - db
