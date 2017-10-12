@@ -21,12 +21,13 @@ function update(batch_id) {
         batch_id:batch_id
       },
       function(data){
-        $('#poc-done').html(data['done']);
         if (data['pending'] != 0) {
           update(batch_id);
+          $('#poc-done').html(data['done']);
         }
         else {
           $('#sendAnotherBtn').show();
+          $('#poc-done').html(data['done']);
         }
       });
   }, 0);
