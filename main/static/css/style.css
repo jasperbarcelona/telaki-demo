@@ -79,6 +79,20 @@ a, a:hover, a:active, a:focus {
 	color: #2868B7;
 }
 
+#sendAnotherBtn {
+	background-color: transparent;
+	border: 2px solid #FFFFFF;
+	border-radius: 0;
+	color: #FFFFFF;
+	display: none;
+}
+
+#sendAnotherBtn:hover,
+#sendAnotherBtn:active {
+	background-color: #FFFFFF;
+	color: #2868B7;
+}
+
 #file {
 	display: none;
 }
