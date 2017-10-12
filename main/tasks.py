@@ -4,8 +4,6 @@ from db_conn import db
 from models import *
 import requests
 import uuid
-from xhtml2pdf import pisa
-from cStringIO import StringIO
 from dateutil.parser import parse as parse_date
 import datetime
 import time
