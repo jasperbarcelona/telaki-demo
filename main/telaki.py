@@ -216,11 +216,6 @@ def message_status():
     return jsonify(done=batch.done,pending=batch.pending),200
 
 
-@app.route('/refresh', methods=['GET', 'POST'])
-def refresh():
-    return flask.render_template('refresh_main.html');
-
-
 @app.route('/db/rebuild', methods=['GET', 'POST'])
 def rebuild_database():
     db.drop_all()

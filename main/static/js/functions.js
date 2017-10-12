@@ -31,10 +31,3 @@ function update(batch_id) {
       });
   }, 0);
 };
-
-function refresh_main(){
-  $.post('/refresh',
-  function(data){
-    $('.main').html(data);
-  });
-}
