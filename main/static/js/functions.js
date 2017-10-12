@@ -30,5 +30,5 @@ function update(batch_id){
           alert('All done!');
         }
       });
-  }, 3000);
+  }, 0);
 };
