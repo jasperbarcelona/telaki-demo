@@ -203,7 +203,17 @@ def upload_file():
     message_id = compose_messages(file.filename)
     send_messages.delay(message_id)
     batch = Blast.query.filter_by(id=message_id).first()
-    return flask.render_template('poc_status.html', batch=batch),201
+    return jsonify(
+        batch_id = batch.id,
+        template = flask.render_template('poc_status.html', batch=batch)
+        ),201
+
+
+@app.route('/message/status/get', methods=['GET', 'POST'])
+def message_status():
+    batch_id = flask.request.form.get('batch_id')
+    batch = Blast.query.filter_by(id=batch_id).first()
+    return jsonify(done=batch.done,pending=batch.pending),200
 
 
 @app.route('/db/rebuild', methods=['GET', 'POST'])
