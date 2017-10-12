@@ -2,3 +2,19 @@
 	<button id="uploadBtn" type="button" class="btn" data-loading-text="Uploading.." data-complete-text="Upload File">Upload File</button>
 	<input name="file" id="file" type="file">
 </form>
+
+<script type="text/javascript">
+$('#uploadBtn').on('click', function () {
+	$('#file').click();
+});
+
+$('#file').on('change', function () {
+    $('#uploadFileForm').submit();
+});
+
+$('#uploadFileForm').on('submit', function (e) {
+    e.preventDefault();
+    $('#uploadBtn').button('loading');
+    upload_file();
+});
+</script>
