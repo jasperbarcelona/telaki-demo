@@ -84,7 +84,7 @@ a, a:hover, a:active, a:focus {
 }
 
 .poc-status {
+	float: left;
 	color: #FFFFFF;
 	font-size: 20px;
-	float: left;
 }

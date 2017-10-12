@@ -26,9 +26,6 @@ function update(batch_id){
         if (data['pending'] != 0) {
           update(batch_id);
         }
-        else {
-          alert('All done!');
-        }
       });
   }, 0);
 };
