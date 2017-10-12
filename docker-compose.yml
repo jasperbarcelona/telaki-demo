@@ -28,6 +28,6 @@ services:
       - ./main:/usr/src/app/
     ports:
       - "8000:8000"
-    command: /usr/local/bin/gunicorn -w 2 -b :8000 admin:app
+    command: /usr/local/bin/gunicorn -w 2 -b :8000 telaki:app
     depends_on:
       - db
