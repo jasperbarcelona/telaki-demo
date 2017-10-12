@@ -18,8 +18,7 @@ services:
       POSTGRES_PASSWORD: temppass
       POSTGRES_DB: telaki
     volumes:
-      - /var/lib/postgresql/data
-      # - ./main/data:/var/lib/postgresql/data
+      - ./main/data:/var/lib/postgresql/data
 
   main:
     restart: always
@@ -31,3 +30,26 @@ services:
     command: /usr/local/bin/gunicorn -w 2 -b :8000 telaki:app
     depends_on:
       - db
+    links:
+      - celery
+      - rabbitmq
+
+  rabbitmq:
+    restart: always
+    image: rabbitmq
+    ports:
+      - "5672:5672"
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: password
+      RABBITMQ_DEFAULT_VHOST: telaki
+
+  celery:
+    restart: always
+    build: ./main
+    command: "celery worker -A tasks --loglevel=info"
+    user: nobody
+    volumes:
+        - ./main:/usr/src/app
+    depends_on:
+      - rabbitmq

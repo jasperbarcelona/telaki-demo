@@ -17,3 +17,4 @@ schedule==0.3.2
 gunicorn==19.4.5
 html5lib==1.0b8
 xlrd==1.0.0
+celery==4.1.0
