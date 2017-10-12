@@ -17,7 +17,6 @@ function upload_file() {
 
 function update(batch_id) {
    setTimeout(function(){
-    alert(batch_id);
       $.post('/message/status/get',{
         batch_id:batch_id
       },
