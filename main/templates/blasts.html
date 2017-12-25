@@ -1,0 +1,54 @@
+<div class="content-header">
+	<div class="content-right-btn-container">
+		<button class="btn control-btn"><i class="material-icons">&#xE5D5;</i></button>
+		<button class="btn control-btn"><i class="material-icons">&#xE8B6;</i></button>
+		<button id="addBlastBtn" class="btn control-btn"><i class="material-icons md-30">add</i></button>
+		<div class="pagination-btn-container">
+			<div class="pagination-label-container">
+				<span class="pagination-label"><strong id="paginationShowingBlasts">{{ showing }}</strong></span>
+				<span class="pagination-label separator">of</span>
+				<span class="pagination-label"><strong id="paginationTotalBlasts">{{ total_entries }}</strong></span>
+			</div>
+			{% if prev_btn == 'enabled' %}
+			<button class="btn pagination-btn left blast" onclick="blast_prev_page()"><i class="material-icons">&#xE5CB;</i></button>
+			{% else %}
+			<button class="btn pagination-btn left blast" onclick="blast_prev_page()" disabled><i class="material-icons">&#xE5CB;</i></button>
+			{% endif %}
+
+			{% if next_btn == 'enabled' %}
+			<button class="btn pagination-btn right blast" onclick="blast_next_page()"><i class="material-icons">&#xE5CC;</i></button>
+			{% else %}
+			<button class="btn pagination-btn right blast" onclick="blast_next_page()" disabled><i class="material-icons">&#xE5CC;</i></button>
+			{% endif %}
+		</div>
+	</div>
+</div>
+{% if not blasts[0] %}
+<div id="emptyBlast" class="empty-overlay">
+	<span class="empty-label">No records yet.</span>
+</div>
+{% endif %}
+<div id="contentBody" class="content-body">
+	<table class="table content-table">
+		<tbody id="blasts">
+			{% for entry in blasts %}
+			<tr onclick="open_blast({{ entry.id }})">
+				<td class="blast-icon-td">
+					<i class="material-icons">&#xE835;</i>
+				</td>
+				<td class="blast-recipient-td">{{ entry.sender_name }}</td>
+				<td class="blast-message-td">{{ entry.content }}</td>
+				<td class="blast-sent-td">{{ entry.batch_size }} unique numbers</td>
+				<td class="blast-date-td align-right">{{ entry.date }}</td>
+			</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+</div>
+<script type="text/javascript">
+$('#addBlastBtn').on('click', function (e) {
+    $('#messageContainer').show();
+    $('#messageContainer').removeClass('minimized');
+    $('#messageBody').focus();
+});
+</script>

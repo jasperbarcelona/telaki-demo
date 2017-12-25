@@ -1,0 +1,11 @@
+{% for entry in reminders %}
+<tr onclick="open_blast({{ entry.id }})">
+	<td class="blast-icon-td">
+		<i class="material-icons">&#xE835;</i>
+	</td>
+	<td class="blast-recipient-td">{{ entry.sender_name }}</td>
+	<td class="blast-message-td">{{ entry.file_name }}</td>
+	<td class="blast-sent-td">{{ entry.done }} / {{ entry.batch_size }} done</td>
+	<td class="blast-date-td align-right">{{ entry.date }}</td>
+</tr>
+{% endfor %}

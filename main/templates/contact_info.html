@@ -1,0 +1,66 @@
+<div class="modal-header">
+    <h4 class="modal-title" id="gridSystemModalLabel">Contact</h4>
+</div>
+<div class="modal-body">
+    <span id="groupsLabel" class="input-group-label">Basic Info:</span>
+    <div class="input-text-container">
+        <input type="text" id="editContactName" class="form-control floatlabel" data-class="input-label" placeholder="Name" value="{{ contact.name }}">
+    </div>
+    <div class="input-text-container">
+        {% if type == 'from_convo' %}
+        <input type="text" id="editContactMsisdn" disabled class="form-control floatlabel" data-class="input-label" placeholder="Mobile Number" value="{{ contact.msisdn }}">
+        {% else %}
+        <input type="text" id="editContactMsisdn" class="form-control floatlabel" data-class="input-label" placeholder="Mobile Number" value="{{ contact.msisdn }}">
+        {% endif %}
+    </div>
+    <span class="input-group-label">Contact Type:</span>
+    {% if (contact.contact_type == 'Customer') or (contact.contact_type == 'Both') %}
+    <div class="edit-contact-picker contact-type-picker customer selected">Customer</div>
+    {% else %}
+    <div class="edit-contact-picker contact-type-picker customer">Customer</div>
+    {% endif %}
+    {% if (contact.contact_type == 'Staff') or (contact.contact_type == 'Both') %}
+    <div class="edit-contact-picker contact-type-picker staff selected">Staff</div>
+    {% else %}
+    <div class="edit-contact-picker contact-type-picker staff">Staff</div>
+    {% endif %}
+    <span id="groupsLabel" class="input-group-label">Groups:</span>
+    {% if not groups[0] %}
+    <span class="no-groups-label">You don't have any groups.</span>
+    <span id="createGroupFromContact" class="link underline" data-toggle="modal" data-target="#createGroupModal">Create Group</span>
+    {% else %}
+    <input type="text" id="searchGroupFromContact" class="form-control" placeholder="Search groups">
+    <span id="addGroupFromContact" class="link underline">Add Group</span>
+    <div class="contact-group-container">
+        {% for group in groups %}
+        {% if group.id in contact_groups %}
+        <div id="{{ group.id }}" class="edit-contact-picker group-picker selected">{{ group.name }}</div>
+        {% else %}
+        <div id="{{ group.id }}" class="edit-contact-picker group-picker">{{ group.name }}</div>
+        {% endif %}
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-danger modal-btn" data-dismiss="modal">Close</button>
+    <button id="editContactBtn" type="button" class="btn btn-primary modal-btn" onclick="edit_contact('{{ type }}')">Save</button>
+</div>
+
+<script type="text/javascript">
+$('.form-control.floatlabel').floatlabel({
+    labelEndTop:'-2px'
+});
+
+(function() {
+  $('.contact-type-picker').on('click', function(e){
+    $(this).toggleClass('selected');
+  });
+})();
+
+(function() {
+  $('.group-picker').on('click', function(e){
+    $(this).toggleClass('selected');
+  });
+})();
+</script>

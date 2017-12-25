@@ -1,0 +1,14 @@
+{% for contact in contacts %}
+<tr id="{{ contact.msisdn }}" data-toggle="modal" data-target="#editContactModal" onclick="supply_info_from_contacts(this.id)">
+	<td class="contact-icon-td">
+		<i class="material-icons">&#xE835;</i>
+	</td>
+	<td class="contact-name-td">{{ contact.name }}</td>
+	{% if contact.contact_type == 'Both' %}
+	<td class="contact-td">Customer & Staff</td>
+	{% else %}
+	<td class="contact-td">{{ contact.contact_type }}</td>
+	{% endif %}
+	<td class="contact-td align-right">{{ contact.msisdn }}</td>
+</tr>
+{% endfor %}

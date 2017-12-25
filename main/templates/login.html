@@ -12,8 +12,8 @@
 		<div id="login-intro" class="loading">
 		</div>
 		<div id="logo-container" class="clickable">
-		<span id="login-brand">Login</span><br />
-		<span id="login-sub-brand"></span>
+			<span id="login-brand">Telaki SMS Client</span>
+			<span id="login-sub-brand">Login</span>
 		</div>
 		<form id="login-form">
 			<center>
@@ -23,10 +23,11 @@
 				<div id="login-form-loader" class="loading">
 					<div class="loader"></div>
 				</div>
+				<input type="text" data-class="input-label" id="client_no" class="form-control" placeholder="Client ID" autocomplete="off" />
 				<input type="email" data-class="input-label" id="user_email" class="form-control" placeholder="Email" autocomplete="off" />
 				<input type="password" data-class="input-label" id="user_password" class="form-control" placeholder="Password"/>
 			</div>
-			<button type="submit" id="login-btn" class="btn" data-loading-text="Logging you in.." data-complete-text="Log In">Log In</button>
+			<button type="submit" id="login-btn" class="btn btn-danger" data-loading-text="Logging you in.." data-complete-text="Log In">Log In</button>
 		</form>
 		<span class="forgot-password clickable">Forgot your password?</span>
 	</div>

@@ -30,16 +30,58 @@ def SWJsonify(*args, **kwargs):
          indent=None if request.is_xhr else 2), mimetype='application/json')
         # from https://github.com/mitsuhiko/flask/blob/master/flask/helpers.py
 
-class Message(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    blast_id = db.Column(db.Integer())
-    msisdn = db.Column(db.String(30))
-    status = db.Column(db.String(30),default='pending')
-    content = db.Column(db.Text)
-    timestamp = db.Column(db.String(50))
+class Client(db.Model):
+    id = db.Column(db.Integer,primary_key=True)
+    client_no = db.Column(db.String(32), unique=True)
+    name = db.Column(db.String(50))
+    app_id = db.Column(db.Text())
+    app_secret = db.Column(db.Text())
+    passphrase = db.Column(db.Text())
+    shortcode = db.Column(db.String(30))
+    created_at = db.Column(db.String(50))
 
-class Blast(db.Model):
+class AdminUser(db.Model):
+    id = db.Column(db.Integer,primary_key=True)
+    client_no = db.Column(db.String(32))
+    email = db.Column(db.String(60))
+    password = db.Column(db.String(20))
+    name = db.Column(db.String(100))
+    status = db.Column(db.String(8), default='Active')
+    added_by_id = db.Column(db.Integer)
+    added_by_name = db.Column(db.String(100))
+    join_date = db.Column(db.String(50))
+    created_at = db.Column(db.String(50))
+
+class Contact(db.Model):
+    id = db.Column(db.Integer,primary_key=True)
+    client_no = db.Column(db.String(32))
+    contact_type = db.Column(db.String(32))
+    name = db.Column(db.String(100))
+    msisdn = db.Column(db.String(20))
+    added_by = db.Column(db.Integer())
+    added_by_name = db.Column(db.String(100))
+    join_date = db.Column(db.String(50))
+    created_at = db.Column(db.String(50))
+
+class Batch(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    client_no = db.Column(db.String(32))
+    message_type = db.Column(db.String(60))
+    sender_id = db.Column(db.Integer())
+    batch_size = db.Column(db.Integer())
+    done = db.Column(db.Integer(),default=0)
+    pending = db.Column(db.Integer(),default=0)
+    failed = db.Column(db.Integer(),default=0)
+    sender_name = db.Column(db.String(60))
+    recipient = db.Column(db.Text())
+    date = db.Column(db.String(20))
+    time = db.Column(db.String(10))
+    content = db.Column(db.Text)
+    created_at = db.Column(db.String(50))
+
+class ReminderBatch(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    client_no = db.Column(db.String(32))
     sender_id = db.Column(db.Integer())
     batch_size = db.Column(db.Integer())
     done = db.Column(db.Integer(),default=0)
@@ -48,15 +90,52 @@ class Blast(db.Model):
     sender_name = db.Column(db.String(60))
     date = db.Column(db.String(20))
     time = db.Column(db.String(10))
-    timestamp = db.Column(db.String(50))
+    file_name = db.Column(db.Text)
+    created_at = db.Column(db.String(50))
 
-class AdminUser(db.Model):
-    id = db.Column(db.Integer,primary_key=True)
-    email = db.Column(db.String(60))
-    password = db.Column(db.String(20))
-    name = db.Column(db.String(100))
-    status = db.Column(db.String(8), default='Active')
-    added_by_id = db.Column(db.Integer)
-    added_by_name = db.Column(db.String(100))
-    join_date = db.Column(db.String(50))
-    timestamp = db.Column(db.String(50))
+class OutboundMessage(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    batch_id = db.Column(db.Integer())
+    date = db.Column(db.String(20))
+    time = db.Column(db.String(10))
+    contact_name = db.Column(db.String(100))
+    contact_city = db.Column(db.String(100))
+    msisdn = db.Column(db.String(30))
+    status = db.Column(db.String(30),default='pending')
+    created_at = db.Column(db.String(50))
+
+class Conversation(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    client_no = db.Column(db.String(32))
+    contact_name = db.Column(db.String(100), default=None)
+    msisdn = db.Column(db.String(30))
+    status = db.Column(db.String(30),default='unread')
+    latest_content = db.Column(db.Text())
+    latest_date = db.Column(db.String(20))
+    latest_time = db.Column(db.String(10))
+    created_at = db.Column(db.String(50))
+
+class ConversationItem(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    conversation_id = db.Column(db.Integer())
+    message_type = db.Column(db.String(30))
+    outbound_sender_id = db.Column(db.Integer())
+    outbound_sender_name = db.Column(db.String(100))
+    date = db.Column(db.String(20))
+    time = db.Column(db.String(10))
+    content = db.Column(db.Text)
+    created_at = db.Column(db.String(50))
+
+class Group(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    client_no = db.Column(db.String(32))
+    name = db.Column(db.String(32))
+    size = db.Column(db.Integer(),default=0)
+    created_by_id = db.Column(db.Integer())
+    created_by_name = db.Column(db.String(100))
+    created_at = db.Column(db.String(50))
+
+class ContactGroup(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    group_id = db.Column(db.Integer())
+    contact_id = db.Column(db.Integer())

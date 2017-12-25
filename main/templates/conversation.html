@@ -1,0 +1,60 @@
+<div class="content-header">
+	<div class="content-header-left">
+		<div class="back-btn">
+			<div onclick="show_conversations('continue')">
+				<i class="material-icons">&#xE5C4;</i>
+				<span>Back</span>
+			</div>
+		</div>
+	</div>
+	<div class="content-header-right">
+		<button class="btn control-btn"><i class="material-icons">&#xE5D5;</i></button>
+	</div>
+</div>
+<div class="content-body">
+	<div class="conversation-container">
+		<input type="hidden" id="hiddenMsisdn" value="{{ conversation.msisdn }}">
+		{% for message in messages %}
+		<div class="conversation-item">
+			<div class="conversation-item-header">
+				<div class="message-item-contact-container">
+					{% if message.message_type == 'inbound' %}
+
+					{% if conversation.contact_name != None %}
+					<span class="message-item-sender-label link" data-toggle="modal" data-target="#editContactModal" onclick="supply_contact_info()">{{ conversation.contact_name }}</span><br />
+					<span class="message-item-sender-sub-label">{{ conversation.msisdn }}</span>
+					{% else %}
+					<span id="unsavedMsisdn" class="message-item-sender-label">{{ conversation.msisdn }}</span>
+					<span class="pipe-separator">|</span>
+					<span class="saveContactBtn link" data-toggle="modal" data-target="#saveContactModal" onclick="supply_msisdn()">Save Contact</span>
+					{% endif %}
+
+					{% else %}
+					<span class="message-item-sender-label">{{ message.outbound_sender_name }}</span>
+					{% endif %}
+				</div>
+				<div class="message-item-date-container">
+					<span class="message-item-date">{{ message.date }}</span><br />
+					<span class="message-item-time">{{ message.time }}</span>
+				</div>
+			</div>
+			<div class="conversation-item-body">
+				{{ message.content }}
+			</div>
+		</div>
+		{% endfor %}
+	</div>
+	<div class="conversation-reply-container">
+		<textarea oninput="replyCounter(this,'replyCharacterCounter',420);" class="form-control" id="conversationReply" placeholder="Write your reply here."></textarea>
+		<div class="reply-footer-container">
+			<div class="reply-footer-left">
+				<button type="button" id="sendReplyBtn" class="btn btn-primary" onclick="send_reply()" data-loading-text="Sending.." data-complete-text="Send">Send</button>
+			</div>
+			<div class="reply-footer-right">
+				<div>
+					<input disabled  value="Remaining: 420" id="replyCharacterCounter">
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

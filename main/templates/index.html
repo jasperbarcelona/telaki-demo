@@ -1,9 +1,145 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="main">
-	<form id="uploadFileForm" method="post" enctype="multipart/form-data">
-		<button id="uploadBtn" type="button" class="btn" data-loading-text="Uploading.." data-complete-text="Upload File">Upload File</button>
-		<input name="file" id="file" type="file">
-	</form>
+<div class="left-panel">
+	<div class="compose-btn-container">
+		<button id="composeMessage" class="btn btn-danger">Compose Message</button>
+	</div>
+	<div class="lower-panel-container">
+		<div id="navConversations" class="panel-nav-item active" onclick="show_conversations('reset')">
+			<span class="nav-label">Conversations</span>
+		</div>
+		<div id="navBlasts" class="panel-nav-item" onclick="show_blasts('reset')">
+			<span class="nav-label">Text Blasts</span>
+		</div>
+		<div id="navReminders" class="panel-nav-item" onclick="show_payment_reminders('reset')">
+			<span class="nav-label">Payment Reminders</span>
+		</div>
+		<div class="nav-separator"></div>
+		<div id="navContacts" class="panel-nav-item" onclick="show_contacts('reset')">
+			<span class="nav-label">Contacts</span>
+		</div>
+		<div id="navGroups" class="panel-nav-item" onclick="show_groups('reset')">
+			<span class="nav-label">Groups</span>
+		</div>
+	</div>
+</div>
+<div id="replyError" class="snackbar snackbar-error">
+	<div>
+		<span class="snackbar-message">There was an error, please try again.</span>
+		<i id="closeReplyError" class="material-icons">&#xE5CD;</i>
+	</div>
+</div>
+<div id="replySuccess" class="snackbar snackbar-success">
+	<div>
+		<span class="snackbar-message">Message sent.</span>
+		<i id="closeReplySuccess" class="material-icons">&#xE5CD;</i>
+	</div>
+</div>
+<div id="blastOverlay" class="hidden">
+	<div class="blast-overlay-dialog">
+		<div class="blast-overlay-body"></div>
+	</div>
+</div>
+<div class="content">
+	<div class="content-header">
+		<div class="content-right-btn-container">
+			<button class="btn control-btn"><i class="material-icons">&#xE5D5;</i></button>
+			<button class="btn control-btn"><i class="material-icons">&#xE8B6;</i></button>
+			<div class="pagination-btn-container">
+				<div class="pagination-label-container">
+					<span class="pagination-label"><strong id="paginationShowingConversation">1-{{ limit }}</strong></span>
+					<span class="pagination-label separator">of</span>
+					<span class="pagination-label"><strong id="paginationTotalConversation">{{ total_entries }}</strong></span>
+				</div>
+				{% if prev_btn == 'enabled' %}
+				<button class="btn pagination-btn left conversation" onclick="conversation_prev_page()"><i class="material-icons">&#xE5CB;</i></button>
+				{% else %}
+				<button class="btn pagination-btn left conversation" onclick="conversation_prev_page()" disabled><i class="material-icons">&#xE5CB;</i></button>
+				{% endif %}
+
+				{% if next_btn == 'enabled' %}
+				<button class="btn pagination-btn right conversation" onclick="conversation_next_page()"><i class="material-icons">&#xE5CC;</i></button>
+				{% else %}
+				<button class="btn pagination-btn right conversation" onclick="conversation_next_page()" disabled><i class="material-icons">&#xE5CC;</i></button>
+				{% endif %}
+			</div>
+		</div>
+	</div>
+	{% if not conversations[0] %}
+	<div class="empty-overlay">
+		<span class="empty-label">No records yet.</span>
+	</div>
+	{% endif %}
+	<div class="content-body">
+		<table class="table content-table">
+			<tbody id="conversations">
+				<tr class="search-panel conversation">
+					<td class="icon-td"></td>
+					<td class="msisdn-td">
+						<input type="text" id="searchConversationName" class="form-control search-text" placeholder="Name / Phone">
+					</td>
+					<td class="message-td">
+						<input type="text" id="searchConversationContent" class="form-control search-text" placeholder="Message content">
+					</td>
+					<td class="date-td align-right">
+						<input type="text" id="searchConversationDate" class="form-control search-text align-right datepicker" placeholder="Date">
+					</td>
+				</tr>
+				{% for entry in conversations %}
+				{% if entry.status == 'unread' %}
+				<tr onclick="open_conversation({{ entry.id }})" class="unread">
+				{% else %}
+				<tr onclick="open_conversation({{ entry.id }})">
+				{% endif %}
+					<td class="icon-td">
+						<i class="material-icons">&#xE835;</i>
+						<i class="material-icons">&#xE83A;</i>
+					</td>
+					{% if entry.contact_name != None %}
+					<td class="msisdn-td">{{ entry.contact_name }}</td>
+					{% else %}
+					<td class="msisdn-td">{{ entry.msisdn }}</td>
+					{% endif %}
+					<td class="message-td">{{ entry.latest_content }}</td>
+					<td class="date-td align-right">{{ entry.latest_date }}</td>
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
+</div>
+<div id="messageContainer">
+	<div class="message-header">
+		<div class="message-header-left">
+			<span>New Message</span>
+		</div>
+		<div class="message-header-right">
+			<div>
+				<i id="closeMessage" class="material-icons">&#xE5CD;</i>
+				<span id="minimizeMessage">_</span>
+			</div>
+		</div>
+	</div>
+	<div class="message-recipients-container">
+		<div id="recipientContainer">
+			<span class="empty-recipient-label">Recipients</span>
+		</div>
+		<div class="add-recipient-container">
+			<i id="addRecipientBtn" class="material-icons" data-toggle="modal" data-target="#addRecipientModal">&#xE145;</i>
+		</div>
+	</div>
+	<div class="message-body-container">
+		<textarea oninput="textCounter(this,'characterCounter',420);" id="messageBody" class="form-control" placeholder="Write your message here"></textarea>
+	</div>
+	<div class="message-footer-container">
+		<div class="message-footer-left">
+			<button type="button" id="sendMessageBtn" class="btn btn-primary" onclick="send_text_blast()" data-loading-text="Preparing" data-done-text="Send">Send</button>
+		</div>
+		<div class="message-footer-right">
+			<div>
+				<input disabled  value="Remaining: 420" id="characterCounter">
+			</div>
+		</div>
+	</div>
 </div>
 {% endblock %}

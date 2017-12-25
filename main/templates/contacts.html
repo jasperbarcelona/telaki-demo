@@ -1,0 +1,50 @@
+<div class="content-header">
+	<div class="content-right-btn-container">
+		<button class="btn control-btn"><i class="material-icons">&#xE5D5;</i></button>
+		<button class="btn control-btn"><i class="material-icons">&#xE8B6;</i></button>
+		<button id="addContactBtn" class="btn control-btn" data-toggle="modal" data-target="#addContactModal"><i class="material-icons md-30">add</i></button>
+		<div class="pagination-btn-container">
+			<div class="pagination-label-container">
+				<span class="pagination-label"><strong id="paginationShowingContacts">{{ showing }}</strong></span>
+				<span class="pagination-label separator">of</span>
+				<span class="pagination-label"><strong id="paginationTotalContacts">{{ total_entries }}</strong></span>
+			</div>
+			{% if prev_btn == 'enabled' %}
+			<button class="btn pagination-btn left contact" onclick="contact_prev_page()"><i class="material-icons">&#xE5CB;</i></button>
+			{% else %}
+			<button class="btn pagination-btn left contact" onclick="contact_prev_page()" disabled><i class="material-icons">&#xE5CB;</i></button>
+			{% endif %}
+
+			{% if next_btn == 'enabled' %}
+			<button class="btn pagination-btn right contact" onclick="contact_next_page()"><i class="material-icons">&#xE5CC;</i></button>
+			{% else %}
+			<button class="btn pagination-btn right contact" onclick="contact_next_page()" disabled><i class="material-icons">&#xE5CC;</i></button>
+			{% endif %}
+		</div>
+	</div>
+</div>
+{% if not contacts[0] %}
+<div id="emptyBlast" class="empty-overlay">
+	<span class="empty-label">No contacts yet.</span>
+</div>
+{% endif %}
+<div id="contentBody" class="content-body">
+	<table class="table content-table">
+		<tbody id="contacts">
+			{% for contact in contacts %}
+			<tr id="{{ contact.msisdn }}" data-toggle="modal" data-target="#editContactModal" onclick="supply_info_from_contacts(this.id)">
+				<td class="contact-icon-td">
+					<i class="material-icons">&#xE835;</i>
+				</td>
+				<td class="contact-name-td">{{ contact.name }}</td>
+				{% if contact.contact_type == 'Both' %}
+				<td class="contact-td">Customer & Staff</td>
+				{% else %}
+				<td class="contact-td">{{ contact.contact_type }}</td>
+				{% endif %}
+				<td class="contact-td align-right">{{ contact.msisdn }}</td>
+			</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+</div>

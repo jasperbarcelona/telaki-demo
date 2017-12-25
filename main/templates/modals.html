@@ -1,0 +1,196 @@
+<div class="modal fade" id="saveContactModal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="gridSystemModalLabel">New Contact</h4>
+            </div>
+            <div class="modal-body">
+                <span id="groupsLabel" class="input-group-label">Basic Info:</span>
+                <div class="input-text-container">
+                    <input type="text" id="saveContactName" class="form-control floatlabel" data-class="input-label" placeholder="Name">
+                </div>
+                <div class="input-text-container">
+                    <input type="text" id="saveContactMsisdn" disabled class="form-control floatlabel" data-class="input-label" placeholder="Mobile Number">
+                </div>
+                <span class="input-group-label">Contact Type:</span>
+                <div class="contact-type-picker customer">Customer</div>
+                <div class="contact-type-picker staff">Staff</div>
+                <span id="groupsLabel" class="input-group-label">Groups:</span>
+                {% if not groups[0] %}
+                <span class="no-groups-label">You don't have any groups.</span>
+                <span id="createGroupFromContact" class="link underline" data-toggle="modal" data-target="#createGroupModal">Create Group</span>
+                {% else %}
+                <input type="text" id="searchGroupFromContact" class="form-control" placeholder="Search groups">
+                <div class="add-group-container">
+                    <span id="addGroupFromContact" class="link underline" data-toggle="modal" data-target="#createGroupModal">Add Group</span>
+                </div>
+                <div class="contact-group-container">
+                    {% for group in groups %}
+                    <div id="{{ group.id }}" class="group-picker">{{ group.name }}</div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger modal-btn" data-dismiss="modal">Close</button>
+                <button id="saveContactBtn" type="button" class="btn btn-primary modal-btn" data-loading-text="Saving.." data-complete-text="Save" onclick="save_contact()">Save</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>
+
+<div class="modal fade" id="createGroupModal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="gridSystemModalLabel">New Group</h4>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="addGroupName" class="form-control floatlabel" data-class="input-label" placeholder="Group Name">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger modal-btn" data-dismiss="modal">Close</button>
+                <button id="saveGroupBtn" type="button" class="btn btn-primary modal-btn" onclick="save_group()">Save</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>
+
+<div class="modal fade" id="editContactModal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>
+
+<div class="modal fade" id="addRecipientModal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="gridSystemModalLabel">Contacts</h4>
+            </div>
+            <div class="modal-body">
+                <div class="add-recipient-left">
+                    <div id="tabs">
+                        <ul class="nav recipient-nav-tabs nav-tabs">
+                            <li class="active">
+                                <a href="#groupContactTab" class="tab-item" data-toggle="tab">Groups</a>
+                            </li>         
+                            <li>
+                                <a href="#individualContactTab" class="tab-item" data-toggle="tab">Individual</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="tab-content recipient-tab-content">
+                        <div class="tab-pane recipient-tab-pane active" id="groupContactTab">
+                            <div class="recipient-group-search-container">
+                                <input type="text" class="form-control" placeholder="Search contact groups">
+                            </div>
+                            {% for group in groups %}
+                            <div id="{{ group.id }}" class="recipient-group" onclick="add_recipient({{ group.id }}, '{{ group.name }}', {{ group.size }})">
+                                <div class="recipient-group-left">
+                                    <span class="recipient-group-name">{{ group.name }}</span>
+                                </div>
+                                <div class="recipient-group-right align-right">
+                                    {% if group.size == 1 %}
+                                    <span class="recipient-group-members">{{ group.size }} contact</span>
+                                    {% else %}
+                                    <span class="recipient-group-members">{{ group.size }} contacts</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <div class="tab-pane recipient-tab-pane" id="individualContactTab">
+                            <div class="recipient-individual-search-container">
+                                <input type="text" class="form-control" placeholder="Search contacts">
+                            </div>
+                            {% for contact in contacts %}
+                            <div id="{{ contact.id }}" class="recipient-contact" onclick="add_individual_recipient({{ contact.id }}, '{{ contact.name }}')">
+                                <div class="recipient-contact-left">
+                                    <span class="recipient-contact-name">{{ contact.name }}</span>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                <div class="add-recipient-right">
+                    <div class="add-recipient-right-header">
+                        <span>Recipients</span><span id="recipientCount">(0):</span>
+                    </div>
+                    <div class="add-recipient-right-body">
+                        <div class="no-recipient">
+                            <span>Empty</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger modal-btn" data-dismiss="modal">Close</button>
+                <button id="saveRecipientsBtn" type="button" class="btn btn-primary modal-btn" onclick="save_recipients()">Done</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>
+
+<div class="modal fade" id="addReminderModal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="gridSystemModalLabel">Text Blast (File Upload)</h4>
+            </div>
+            <div class="modal-body">
+                <form id="uploadFileForm" method="post" enctype="multipart/form-data">
+                    <input name="file" id="file" type="file">
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger modal-btn" data-dismiss="modal">Close</button>
+                <button id="saveContactBtn" type="button" class="btn btn-primary modal-btn" onclick="send_reminder()">Save</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>
+
+<div class="modal fade" id="addContactModal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="gridSystemModalLabel">New Contact</h4>
+            </div>
+            <div class="modal-body">
+                <span id="groupsLabel" class="input-group-label">Basic Info:</span>
+                <div class="input-text-container">
+                    <input type="text" id="addContactName" class="form-control floatlabel" data-class="input-label" placeholder="Name">
+                </div>
+                <div class="input-text-container">
+                    <input type="text" id="addContactMsisdn" class="form-control floatlabel" data-class="input-label" placeholder="Mobile Number">
+                </div>
+                <span class="input-group-label">Contact Type:</span>
+                <div class="contact-type-picker customer add-contact-picker">Customer</div>
+                <div class="contact-type-picker staff add-contact-picker">Staff</div>
+                <span id="groupsLabel" class="input-group-label">Groups:</span>
+                {% if not groups[0] %}
+                <span class="no-groups-label">You don't have any groups.</span>
+                <span id="createGroupFromContact" class="link underline" data-toggle="modal" data-target="#createGroupModal">Create Group</span>
+                {% else %}
+                <input type="text" id="searchGroupFromContact" class="form-control" placeholder="Search groups">
+                <div class="add-group-container">
+                    <span id="addGroupFromContact" class="link underline" data-toggle="modal" data-target="#createGroupModal">Add Group</span>
+                </div>
+                <div class="contact-group-container">
+                    {% for group in groups %}
+                    <div id="{{ group.id }}" class="group-picker add-contact-picker add-contact-picker">{{ group.name }}</div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger modal-btn" data-dismiss="modal">Close</button>
+                <button id="addContactBtn" type="button" class="btn btn-primary modal-btn" onclick="add_contact()">Save</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>

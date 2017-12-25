@@ -1,0 +1,54 @@
+<div class="content-header">
+	<div class="content-right-btn-container">
+		<button class="btn control-btn"><i class="material-icons">&#xE5D5;</i></button>
+		<button class="btn control-btn"><i class="material-icons">&#xE8B6;</i></button>
+		<div class="pagination-btn-container">
+			<div class="pagination-label-container">
+				<span class="pagination-label"><strong id="paginationShowingConversation">{{ showing }}</strong></span>
+				<span class="pagination-label separator">of</span>
+				<span class="pagination-label"><strong id="paginationTotalConversation">{{ total_entries }}</strong></span>
+			</div>
+			{% if prev_btn == 'enabled' %}
+			<button class="btn pagination-btn left conversation" onclick="conversation_prev_page()"><i class="material-icons">&#xE5CB;</i></button>
+			{% else %}
+			<button class="btn pagination-btn left conversation" onclick="conversation_prev_page()" disabled><i class="material-icons">&#xE5CB;</i></button>
+			{% endif %}
+
+			{% if next_btn == 'enabled' %}
+			<button class="btn pagination-btn right conversation" onclick="conversation_next_page()"><i class="material-icons">&#xE5CC;</i></button>
+			{% else %}
+			<button class="btn pagination-btn right conversation" onclick="conversation_next_page()" disabled><i class="material-icons">&#xE5CC;</i></button>
+			{% endif %}
+		</div>
+	</div>
+</div>
+{% if not conversations[0] %}
+<div class="empty-overlay">
+	<span class="empty-label">No records yet.</span>
+</div>
+{% endif %}
+<div id="contentBody" class="content-body">
+	<table class="table content-table">
+		<tbody id="conversations">
+			{% for entry in conversations %}
+			{% if entry.status == 'unread' %}
+			<tr onclick="open_conversation({{ entry.id }})" class="unread">
+			{% else %}
+			<tr onclick="open_conversation({{ entry.id }})">
+			{% endif %}
+				<td class="icon-td">
+					<i class="material-icons">&#xE835;</i>
+					<i class="material-icons">&#xE83A;</i>
+				</td>
+				{% if entry.contact_name != None %}
+				<td class="msisdn-td">{{ entry.contact_name }}</td>
+				{% else %}
+				<td class="msisdn-td">{{ entry.msisdn }}</td>
+				{% endif %}
+				<td class="message-td">{{ entry.latest_content }}</td>
+				<td class="date-td align-right">{{ entry.latest_date }}</td>
+			</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+</div>

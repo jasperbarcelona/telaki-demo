@@ -15,16 +15,30 @@
                 <!--<script src="//fast.eager.io/sgP7QN5AJL.js"></script>
                 <script src="//fast.eager.io/nH76uFjaDI.js"></script> -->
                 <link rel="shortcut icon" href="../static/images/logos/favicon.ico" type="image/x-icon">
-                <title>POC | Alson's Trading</title>
+                <title>Dashboard | {{client_name}}</title>
         </head>
-        <body>  
+        <body onload="initialize_recipients()">
+                <div id="mainPreloader" class="wrapperloader hidden">
+                        <svg id="loaderSVG" viewBox="0 0 190 132" style="background-color:#ffffff00" xmlns="http://www.w3.org/2000/svg">
+                                <g stroke="#FFF" stroke-width="2" fill="none">
+                                        <path d="M183.618.5c3.234 0 5.882 2.647 5.882 5.88v119.24c0 3.233-2.648 5.88-5.882 5.88H6.382C3.148 131.5.5 128.853.5 125.62V6.38C.5 3.147 3.148.5 6.382.5h177.236z" />
+                                        <path d="M184 1c0 .833-72.32 78.49-72.32 78.49-8.915 9.376-23.5 9.376-32.416-.007C79.264 79.483 5 1.03 5 1" />
+                                        <path d="M2.5 129.5l55-55" />
+                                        <path d="M187.5 129.5l-55-55" />
+                                </g>
+                        </svg>
+                        <span class="loading-label">Welcome to Telaki! Please wait.</span>
+                </div>
                 {% include 'header.html' %}
                 {% include 'modals.html' %}
                 {% block content %} 
                 {% endblock %}
-                
+
                 <script src="../static/js/jquery-1.11.0.min.js"></script>
                 <script src="../static/js/easing.js"></script>
+                <script src="../static/js/TweenMax.min.js"></script>
+                <script src="../static/js/TimelineMax.min.js"></script>
+                <script src="../static/js/jquery.drawsvg.js"></script>
                 <script src="../static/js/jquery-ui.min.js"></script>
                 <script src="../static/js/animations.js"></script>
                 <script src="../static/js/bootstrap-select.js"></script>

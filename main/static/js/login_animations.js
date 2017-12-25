@@ -2,12 +2,8 @@ $(document).ready(function(){
 
 $('#login-error-container').hide();
 
-setTimeout(function(){
-    $("#school_no").focus();
-}, 0);
-
 $(window).load(function() {
-    $('#user_email').focus();
+	$("#client_no").focus();
     $('#login-intro').hide();
 });
 

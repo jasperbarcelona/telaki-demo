@@ -1,0 +1,27 @@
+<div class="conversation-item">
+	<div class="conversation-item-header">
+		<div class="message-item-contact-container">
+			{% if message.message_type == 'inbound' %}
+
+			{% if conversation.contact_name != None %}
+			<span class="message-item-sender-label link" data-toggle="modal" data-target="#editContactModal" onclick="supply_contact_info()">{{ conversation.contact_name }}</span><br />
+			<span class="message-item-sender-sub-label">{{ conversation.msisdn }}</span>
+			{% else %}
+			<span id="unsavedMsisdn" class="message-item-sender-label">{{ conversation.msisdn }}</span>
+			<span class="pipe-separator">|</span>
+			<span class="saveContactBtn link" data-toggle="modal" data-target="#saveContactModal" onclick="supply_msisdn()">Save Contact</span>
+			{% endif %}
+
+			{% else %}
+			<span class="message-item-sender-label">{{ message.outbound_sender_name }}</span>
+			{% endif %}
+		</div>
+		<div class="message-item-date-container">
+			<span class="message-item-date">{{ message.date }}</span><br />
+			<span class="message-item-time">{{ message.time }}</span>
+		</div>
+	</div>
+	<div class="conversation-item-body">
+		{{ message.content }}
+	</div>
+</div>

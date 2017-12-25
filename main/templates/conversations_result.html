@@ -1,0 +1,19 @@
+{% for entry in conversations %}
+{% if entry.status == 'unread' %}
+<tr onclick="open_conversation({{ entry.id }})" class="unread">
+{% else %}
+<tr onclick="open_conversation({{ entry.id }})">
+{% endif %}
+	<td class="icon-td">
+		<i class="material-icons">&#xE835;</i>
+		<i class="material-icons">&#xE83A;</i>
+	</td>
+	{% if entry.contact_name != None %}
+	<td class="msisdn-td">{{ entry.contact_name }}</td>
+	{% else %}
+	<td class="msisdn-td">{{ entry.msisdn }}</td>
+	{% endif %}
+	<td class="message-td">{{ entry.latest_content }}</td>
+	<td class="date-td align-right">{{ entry.latest_date }}</td>
+</tr>
+{% endfor %}

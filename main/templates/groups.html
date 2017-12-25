@@ -1,0 +1,45 @@
+<div class="content-header">
+	<div class="content-right-btn-container">
+		<button class="btn control-btn"><i class="material-icons">&#xE5D5;</i></button>
+		<button class="btn control-btn"><i class="material-icons">&#xE8B6;</i></button>
+		<button id="addGroupBtn" class="btn control-btn" data-toggle="modal" data-target="#createGroupModal"><i class="material-icons md-30">add</i></button>
+		<div class="pagination-btn-container">
+			<div class="pagination-label-container">
+				<span class="pagination-label"><strong id="paginationShowingGroups">{{ showing }}</strong></span>
+				<span class="pagination-label separator">of</span>
+				<span class="pagination-label"><strong id="paginationTotalGroups">{{ total_entries }}</strong></span>
+			</div>
+			{% if prev_btn == 'enabled' %}
+			<button class="btn pagination-btn left group" onclick="group_prev_page()"><i class="material-icons">&#xE5CB;</i></button>
+			{% else %}
+			<button class="btn pagination-btn left group" onclick="group_prev_page()" disabled><i class="material-icons">&#xE5CB;</i></button>
+			{% endif %}
+
+			{% if next_btn == 'enabled' %}
+			<button class="btn pagination-btn right group" onclick="group_next_page()"><i class="material-icons">&#xE5CC;</i></button>
+			{% else %}
+			<button class="btn pagination-btn right group" onclick="group_next_page()" disabled><i class="material-icons">&#xE5CC;</i></button>
+			{% endif %}
+		</div>
+	</div>
+</div>
+{% if not groups[0] %}
+<div id="emptyBlast" class="empty-overlay">
+	<span class="empty-label">No groups yet.</span>
+</div>
+{% endif %}
+<div id="contentBody" class="content-body">
+	<table class="table content-table">
+		<tbody id="groups">
+			{% for group in groups %}
+			<tr id="{{ group.id }}" data-toggle="modal" data-target="#groupMembersModal" onclick="open_group(this.id)">
+				<td class="group-icon-td">
+					<i class="material-icons">&#xE835;</i>
+				</td>
+				<td class="group-name-td">{{ group.name }}</td>
+				<td class="group-size-td align-right">{{ group.size }} members</td>
+			</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+</div>

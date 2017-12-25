@@ -1,0 +1,10 @@
+{% for group in group_recipients %}
+<div class="saved-recipient-container">
+	<span class="saved-recipient-name group">{{ group }}</span>
+</div>
+{% endfor %}
+{% for contact in individual_recipients %}
+<div class="saved-recipient-container">
+	<span class="saved-recipient-name individual">{{ contact }}</span>
+</div>
+{% endfor %}

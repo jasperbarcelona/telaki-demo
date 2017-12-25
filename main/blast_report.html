@@ -1,0 +1,19 @@
+<div class="blast-report-container">
+	<table class="table">
+		<tbody>
+			<tr>
+				<td class="report-success">Success</td>
+				<td class="align-right">{{ blast.done }}</td>
+			</tr>
+			<tr>
+				{% if blast.failed != 0 %}
+				<td class="report-failed">Failed <span id="retryBlastBtn" class="link">(click here to retry)</span></td>
+				{% endif %}
+				<td class="align-right">{{ blast.failed }}</td>
+			</tr>
+		</tbody>
+	</table>
+	<div class="blast-overlay-footer align-right">
+		<button type="button" class="btn btn-primary">Done</button>
+	</div>
+</div>

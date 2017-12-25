@@ -13,20 +13,15 @@ body, html{
 body{
   color: #373A3C !important;
   font-family: Lato;
-  background-color: #2868B7;
+  background-color: #d9534f;
 }
 
-#login-btn {
-  background: transparent;
-  border: 2px solid #FFFFFF;
-  color: #FFFFFF;
-}
-
-#login-btn:hover,
-#login-btn:active {
-  color: #2868B7;
-  background: #FFFFFF !important;
-}
+/*.btn-primary,
+.btn-primary:hover
+.btn-primary:active {
+  background-color: #d9534f !important;
+  border-color: #d9534f !important; 
+}*/
 
 .loading{
   position: absolute;
@@ -49,14 +44,14 @@ body{
 #login-form-loader{
   height: 100%;
   width: 100%;
-  background-color: #2868B7;
+  background-color: #d9534f;
   display: none;
 }
 
 #login-intro{
   height: 100%;
   width: 100%;
-  background-color: #2868B7;
+  background-color: #d9534f;
 }
 
 .clickable{
@@ -82,14 +77,29 @@ body{
 }
 
 #login-brand{
-  font-size: 32px;
+  float: left;
+  width: 100%;
+  font-size: 42px;
+  font-weight: bold;
+  letter-spacing: 1px;
   color: #FFFFFF;
+}
+
+#login-sub-brand{
+  margin-top: 30px;
+  float: left;
+  width: 100%;
+  color: #FFFFFF;
+  font-size: 20px;
+  letter-spacing: 2px;
+  font-weight: bold;
+  text-transform: uppercase;
 }
 
 #login-form{
   position: relative;
   padding: 20px;
-  background-color: transparent;
+  background-color: #FFFFFF;
   width: 400px;
 }
 
@@ -106,20 +116,16 @@ body{
 #login-form .form-control{
   border-radius: 0 !important;
   outline: none !important;
-  height: 45px !important;
-  margin-bottom: 15px;
+  height: 40px !important;
+  margin-bottom: 20px;
   border-top: 0 !important;
   border-left: 0 !important;
   border-right: 0 !important;
-  border-bottom: 1px solid #FFFFFF !important;
+  border-bottom: 1px solid #999 !important;
   box-shadow: none !important;
   background-color: transparent;
-  color: #FFFFFF;
+  color: #494949;
   font-size: 15px;
-}
-
-#login-form .form-control::placeholder {
-  color: #FFFFFF;
 }
 
 .input-label{
@@ -127,7 +133,7 @@ body{
   font-weight: normal !important;
   padding-left: 4px;
   font-size: 12px !important;
-  color: #FFFFFF !important;
+  color: #494949 !important;
 }
 
 #login-btn{
@@ -170,14 +176,7 @@ body{
 
 #logo-container{
   text-align: center;
-  margin-bottom: 40px;
-}
-
-#login-sub-brand{
-  color: #FFFFFF;
-  font-size: 16px;
-  font-weight: bold;
-  text-transform: uppercase;
+  margin-bottom: 30px;
 }
 
 .loader {
@@ -267,6 +266,14 @@ body{
   height: 40px;
   width: 100%;
   background-color: transparent;
-  color: #FFFFFF;
+  color: red;
   text-align: center;
+  display: -webkit-flex;
+  display: flex;
+  -webkit-flex-direction: row;
+  flex-direction: row;
+  -webkit-align-items: center;
+  align-items: center;
+  -webkit-justify-content: center;
+  justify-content: center;
 }
