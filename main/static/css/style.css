@@ -915,6 +915,16 @@ a,a:hover,a:active,a:focus {
 	background-color: #d9534f;
 }
 
+.error-text {
+	color: #d9534f;
+	font-weight: bold;
+}
+
+#fileErrorMessage {
+	float: left;
+	margin-top: 15px;
+}
+
 .snackbar-success > div {
 	background-color: #5cb85c;
 }

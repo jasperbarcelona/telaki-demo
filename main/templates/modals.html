@@ -145,10 +145,11 @@
                 <form id="uploadFileForm" method="post" enctype="multipart/form-data">
                     <input name="file" id="file" type="file">
                 </form>
+                <span id="fileErrorMessage" class="error-text hidden"></span>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-danger modal-btn" data-dismiss="modal">Close</button>
-                <button id="saveContactBtn" type="button" class="btn btn-primary modal-btn" onclick="send_reminder()">Save</button>
+                <button id="sendReminderBtn" type="button" class="btn btn-primary modal-btn" onclick="send_reminder()" data-loading-text="Preparing.." data-complete-text="Upload">Upload</button>
             </div>
         </div><!-- /.modal-content -->
     </div><!-- /.modal-dialog -->

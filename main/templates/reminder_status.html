@@ -1,0 +1,7 @@
+<div class="blast-overlay-label-container">
+	<span class="blast-progress">{{ batch.batch_size - batch.pending }} of {{ batch.batch_size }} done.</span><br />
+	<span class="blast-ignore">(Ignoring duplicate numbers)</span>
+</div>
+<div class="progress">	
+	<div id="blastProgressBar" class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" style="width:{{ ((batch.batch_size - batch.pending) / batch.batch_size) * 100 }}%"></div>
+</div>

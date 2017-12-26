@@ -34,7 +34,7 @@ from email.mime.text import MIMEText as text
 import os
 import schedule
 from werkzeug.utils import secure_filename
-from tasks import blast_sms, blast_sms
+from tasks import blast_sms, send_reminders
 import db_conn
 from db_conn import db, app
 from models import *
@@ -61,6 +61,7 @@ admin.add_view(SchoolAdmin(Client, db.session))
 admin.add_view(SchoolAdmin(AdminUser, db.session))
 admin.add_view(SchoolAdmin(Contact, db.session))
 admin.add_view(SchoolAdmin(Batch, db.session))
+admin.add_view(SchoolAdmin(ReminderBatch, db.session))
 admin.add_view(SchoolAdmin(OutboundMessage, db.session))
 admin.add_view(SchoolAdmin(Conversation, db.session))
 admin.add_view(SchoolAdmin(ConversationItem, db.session))
@@ -81,26 +82,6 @@ def nocache(view):
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
-def save_reminder(filename):
-    path = '%s/%s' % (UPLOAD_FOLDER, filename)
-    book = xlrd.open_workbook(path)
-    sheet = book.sheet_by_index(0)
-    rows = sheet.nrows;
-    cols = 2
-    new_reminder = ReminderBatch(
-        client_no=session['client_no'],
-        sender_id=session['user_id'],
-        batch_size=rows,
-        sender_name=session['user_name'],
-        date=datetime.datetime.now().strftime('%B %d, %Y'),
-        time=time.strftime("%I:%M %p"),
-        file_name=filename,
-        created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
-        )
-    db.session.add(new_reminder)
-    db.session.commit()
-    return
 
 
 @app.route('/',methods=['GET','POST'])
@@ -701,40 +682,100 @@ def upload_file():
     filename = secure_filename(file.filename)
     file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
     if file and allowed_file(file.filename):
-        save_reminder(filename)
-        # send_messages.delay(message_id)
-        prev_btn = 'enabled'
-        total_entries = ReminderBatch.query.filter_by(client_no=session['client_no']).count()
-        reminders = ReminderBatch.query.filter_by(client_no=session['client_no']).order_by(ReminderBatch.created_at.desc()).slice(session['reminder_limit'] - 50, session['reminder_limit'])
-        if total_entries < 50:
-            showing='1 - %s' % total_entries
-            prev_btn = 'disabled'
-            next_btn='disabled'
-        else:
-            diff = total_entries - (session['reminder_limit'] - 50)
-            if diff > 50:
-                showing = '%s - %s' % (str(session['reminder_limit'] - 49),str(session['reminder_limit']))
-                next_btn='enabled'
+        path = '%s/%s' % (UPLOAD_FOLDER, filename)
+        book = xlrd.open_workbook(path)
+        sheet = book.sheet_by_index(0)
+        rows = sheet.nrows;
+        cols = 2
+        new_reminder = ReminderBatch(
+            client_no=session['client_no'],
+            sender_id=session['user_id'],
+            batch_size=rows,
+            sender_name=session['user_name'],
+            date=datetime.datetime.now().strftime('%B %d, %Y'),
+            time=time.strftime("%I:%M %p"),
+            file_name=filename,
+            created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
+            )
+        db.session.add(new_reminder)
+        db.session.commit()
+
+        for row in range(rows):
+            vals = []
+            for col in range(cols):
+                cell = sheet.cell(row,col)
+                if cell.value == '':
+                    vals.append(None)
+                else:
+                    vals.append(cell.value)
+
+            contact = Contact.query.filter_by(msidn='0%s'%vals[0][-10:]).first()
+            if contact or contact != None:
+                new_message = Message(
+                    batch_id=new_reminder.id,
+                    contact_name=contact.name,
+                    msisdn=contact.msisdn,
+                    content=vals[1],
+                    batch_id=new_reminder.id,
+                    date=new_reminder.date,
+                    time=new_reminder.time,
+                    )
             else:
-                showing = '%s - %s' % (str(session['reminder_limit'] - 49),str((session['reminder_limit']-50)+diff))
-                prev_btn = 'enabled'
-                next_btn='disabled'
+                new_message = Message(
+                    batch_id=new_reminder.id,
+                    msisdn=contact.msisdn,
+                    content=vals[1],
+                    batch_id=new_reminder.id,
+                    date=new_reminder.date,
+                    time=new_reminder.time,
+                    )
+            db.session.add(new_message)
+            db.session.commit()
+            new_reminder.pending = Message.query.filter_by(id=new_reminder.id,status='pending').count()
+            db.session.commit()
+
+        send_reminders.delay(new_reminder.id,new_reminder.date,new_reminder.time,session['client_no'])
 
         return jsonify(
             status='success',
-            template=flask.render_template(
-                    'reminders.html',
-                    reminders=reminders,
-                    showing=showing,
-                    total_entries=total_entries,
-                    prev_btn=prev_btn,
-                    next_btn=next_btn
-                )
+            pending=new_reminder.pending,
+            batch_id=new_reminder.id,
+            template=flask.render_template('reminder_status.html', batch=new_reminder)
             )
+
+        # prev_btn = 'enabled'
+        # total_entries = ReminderBatch.query.filter_by(client_no=session['client_no']).count()
+        # reminders = ReminderBatch.query.filter_by(client_no=session['client_no']).order_by(ReminderBatch.created_at.desc()).slice(session['reminder_limit'] - 50, session['reminder_limit'])
+        # if total_entries < 50:
+        #     showing='1 - %s' % total_entries
+        #     prev_btn = 'disabled'
+        #     next_btn='disabled'
+        # else:
+        #     diff = total_entries - (session['reminder_limit'] - 50)
+        #     if diff > 50:
+        #         showing = '%s - %s' % (str(session['reminder_limit'] - 49),str(session['reminder_limit']))
+        #         next_btn='enabled'
+        #     else:
+        #         showing = '%s - %s' % (str(session['reminder_limit'] - 49),str((session['reminder_limit']-50)+diff))
+        #         prev_btn = 'enabled'
+        #         next_btn='disabled'
+
+        # return jsonify(
+        #     status='success',
+        #     template=flask.render_template(
+        #             'reminders.html',
+        #             reminders=reminders,
+        #             showing=showing,
+        #             total_entries=total_entries,
+        #             prev_btn=prev_btn,
+        #             next_btn=next_btn
+        #         )
+        #     )
+
     return jsonify(
-            status = 'failed',
-            message = 'Invalid file'
-            )
+        status = 'failed',
+        message = 'Invalid file.'
+        )
 
 
 @app.route('/conversation',methods=['GET','POST'])
@@ -805,7 +846,7 @@ def edit_contact():
     contact = Contact.query.filter_by(msisdn=session['contact_msisdn']).first()
     contact.name = data['name'].title()
     contact.contact_type = data['contact_type']
-    contact.msisdn = data['msisdn']
+    contact.msisdn = '0%s'%data['msisdn'][-10:]
 
     existing_contact_groups = ContactGroup.query.filter_by(contact_id=contact.id).delete()
 
@@ -874,7 +915,7 @@ def save_contact():
         client_no=session['client_no'],
         contact_type=data['contact_type'].title(),
         name=data['name'].title(),
-        msisdn=data['msisdn'],
+        msisdn='0%s'%data['msisdn'][-10:],
         added_by=session['user_id'],
         added_by_name=session['user_name'],
         join_date=datetime.datetime.now().strftime('%B %d, %Y'),
@@ -938,7 +979,7 @@ def save_contact():
 def get_contact_info():
     data = flask.request.args.to_dict()
     session['contact_msisdn'] = data['msisdn']
-    contact = Contact.query.filter_by(msisdn=data['msisdn']).first()
+    contact = Contact.query.filter_by(msisdn='0%s'%data['msisdn'][-10:]).first()
     contact_groups = [r.group_id for r in db.session.query(ContactGroup.group_id).filter_by(contact_id=contact.id).all()]
     groups = Group.query.filter_by(client_no=session['client_no']).order_by(Group.name)
 

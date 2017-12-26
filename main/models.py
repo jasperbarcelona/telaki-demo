@@ -99,7 +99,17 @@ class OutboundMessage(db.Model):
     date = db.Column(db.String(20))
     time = db.Column(db.String(10))
     contact_name = db.Column(db.String(100))
-    contact_city = db.Column(db.String(100))
+    msisdn = db.Column(db.String(30))
+    status = db.Column(db.String(30),default='pending')
+    created_at = db.Column(db.String(50))
+
+class ReminderMessage(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    batch_id = db.Column(db.Integer())
+    date = db.Column(db.String(20))
+    time = db.Column(db.String(10))
+    contact_name = db.Column(db.String(100), default='Unknown')
+    content = db.Column(db.Text())
     msisdn = db.Column(db.String(30))
     status = db.Column(db.String(30),default='pending')
     created_at = db.Column(db.String(50))

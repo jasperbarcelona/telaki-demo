@@ -582,7 +582,6 @@ function remove_individual_recipient(id,name) {
 }
 
 function remove_group_recipient(id,size,name) {
-  alert('working');
   var id_index = group_recipients.indexOf(id);
   var name_index = group_recipients.indexOf(name);
   group_recipients.splice(id_index, 1);
@@ -670,6 +669,7 @@ function display_blast_report(batch_id) {
 }
 
 function send_reminder() {
+  $('#sendReminderBtn').button('loading');
   var form_data = new FormData($('#uploadFileForm')[0]);
   $.ajax({
       type: 'POST',
@@ -682,8 +682,17 @@ function send_reminder() {
       success: function(data) {
         if (data['status'] == 'success') {
           $('#addReminderModal').modal('hide');
-          $('.content').html(data['template']);
-          $('#emptyReminder').hide();
+          $('#sendReminderBtn').button('complete');
+          $('#blastOverlay .blast-overlay-body').html(data['template']);
+          $('#blastOverlay').removeClass('hidden');
+
+          if (data['pending'] != 0) {
+            refresh_reminder_progress(data['batch_id']);
+          }
+        }
+        else {
+          $('#fileErrorMessage').html(data['message']);
+          $('#fileErrorMessage').removeClass('hidden');
         }
       },
   });

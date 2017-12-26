@@ -1,7 +1,7 @@
 <div class="content-header">
 	<div class="content-header-left">
 		<div class="back-btn">
-			<div onclick="show_conversations('continue')">
+			<div onclick="show_blasts('continue')">
 				<i class="material-icons">&#xE5C4;</i>
 				<span>Back</span>
 			</div>
@@ -15,8 +15,10 @@
 		<div class="conversation-item">
 			<div class="conversation-item-header">
 				<div class="message-item-contact-container">
-					<span class="blast-sender-label">Sent by</span>
-					<span class="blast-sender"><strong>{{ batch.sender_name }}</strong></span>
+					<span class="blast-sender-label">Sent by:</span>
+					<span class="blast-sender"><strong>{{ batch.sender_name }}</strong></span><br/>
+					<span class="blast-sender-label">To:</span>
+					<span class="blast-recipient">{{ batch.recipient }}</span>
 				</div>
 				<div class="message-item-date-container">
 					<span class="message-item-date">{{ batch.date }}</span><br />
@@ -36,6 +38,8 @@
 						<tr>
 							{% if batch.failed != 0 %}
 							<td class="report-failed">Failed <span id="retryBlastBtn" class="link">(click here to retry)</span></td>
+							{% else %}
+							<td class="report-failed">Failed</td>
 							{% endif %}
 							<td class="align-right">{{ batch.failed }}</td>
 						</tr>
