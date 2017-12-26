@@ -709,29 +709,27 @@ def upload_file():
                 else:
                     vals.append(cell.value)
 
-            contact = Contact.query.filter_by(msidn='0%s'%vals[0][-10:]).first()
+            contact = Contact.query.filter_by(msisdn='0%s'%vals[0][-10:]).first()
             if contact or contact != None:
-                new_message = Message(
+                new_message = ReminderMessage(
                     batch_id=new_reminder.id,
                     contact_name=contact.name,
                     msisdn=contact.msisdn,
                     content=vals[1],
-                    batch_id=new_reminder.id,
                     date=new_reminder.date,
                     time=new_reminder.time,
                     )
             else:
-                new_message = Message(
+                new_message = ReminderMessage(
                     batch_id=new_reminder.id,
                     msisdn=contact.msisdn,
                     content=vals[1],
-                    batch_id=new_reminder.id,
                     date=new_reminder.date,
                     time=new_reminder.time,
                     )
             db.session.add(new_message)
             db.session.commit()
-            new_reminder.pending = Message.query.filter_by(id=new_reminder.id,status='pending').count()
+            new_reminder.pending = ReminderMessage.query.filter_by(id=new_reminder.id,status='pending').count()
             db.session.commit()
 
         send_reminders.delay(new_reminder.id,new_reminder.date,new_reminder.time,session['client_no'])
@@ -979,7 +977,7 @@ def save_contact():
 def get_contact_info():
     data = flask.request.args.to_dict()
     session['contact_msisdn'] = data['msisdn']
-    contact = Contact.query.filter_by(msisdn='0%s'%data['msisdn'][-10:]).first()
+    contact = Contact.query.filter_by(msisdn=data['msisdn']).first()
     contact_groups = [r.group_id for r in db.session.query(ContactGroup.group_id).filter_by(contact_id=contact.id).all()]
     groups = Group.query.filter_by(client_no=session['client_no']).order_by(Group.name)
 
@@ -1317,7 +1315,7 @@ def rebuild_database():
             client_no='at-ic2017',
             contact_type='Customer',
             name='John Doe',
-            msisdn=str(i),
+            msisdn='091756869%s'%str(i),
             added_by=1,
             added_by_name='Jasper Barcelona',
             join_date='November 14, 2017',

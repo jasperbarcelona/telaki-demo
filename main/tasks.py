@@ -21,10 +21,10 @@ UPLOAD_FOLDER = 'static/records'
 # 'sqlite:///local.db'
 
 @app.task
-def blast_sms(batch_id,date,time,client_no):
+def blast_sms(batch_id,date,time,message_content,client_no):
     client = Client.query.filter_by(client_no=client_no).first()
-    batch = Batch.query.filter_by(id=batch_id).first()
-    messages = ReminderMessage.query.filter_by(batch_id=batch_id).all()
+    batch = Batch.query.filter_by(client_no=client_no,id=batch_id).first()
+    messages = OutboundMessage.query.filter_by(batch_id=batch_id).all()
 
     for message in messages:
         message_options = {
@@ -59,16 +59,16 @@ def blast_sms(batch_id,date,time,client_no):
     return
 
 @app.task
-def send_reminders(batch_id,date,time,message_content,client_no):
+def send_reminders(batch_id,date,time,client_no):
     client = Client.query.filter_by(client_no=client_no).first()
-    batch = Batch.query.filter_by(id=batch_id).first()
-    messages = OutboundMessage.query.filter_by(batch_id=batch_id).all()
+    batch = ReminderBatch.query.filter_by(client_no=client_no,id=batch_id).first()
+    messages = ReminderMessage.query.filter_by(batch_id=batch_id).all()
 
     for message in messages:
         message_options = {
             'app_id': client.app_id,
             'app_secret': client.app_secret,
-            'message': message_content,
+            'message': message.content,
             'address': message.msisdn,
             'passphrase': client.passphrase,
         }
@@ -89,9 +89,9 @@ def send_reminders(batch_id,date,time,message_content,client_no):
             message.timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
             db.session.commit()
         
-        batch.done = OutboundMessage.query.filter_by(batch_id=batch.id,status='success').count()
-        batch.pending = OutboundMessage.query.filter_by(batch_id=batch.id,status='pending').count()
-        batch.failed = OutboundMessage.query.filter_by(batch_id=batch.id,status='failed').count()
+        batch.done = ReminderMessage.query.filter_by(batch_id=batch.id,status='success').count()
+        batch.pending = ReminderMessage.query.filter_by(batch_id=batch.id,status='pending').count()
+        batch.failed = ReminderMessage.query.filter_by(batch_id=batch.id,status='failed').count()
         db.session.commit()
 
     return
