@@ -285,8 +285,9 @@ def all_blasts():
 def get_blast():
     batch_id = flask.request.args.get('batch_id')
     batch = Batch.query.filter_by(id=batch_id).first()
-    messages = OutboundMessage.query.filter_by(batch_id=batch_id).all()
-    return flask.render_template('blast_info.html',batch=batch,messages=messages)
+    success = OutboundMessage.query.filter_by(batch_id=batch_id, status='success').all()
+    failed = OutboundMessage.query.filter_by(batch_id=batch_id, status='failed').all()
+    return flask.render_template('blast_info.html',batch=batch,success=success,failed=failed)
 
 
 @app.route('/blasts/next',methods=['GET','POST'])
@@ -380,6 +381,16 @@ def payment_reminders():
         prev_btn=prev_btn,
         next_btn=next_btn,
     )
+
+
+@app.route('/reminder',methods=['GET','POST'])
+def view_reminder():
+    reminder_id = flask.request.args.get('reminder_id')
+    reminder = ReminderBatch.query.filter_by(id=reminder_id).first()
+    file_loc = '%s/%s' % (UPLOAD_FOLDER, reminder.file_name)
+    success = ReminderMessage.query.filter_by(batch_id=reminder.id,status='success')
+    failed = ReminderMessage.query.filter_by(batch_id=reminder.id,status='failed')
+    return flask.render_template('view_reminder.html', file_loc=file_loc, filename=reminder.file_name, success=success, failed=failed)
 
 
 @app.route('/reminders/next',methods=['GET','POST'])
@@ -729,7 +740,7 @@ def upload_file():
                     )
             db.session.add(new_message)
             db.session.commit()
-            new_reminder.pending = ReminderMessage.query.filter_by(id=new_reminder.id,status='pending').count()
+            new_reminder.pending = ReminderMessage.query.filter_by(batch_id=new_reminder.id,status='pending').count()
             db.session.commit()
 
         send_reminders.delay(new_reminder.id,new_reminder.date,new_reminder.time,session['client_no'])
@@ -774,6 +785,28 @@ def upload_file():
         status = 'failed',
         message = 'Invalid file.'
         )
+
+
+@app.route('/progress/existing',methods=['GET','POST'])
+def check_existing_progress():
+    blast = Batch.query.filter(Batch.sender_id==session['user_id'],Batch.pending!=0).first()
+    if blast or blast != None:
+        return jsonify(
+            in_progress='blast',
+            pending=blast.pending,
+            batch_id=blast.id,
+            template=flask.render_template('blast_status.html', batch=blast)
+            )
+    reminder = ReminderBatch.query.filter(ReminderBatch.sender_id==session['user_id'],ReminderBatch.pending!=0).first()
+    if reminder or reminder != None:
+        return jsonify(
+            in_progress='reminder',
+            pending=reminder.pending,
+            batch_id=reminder.id,
+            template=flask.render_template('reminder_status.html', batch=reminder)
+            )
+    return jsonify(in_progress='none')
+
 
 
 @app.route('/conversation',methods=['GET','POST'])
@@ -1099,11 +1132,28 @@ def get_blast_progress():
         )
 
 
+@app.route('/reminder/progress', methods=['GET', 'POST'])
+def get_reminder_progress():
+    batch_id = flask.request.form.get('batch_id')
+    batch = ReminderBatch.query.filter_by(id=batch_id).first()
+    return jsonify(
+        pending=batch.pending,
+        template=flask.render_template('reminder_status.html', batch=batch)
+        )
+
+
 @app.route('/blast/summary', methods=['GET', 'POST'])
 def display_blast_summary():
     batch_id = flask.request.form.get('batch_id')
     batch = Batch.query.filter_by(id=batch_id).first()
     return flask.render_template('blast_report.html', batch=batch)
+
+
+@app.route('/reminder/summary', methods=['GET', 'POST'])
+def display_reminder_summary():
+    batch_id = flask.request.form.get('batch_id')
+    batch = ReminderBatch.query.filter_by(id=batch_id).first()
+    return flask.render_template('reminder_report.html', batch=batch)
 
 
 @app.route('/db/rebuild',methods=['GET','POST'])

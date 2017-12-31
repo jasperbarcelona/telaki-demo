@@ -32,7 +32,7 @@
 	<table class="table content-table">
 		<tbody id="reminders">
 			{% for entry in reminders %}
-			<tr onclick="open_blast({{ entry.id }})">
+			<tr onclick="open_reminder({{ entry.id }})" data-toggle="modal" data-target="#viewReminderModal">
 				<td class="blast-icon-td">
 					<i class="material-icons">&#xE835;</i>
 				</td>

@@ -52,4 +52,34 @@
 			</div>
 		</div>
 	</div>
+	<div class="blast-info-recipients-label">
+		<span>Recipients</span>
+	</div>
+	<div class="blast-info-recipients">
+		<table class="table">
+			<thead>
+				<tr>
+					<th>Contact</th>
+					<th>Mobile Number</th>
+					<th class="align-right">Status</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for message in failed %}
+				<tr>
+					<td>{{ message.contact_name }}</td>
+					<td>{{ message.msisdn }}</td>
+					<td class="report-failed align-right">{{ message.status }}</td>
+				</tr>
+				{% endfor %}
+				{% for message in success %}
+				<tr>
+					<td>{{ message.contact_name }}</td>
+					<td>{{ message.msisdn }}</td>
+					<td class="report-success align-right">{{ message.status }}</td>
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
 </div>

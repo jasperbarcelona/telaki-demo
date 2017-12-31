@@ -654,6 +654,23 @@ function refresh_blast_progress(batch_id) {
     });
 }
 
+function refresh_reminder_progress(batch_id) {
+  $.post('/reminder/progress',
+    {
+      batch_id:batch_id
+    },
+    function(data){
+      $('#blastOverlay .blast-overlay-body').html(data['template']);
+      if (data['pending'] != 0) {
+        console.log('working');
+        refresh_reminder_progress(batch_id);
+      }
+      else {
+        display_reminder_report(batch_id);
+      }
+    });
+}
+
 function hide_blast_progress() {
   $('#blastOverlay').addClass('hidden');
 }
@@ -668,34 +685,47 @@ function display_blast_report(batch_id) {
     });
 }
 
+function display_reminder_report(batch_id) {
+  $.post('/reminder/summary',
+    {
+      batch_id:batch_id
+    },
+    function(data){
+      $('#blastOverlay .blast-overlay-body').append(data);
+    });
+}
+
 function send_reminder() {
   $('#sendReminderBtn').button('loading');
-  var form_data = new FormData($('#uploadFileForm')[0]);
-  $.ajax({
-      type: 'POST',
-      url: '/reminder/upload',
-      data: form_data,
-      contentType: false,
-      cache: false,
-      processData: false,
-      async: false,
-      success: function(data) {
-        if (data['status'] == 'success') {
-          $('#addReminderModal').modal('hide');
-          $('#sendReminderBtn').button('complete');
-          $('#blastOverlay .blast-overlay-body').html(data['template']);
-          $('#blastOverlay').removeClass('hidden');
-
-          if (data['pending'] != 0) {
-            refresh_reminder_progress(data['batch_id']);
+  setTimeout(function(){
+    var form_data = new FormData($('#uploadFileForm')[0]);
+    $.ajax({
+        type: 'POST',
+        url: '/reminder/upload',
+        data: form_data,
+        contentType: false,
+        cache: false,
+        processData: false,
+        async: false,
+        success: function(data) {
+          if (data['status'] == 'success') {
+            $('#fileErrorMessage').addClass('hidden');
+            $('#addReminderModal').modal('hide');
+            $('#blastOverlay .blast-overlay-body').html(data['template']);
+            $('#blastOverlay').removeClass('hidden');
+            if (data['pending'] != 0) {
+              refresh_reminder_progress(data['batch_id']);
+            }
+            $('#sendReminderBtn').button('complete');
           }
-        }
-        else {
-          $('#fileErrorMessage').html(data['message']);
-          $('#fileErrorMessage').removeClass('hidden');
-        }
-      },
-  });
+          else {
+            $('#fileErrorMessage').html(data['message']);
+            $('#fileErrorMessage').removeClass('hidden');
+            $('#sendReminderBtn').button('complete');
+          }
+        },
+    });
+  }, 800);
 }
 
 function save_group() {
@@ -720,5 +750,35 @@ function open_blast(batch_id) {
     },
     function(data){
       $('.content').html(data);
+    });
+}
+
+function open_reminder(reminder_id) {
+  $.get('/reminder',
+    {
+      reminder_id:reminder_id
+    },
+    function(data){
+      $('#viewReminderModal .modal-body').html(data);
+    });
+}
+
+function check_upload_progress() {
+  $.get('/progress/existing',
+    function(data){
+      if (data['in_progress'] == 'blast') {
+        $('#blastOverlay .blast-overlay-body').html(data['template']);
+        $('#blastOverlay').removeClass('hidden');
+        if (data['pending'] != 0) {
+          refresh_blast_progress(data['batch_id']);
+        }
+      }
+      else if (data['in_progress'] == 'reminder') {
+        $('#blastOverlay .blast-overlay-body').html(data['template']);
+        $('#blastOverlay').removeClass('hidden');
+        if (data['pending'] != 0) {
+          refresh_reminder_progress(data['batch_id']);
+        }
+      }
     });
 }

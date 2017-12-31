@@ -1,0 +1,33 @@
+<a href='{{ file_loc }}'>
+	<div class="view-reminder-container">
+	    <i class="material-icons view-file-download">&#xE2C4;</i>
+	    <span id="viewFilename">{{ filename }}</span>
+	</div>
+</a>
+<div class="reminder-info-recipients">
+	<table class="table">
+		<thead>
+			<tr>
+				<th>Contact</th>
+				<th>Mobile Number</th>
+				<th class="align-right">Status</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for message in failed %}
+			<tr>
+				<td>{{ message.contact_name }}</td>
+				<td>{{ message.msisdn }}</td>
+				<td class="report-failed align-right">{{ message.status }}</td>
+			</tr>
+			{% endfor %}
+			{% for message in success %}
+			<tr>
+				<td>{{ message.contact_name }}</td>
+				<td>{{ message.msisdn }}</td>
+				<td class="report-success align-right">{{ message.status }}</td>
+			</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+</div>

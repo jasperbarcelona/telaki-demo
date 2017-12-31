@@ -1,6 +1,7 @@
 $(document).ready(function(){
 
 $(window).load(function(){
+  check_upload_progress();
   setTimeout(function() {
     $('#mainPreloader').fadeOut();
   }, 3000);
