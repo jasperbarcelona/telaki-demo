@@ -1,10 +1,30 @@
 <a href='{{ file_loc }}'>
 	<div class="view-reminder-container">
 	    <i class="material-icons view-file-download">&#xE2C4;</i>
-	    <span id="viewFilename">{{ filename }}</span>
+	    <span id="viewFilename">{{ batch.file_name }}</span>
 	</div>
 </a>
 <div class="reminder-info-recipients">
+	<table class="table">
+		<tbody>
+			<tr>
+				<td class="report-success">Success</td>
+				<td class="align-right">{{ batch.done }}</td>
+			</tr>
+			<tr>
+				{% if batch.failed != 0 %}
+				<td class="report-failed">Failed <span id="retryBlastBtn" class="link">(click here to retry)</span></td>
+				{% else %}
+				<td class="report-failed">Failed</td>
+				{% endif %}
+				<td class="align-right">{{ batch.failed }}</td>
+			</tr>
+			<tr class="batch-size-tr">
+				<td class="report-total">TOTAL</td>
+				<td class="align-right">{{ batch.batch_size }}</td>
+			</tr>
+		</tbody>
+	</table>
 	<table class="table">
 		<thead>
 			<tr>

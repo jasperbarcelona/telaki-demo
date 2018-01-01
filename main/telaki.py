@@ -63,6 +63,7 @@ admin.add_view(SchoolAdmin(Contact, db.session))
 admin.add_view(SchoolAdmin(Batch, db.session))
 admin.add_view(SchoolAdmin(ReminderBatch, db.session))
 admin.add_view(SchoolAdmin(OutboundMessage, db.session))
+admin.add_view(SchoolAdmin(ReminderMessage, db.session))
 admin.add_view(SchoolAdmin(Conversation, db.session))
 admin.add_view(SchoolAdmin(ConversationItem, db.session))
 admin.add_view(SchoolAdmin(Group, db.session))
@@ -390,7 +391,7 @@ def view_reminder():
     file_loc = '%s/%s' % (UPLOAD_FOLDER, reminder.file_name)
     success = ReminderMessage.query.filter_by(batch_id=reminder.id,status='success')
     failed = ReminderMessage.query.filter_by(batch_id=reminder.id,status='failed')
-    return flask.render_template('view_reminder.html', file_loc=file_loc, filename=reminder.file_name, success=success, failed=failed)
+    return flask.render_template('view_reminder.html', file_loc=file_loc, batch=reminder, success=success, failed=failed)
 
 
 @app.route('/reminders/next',methods=['GET','POST'])
@@ -733,7 +734,7 @@ def upload_file():
             else:
                 new_message = ReminderMessage(
                     batch_id=new_reminder.id,
-                    msisdn=contact.msisdn,
+                    msisdn='0%s'%vals[0][-10:],
                     content=vals[1],
                     date=new_reminder.date,
                     time=new_reminder.time,
