@@ -155,6 +155,26 @@
     </div><!-- /.modal-dialog -->
 </div>
 
+<div class="modal fade" id="uploadContactsModal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="gridSystemModalLabel">Import Contacts (File Upload)</h4>
+            </div>
+            <div class="modal-body">
+                <form id="uploadContactsForm" method="post" enctype="multipart/form-data">
+                    <input name="contactsFile" id="contactsFile" type="file">
+                </form>
+                <span id="contactsFileErrorMessage" class="error-text hidden"></span>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger modal-btn" data-dismiss="modal">Close</button>
+                <button id="uploadContactsBtn" type="button" class="btn btn-primary modal-btn" onclick="upload_contacts()" data-loading-text="Preparing.." data-complete-text="Upload">Upload</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>
+
 <div class="modal fade" id="viewReminderModal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">

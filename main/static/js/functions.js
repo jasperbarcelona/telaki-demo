@@ -634,6 +634,9 @@ function send_text_blast() {
       if (data['pending'] != 0) {
         refresh_blast_progress(data['batch_id']);
       }
+      else {
+        display_blast_report(data['batch_id']);
+      }
     });
 }
 
@@ -645,7 +648,6 @@ function refresh_blast_progress(batch_id) {
     function(data){
       $('#blastOverlay .blast-overlay-body').html(data['template']);
       if (data['pending'] != 0) {
-        console.log('working');
         refresh_blast_progress(batch_id);
       }
       else {
@@ -662,11 +664,26 @@ function refresh_reminder_progress(batch_id) {
     function(data){
       $('#blastOverlay .blast-overlay-body').html(data['template']);
       if (data['pending'] != 0) {
-        console.log('working');
         refresh_reminder_progress(batch_id);
       }
       else {
         display_reminder_report(batch_id);
+      }
+    });
+}
+
+function refresh_contacts_progress(batch_id) {
+  $.post('/contacts/progress',
+    {
+      batch_id:batch_id
+    },
+    function(data){
+      $('#blastOverlay .blast-overlay-body').html(data['template']);
+      if (data['pending'] != 0) {
+        refresh_contacts_progress(batch_id);
+      }
+      else {
+        display_contacts_report(batch_id);
       }
     });
 }
@@ -687,6 +704,16 @@ function display_blast_report(batch_id) {
 
 function display_reminder_report(batch_id) {
   $.post('/reminder/summary',
+    {
+      batch_id:batch_id
+    },
+    function(data){
+      $('#blastOverlay .blast-overlay-body').append(data);
+    });
+}
+
+function display_contacts_report(batch_id) {
+  $.post('/contacts/summary',
     {
       batch_id:batch_id
     },
@@ -716,12 +743,51 @@ function send_reminder() {
             if (data['pending'] != 0) {
               refresh_reminder_progress(data['batch_id']);
             }
+            else {
+              display_reminder_report(data['batch_id']);
+            }
             $('#sendReminderBtn').button('complete');
           }
           else {
             $('#fileErrorMessage').html(data['message']);
             $('#fileErrorMessage').removeClass('hidden');
             $('#sendReminderBtn').button('complete');
+          }
+        },
+    });
+  }, 800);
+}
+
+function upload_contacts() {
+  $('#uploadContactsBtn').button('loading');
+  setTimeout(function(){
+    var form_data = new FormData($('#uploadContactsForm')[0]);
+    $.ajax({
+        type: 'POST',
+        url: '/contacts/upload',
+        data: form_data,
+        contentType: false,
+        cache: false,
+        processData: false,
+        async: false,
+        success: function(data) {
+          if (data['status'] == 'success') {
+            $('#contactsFileErrorMessage').addClass('hidden');
+            $('#uploadContactsModal').modal('hide');
+            $('#blastOverlay .blast-overlay-body').html(data['template']);
+            $('#blastOverlay').removeClass('hidden');
+            if (data['pending'] != 0) {
+              refresh_contacts_progress(data['batch_id']);
+            }
+            else {
+              display_contacts_report(data['batch_id']);
+            }
+            $('#uploadContactsBtn').button('complete');
+          }
+          else {
+            $('#contactsFileErrorMessage').html(data['message']);
+            $('#contactsFileErrorMessage').removeClass('hidden');
+            $('#uploadContactsBtn').button('complete');
           }
         },
     });

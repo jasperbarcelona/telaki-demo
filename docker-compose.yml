@@ -48,7 +48,7 @@ services:
     restart: always
     build: ./main
     command: "celery worker -A tasks --loglevel=info"
-    user: nobody
+    user: root
     volumes:
         - ./main:/usr/src/app
     depends_on:

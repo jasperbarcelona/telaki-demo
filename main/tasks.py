@@ -58,6 +58,75 @@ def blast_sms(batch_id,date,time,message_content,client_no):
 
     return
 
+
+@app.task
+def upload_contacts(batch_id,client_no,user_id,user_name):
+    batch = ContactBatch.query.filter_by(id=batch_id).first()
+    
+    path = '%s/%s' % (UPLOAD_FOLDER, batch.file_name)
+    book = xlrd.open_workbook(path)
+    sheet = book.sheet_by_index(0)
+    rows = sheet.nrows;
+    cols = 3
+
+    for row in range(rows):
+        vals = []
+        for col in range(cols):
+            cell = sheet.cell(row,col)
+            if cell.value == '':
+                vals.append(None)
+            else:
+                vals.append(cell.value)
+
+        contact = Contact.query.filter_by(msisdn='0%s'%str(vals[0])[-10:]).first()
+        group = Group.query.filter_by(name=vals[2]).first()
+        if contact or contact != None:
+            contact.name = vals[1].title()
+            db.session.commit()
+        else:
+            contact = Contact(
+                batch_id=batch.id,
+                client_no=client_no,
+                contact_type='Customer',
+                name=vals[1].title(),
+                msisdn='0%s'%str(vals[0])[-10:],
+                added_by=user_id,
+                added_by_name=user_name,
+                upload_status='pending',
+                join_date=datetime.datetime.now().strftime('%B %d, %Y'),
+                created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
+                )
+            db.session.add(contact)
+            db.session.commit()
+
+        if not group or group == None:
+            group = Group(
+                client_no=client_no,
+                name=vals[2],
+                created_by_id=user_id,
+                created_by_name=user_name,
+                created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
+                )
+            db.session.add(group)
+            db.session.commit()
+
+        contact_group = ContactGroup.query.filter_by(contact_id=contact.id,group_id=group.id).first()
+        if not contact_group or contact_group == None:
+            new_contact_group = ContactGroup(
+                contact_id=contact.id,
+                group_id=group.id
+                )
+            db.session.add(new_contact_group)
+            db.session.commit()
+            group.size = ContactGroup.query.filter_by(group_id=group.id).count()
+            db.session.commit()
+
+        batch.done = Contact.query.filter_by(batch_id=str(batch.id),upload_status='success').count()
+        batch.pending = Contact.query.filter_by(batch_id=str(batch.id),upload_status='pending').count()
+        batch.failed = Contact.query.filter_by(batch_id=str(batch.id),upload_status='failed').count()
+        db.session.commit()
+    return
+
 @app.task
 def send_reminders(batch_id,date,time,client_no):
     client = Client.query.filter_by(client_no=client_no).first()

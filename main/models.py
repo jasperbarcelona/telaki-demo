@@ -52,17 +52,6 @@ class AdminUser(db.Model):
     join_date = db.Column(db.String(50))
     created_at = db.Column(db.String(50))
 
-class Contact(db.Model):
-    id = db.Column(db.Integer,primary_key=True)
-    client_no = db.Column(db.String(32))
-    contact_type = db.Column(db.String(32))
-    name = db.Column(db.String(100))
-    msisdn = db.Column(db.String(20))
-    added_by = db.Column(db.Integer())
-    added_by_name = db.Column(db.String(100))
-    join_date = db.Column(db.String(50))
-    created_at = db.Column(db.String(50))
-
 class Batch(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     client_no = db.Column(db.String(32))
@@ -87,10 +76,37 @@ class ReminderBatch(db.Model):
     done = db.Column(db.Integer(),default=0)
     pending = db.Column(db.Integer(),default=0)
     failed = db.Column(db.Integer(),default=0)
-    sender_name = db.Column(db.String(60))
+    sender_name = db.Column(db.String(100))
     date = db.Column(db.String(20))
     time = db.Column(db.String(10))
     file_name = db.Column(db.Text)
+    created_at = db.Column(db.String(50))
+
+class ContactBatch(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    client_no = db.Column(db.String(32))
+    uploader_id = db.Column(db.Integer())
+    uploader_name = db.Column(db.String(100))
+    batch_size = db.Column(db.Integer())
+    date = db.Column(db.String(20))
+    time = db.Column(db.String(10))
+    file_name = db.Column(db.Text)
+    done = db.Column(db.Integer(),default=0)
+    pending = db.Column(db.Integer(),default=0)
+    failed = db.Column(db.Integer(),default=0)
+    created_at = db.Column(db.String(50))
+
+class Contact(db.Model):
+    id = db.Column(db.Integer,primary_key=True)
+    batch_id = db.Column(db.String(30),default='N/A')
+    client_no = db.Column(db.String(32))
+    contact_type = db.Column(db.String(32))
+    name = db.Column(db.String(100))
+    msisdn = db.Column(db.String(20))
+    added_by = db.Column(db.Integer())
+    added_by_name = db.Column(db.String(100))
+    upload_status = db.Column(db.String(30),default='N/A')
+    join_date = db.Column(db.String(50))
     created_at = db.Column(db.String(50))
 
 class OutboundMessage(db.Model):

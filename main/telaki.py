@@ -34,7 +34,7 @@ from email.mime.text import MIMEText as text
 import os
 import schedule
 from werkzeug.utils import secure_filename
-from tasks import blast_sms, send_reminders
+from tasks import blast_sms, send_reminders, upload_contacts
 import db_conn
 from db_conn import db, app
 from models import *
@@ -688,6 +688,46 @@ def add_group():
         )
 
 
+@app.route('/contacts/upload', methods=['GET', 'POST'])
+def prepare_contacts_upload():
+    file = flask.request.files['contactsFile']
+    filename = secure_filename(file.filename)
+    file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+    if file and allowed_file(file.filename):
+        path = '%s/%s' % (UPLOAD_FOLDER, filename)
+        book = xlrd.open_workbook(path)
+        sheet = book.sheet_by_index(0)
+        rows = sheet.nrows;
+        cols = 3
+
+        new_contact_upload = ContactBatch(
+            client_no=session['client_no'],
+            uploader_id=session['user_id'],
+            uploader_name=session['user_name'],
+            batch_size=rows,
+            date=datetime.datetime.now().strftime('%B %d, %Y'),
+            time=time.strftime("%I:%M %p"),
+            file_name=filename,
+            created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
+            )
+        db.session.add(new_contact_upload)
+        db.session.commit()
+
+        upload_contacts.delay(new_contact_upload.id, session['client_no'],session['user_id'], session['user_name'])      
+
+        return jsonify(
+            status='success',
+            pending=new_contact_upload.pending,
+            batch_id=new_contact_upload.id,
+            template=flask.render_template('contact_upload_status.html', batch=new_contact_upload)
+            )
+
+    return jsonify(
+        status = 'failed',
+        message = 'Invalid file.'
+        )
+
+
 @app.route('/reminder/upload', methods=['GET', 'POST'])
 def upload_file():
     file = flask.request.files['file']
@@ -1143,6 +1183,16 @@ def get_reminder_progress():
         )
 
 
+@app.route('/contacts/progress', methods=['GET', 'POST'])
+def get_contact_upload_progress():
+    batch_id = flask.request.form.get('batch_id')
+    batch = ContactBatch.query.filter_by(id=str(batch_id)).first()
+    return jsonify(
+        pending=batch.pending,
+        template=flask.render_template('contact_upload_status.html', batch=batch)
+        )
+
+
 @app.route('/blast/summary', methods=['GET', 'POST'])
 def display_blast_summary():
     batch_id = flask.request.form.get('batch_id')
@@ -1155,6 +1205,13 @@ def display_reminder_summary():
     batch_id = flask.request.form.get('batch_id')
     batch = ReminderBatch.query.filter_by(id=batch_id).first()
     return flask.render_template('reminder_report.html', batch=batch)
+
+
+@app.route('/contacts/summary', methods=['GET', 'POST'])
+def display_contact_upload_summary():
+    batch_id = flask.request.form.get('batch_id')
+    batch = ContactBatch.query.filter_by(id=str(batch_id)).first()
+    return flask.render_template('contact_report.html', batch=batch)
 
 
 @app.route('/db/rebuild',methods=['GET','POST'])

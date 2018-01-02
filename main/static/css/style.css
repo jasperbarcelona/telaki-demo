@@ -729,7 +729,8 @@ a,a:hover,a:active,a:focus {
 }
 
 #addReminderModal .modal-body,
-#createGroupModal .modal-body {
+#createGroupModal .modal-body,
+#uploadContactsModal .modal-body {
 	background-color: #FFFFFF;
 }
 
@@ -922,7 +923,8 @@ a,a:hover,a:active,a:focus {
 	font-weight: bold;
 }
 
-#fileErrorMessage {
+#fileErrorMessage,
+#contactsFileErrorMessage {
 	float: left;
 	margin-top: 15px;
 }
