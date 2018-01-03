@@ -715,6 +715,10 @@ def prepare_contacts_upload():
 
         upload_contacts.delay(new_contact_upload.id, session['client_no'],session['user_id'], session['user_name'])      
 
+        existing = Contact.query.filter_by(batch_id=str(new_contact_upload.id)).count()
+        new_contact_upload.pending = new_contact_upload.batch_size - existing
+        db.session.commit()
+
         return jsonify(
             status='success',
             pending=new_contact_upload.pending,
@@ -1186,7 +1190,7 @@ def get_reminder_progress():
 @app.route('/contacts/progress', methods=['GET', 'POST'])
 def get_contact_upload_progress():
     batch_id = flask.request.form.get('batch_id')
-    batch = ContactBatch.query.filter_by(id=str(batch_id)).first()
+    batch = ContactBatch.query.filter_by(id=batch_id).first()
     return jsonify(
         pending=batch.pending,
         template=flask.render_template('contact_upload_status.html', batch=batch)
@@ -1210,7 +1214,7 @@ def display_reminder_summary():
 @app.route('/contacts/summary', methods=['GET', 'POST'])
 def display_contact_upload_summary():
     batch_id = flask.request.form.get('batch_id')
-    batch = ContactBatch.query.filter_by(id=str(batch_id)).first()
+    batch = ContactBatch.query.filter_by(id=batch_id).first()
     return flask.render_template('contact_report.html', batch=batch)
 
 
@@ -1262,20 +1266,20 @@ def rebuild_database():
     contact = Contact(
         client_no='at-ic2017',
         contact_type='Customer',
-        name='John Doe',
-        msisdn='09176214704',
+        name='ABAC, AILYN-AGN',
+        msisdn='09994282203',
         added_by=1,
-        added_by_name='Jasper Barcelona',
+        added_by_name='Super Admin',
         join_date='November 14, 2017',
         created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
         )
 
     conversations = Conversation(
         client_no='at-ic2017',
-        contact_name='John Doe',
-        msisdn='09176214704',
-        status='unread',
-        latest_content='This is the latest message in this conversation.',
+        contact_name='ABAC, AILYN-AGN'.title(),
+        msisdn='09994282203',
+        status='read',
+        latest_content='This is a sample message.',
         latest_date='November 14, 2017',
         latest_time='11:36 AM',
         created_at='2017-11-14 11:36:49:270418',
@@ -1283,12 +1287,12 @@ def rebuild_database():
 
     conversations1 = Conversation(
         client_no='at-ic2017',
-        msisdn='09189123948',
+        msisdn='09176214704',
         status='unread',
-        latest_content='This is the latest message in this conversation.',
-        latest_date='November 15, 2017',
+        latest_content='This is another sample message.',
+        latest_date='November 13, 2017',
         latest_time='12:23 PM',
-        created_at='2017-11-15 12:23:49:270418',
+        created_at='2017-11-13 12:23:49:270418',
         )
 
     message = ConversationItem(
@@ -1296,75 +1300,118 @@ def rebuild_database():
         message_type='inbound',
         date='November 14, 2017',
         time='11:30 AM',
-        content='Hello, this is a sample inquiry from a customer.',
+        content='This is another sample message.',
         created_at='2017-11-14 11:30:49:270418'
-        )
-
-    message1 = ConversationItem(
-        conversation_id=1,
-        message_type='outbound',
-        date='November 14, 2017',
-        outbound_sender_id=1,
-        outbound_sender_name='Jasper Barcelona',
-        time='11:36 AM',
-        content='Hello, this is a sample reply from one of your staff.',
-        created_at='2017-11-14 11:36:49:270418'
         )
 
     message2 = ConversationItem(
         conversation_id=2,
         message_type='inbound',
-        date='November 15, 2017',
-        outbound_sender_id=1,
-        outbound_sender_name='Jasper Barcelona',
+        date='November 13, 2017',
         time='12:10 PM',
-        content='Hello, this is a sample inquiry from an unsaved contact.',
-        created_at='2017-11-15 12:10:49:270418'
+        content='This is another sample message.',
+        created_at='2017-11-13 12:10:49:270418'
         )
 
-    message3 = ConversationItem(
-        conversation_id=2,
-        message_type='outbound',
-        date='November 15, 2017',
-        outbound_sender_id=1,
-        outbound_sender_name='Jasper Barcelona',
-        time='12:23 PM',
-        content='Hello, this is a sample reply.',
-        created_at='2017-11-15 12:23:49:270418'
-        )
-
-    group = Group(
+    blast = Batch(
         client_no='at-ic2017',
-        name='Group Sample 1',
-        created_by_id=1,
-        created_by_name='Jasper Barcelona',
-        created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f'),
-        )
+        message_type='custom',
+        sender_id=1,
+        batch_size=3,
+        sender_name='Super Admin',
+        recipient='AGN, ANB, JNC',
+        date='November 14, 2017',
+        time='07:36 AM',
+        content='This is a sample text blast.',
+        created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
+        ) 
 
-    group1 = Group(
+    reminder = ReminderBatch(
         client_no='at-ic2017',
-        name='Group Sample 2',
-        created_by_id=1,
-        created_by_name='Jasper Barcelona',
-        created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f'),
+        sender_id=1,
+        batch_size=3,
+        sender_name='Super Admin',
+        date='November 14, 2017',
+        time='11:36 AM',
+        file_name='payment_reminders.xls',
+        created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
         )
 
-    group2 = Group(
+    contact = Contact(
         client_no='at-ic2017',
-        name='Group 3',
-        created_by_id=1,
-        created_by_name='Jasper Barcelona',
-        created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f'),
+        contact_type='Customer',
+        name='ABAC, AILYN-AGN'.title(),
+        msisdn='09994282203',
+        added_by=1,
+        added_by_name='Super Admin',
+        join_date='November 10, 2017',
+        created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
         )
 
-    group3 = Group(
+    contact1 = Contact(
         client_no='at-ic2017',
-        name='Group',
-        created_by_id=1,
-        created_by_name='Jasper Barcelona',
-        created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f'),
+        contact_type='Customer',
+        name='ABAD, LANDELINA ORCIGA-ANB'.title(),
+        msisdn='09183132539',
+        added_by=1,
+        added_by_name='Super Admin',
+        join_date='November 10, 2017',
+        created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
         )
 
+    contact2 = Contact(
+        client_no='at-ic2017',
+        contact_type='Customer',
+        name='ABAD, NELSON M.-JNC'.title(),
+        msisdn='09071755339',
+        added_by=1,
+        added_by_name='Super Admin',
+        join_date='November 10, 2017',
+        created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
+        )
+
+    new_group = Group(
+        client_no='at-ic2017',
+        name='AGN',
+        size=1,
+        created_by_id=1,
+        created_by_name='Super Admin',
+        created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
+        )
+
+    new_group1 = Group(
+        client_no='at-ic2017',
+        name='ANB',
+        size=1,
+        created_by_id=1,
+        created_by_name='Super Admin',
+        created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
+        )
+
+    new_group2 = Group(
+        client_no='at-ic2017',
+        name='JNC',
+        size=1,
+        created_by_id=1,
+        created_by_name='Super Admin',
+        created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
+        )
+
+    contact_group = ContactGroup(
+        group_id=1,
+        user_id=1
+        )
+
+    contact_group1 = ContactGroup(
+        group_id=2,
+        user_id=2
+        )
+
+    contact_group2 = ContactGroup(
+        group_id=3,
+        user_id=3
+        )
+    
     db.session.add(client)
     db.session.add(client1)
     db.session.add(admin)
@@ -1373,73 +1420,19 @@ def rebuild_database():
     db.session.add(conversations)
     db.session.add(conversations1)
     db.session.add(message)
-    db.session.add(message1)
     db.session.add(message2)
-    db.session.add(message3)
 
-    for i in range(1000):
-        convo = Conversation(
-            client_no='at-ic2017',
-            contact_name='Convo%s' % i,
-            msisdn=str(i),
-            status='unread',
-            latest_content='This is the latest message in this conversation.',
-            latest_date='November 14, 2017',
-            latest_time='11:36 AM',
-            created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
-            )
-        db.session.add(convo)
-
-    for i in range(1000):
-        blast = Batch(
-            client_no='at-ic2017',
-            message_type='custom',
-            sender_id=1,
-            batch_size=30,
-            sender_name='Jasper Barcelona %s' % str(i),
-            recipient='Recipient',
-            date='November 14, 2017',
-            time='11:36 AM',
-            content='Sample content',
-            created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
-            )
-        db.session.add(blast)
-
-    for i in range(1000):
-        reminder = ReminderBatch(
-            client_no='at-ic2017',
-            sender_id=1,
-            batch_size=40,
-            sender_name='Jasper Barcelona',
-            date='November 14, 2017',
-            time='11:36 AM',
-            file_name='filename %s' % i,
-            created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
-            )
-        db.session.add(reminder)
-
-    for i in range(1000):
-        contact = Contact(
-            client_no='at-ic2017',
-            contact_type='Customer',
-            name='John Doe',
-            msisdn='091756869%s'%str(i),
-            added_by=1,
-            added_by_name='Jasper Barcelona',
-            join_date='November 14, 2017',
-            created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
-            )
-        db.session.add(contact)
-
-    for i in range(1000):
-        new_group = Group(
-            client_no='at-ic2017',
-            name='group %s' % str(i),
-            created_by_id=1,
-            created_by_name='Jasper Barcelona',
-            created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
-            )
-        db.session.add(new_group)
+    db.session.add(blast)
+    db.session.add(reminder)
+    db.session.add(contact)
+    db.session.add(contact1)
+    db.session.add(contact2)
+    db.session.add(new_group)
+    db.session.add(new_group1)
+    db.session.add(new_group2)
+    db.session.add(contact_group)
+    db.session.add(contact_group1)
+    db.session.add(contact_group2)
 
     db.session.commit()
 

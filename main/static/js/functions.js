@@ -776,6 +776,7 @@ function upload_contacts() {
             $('#uploadContactsModal').modal('hide');
             $('#blastOverlay .blast-overlay-body').html(data['template']);
             $('#blastOverlay').removeClass('hidden');
+            alert(data['pending']);
             if (data['pending'] != 0) {
               refresh_contacts_progress(data['batch_id']);
             }

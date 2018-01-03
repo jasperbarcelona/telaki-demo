@@ -92,7 +92,6 @@ def upload_contacts(batch_id,client_no,user_id,user_name):
                 msisdn='0%s'%str(vals[0])[-10:],
                 added_by=user_id,
                 added_by_name=user_name,
-                upload_status='pending',
                 join_date=datetime.datetime.now().strftime('%B %d, %Y'),
                 created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
                 )
@@ -121,9 +120,8 @@ def upload_contacts(batch_id,client_no,user_id,user_name):
             group.size = ContactGroup.query.filter_by(group_id=group.id).count()
             db.session.commit()
 
-        batch.done = Contact.query.filter_by(batch_id=str(batch.id),upload_status='success').count()
-        batch.pending = Contact.query.filter_by(batch_id=str(batch.id),upload_status='pending').count()
-        batch.failed = Contact.query.filter_by(batch_id=str(batch.id),upload_status='failed').count()
+        existing = Contact.query.filter_by(batch_id=str(batch.id)).count()
+        batch.pending = batch.batch_size - existing
         db.session.commit()
     return
 

@@ -105,7 +105,6 @@ class Contact(db.Model):
     msisdn = db.Column(db.String(20))
     added_by = db.Column(db.Integer())
     added_by_name = db.Column(db.String(100))
-    upload_status = db.Column(db.String(30),default='N/A')
     join_date = db.Column(db.String(50))
     created_at = db.Column(db.String(50))
 
