@@ -128,5 +128,11 @@ function animate() {
 
 animate();
 
+$('.search-conversations').keypress(function(e){
+    if (e.which == 13) {
+        search_conversations()
+    }
+});
+
 
 });

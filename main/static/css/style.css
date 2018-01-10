@@ -52,6 +52,14 @@ a,a:hover,a:active,a:focus {
 	z-index: 2;
 }
 
+#logout-btn,
+#logout-btn:hover,
+#logout-btn:active,
+#logout-btn:focus {
+	color: #FFFFFF;
+	text-decoration: none;
+}
+
 #header-left, #header-right{
 	float: left;
 	height: 100%;
@@ -287,6 +295,13 @@ a,a:hover,a:active,a:focus {
 	justify-content: center;
 }
 
+.control-btn:hover,
+.control-btn:focus,
+.control-btn:active {
+	color: #fff;
+  	background-color: #c9302c;
+}
+
 .content-body {
 	position: relative;
 	padding-left: 10px !important;
@@ -343,6 +358,11 @@ a,a:hover,a:active,a:focus {
 	font-size: 16px !important;
 	margin-right: 10px;
 	padding: 0;
+}
+
+.icon-td > span.link {
+	float: left;
+	margin-top: 6px;
 }
 
 .icon-td {
@@ -716,6 +736,10 @@ a,a:hover,a:active,a:focus {
 	width: 100%;
 }
 
+#createGroupModal {
+	z-index: 9999 !important;
+}
+
 #saveContactModal .modal-body,
 #editContactModal .modal-body,
 #addContactModal .modal-body,
@@ -972,7 +996,7 @@ a,a:hover,a:active,a:focus {
 }
 
 .blast-message-td {
-	width: 40%;
+	width: 47%;
 }
 
 .blast-sent-td {
@@ -1199,6 +1223,18 @@ a,a:hover,a:active,a:focus {
 	font-weight: bold;
 }
 
+.contact-name-td {
+	width: 35%;
+}
+
+.contact-type-td {
+	width: 20%;
+}
+
+.contact-msisdn-td {
+	width: 25%;
+}
+
 #blastOverlay {
 	position: absolute;
 	left: 0;
@@ -1348,4 +1384,22 @@ a,a:hover,a:active,a:focus {
 	float: left;
 	width: 100%;
 	margin-top: 20px;
+}
+
+#searchLoader {
+	position: absolute;
+	z-index: 999999;
+	left: 0;
+	top: 59px;
+	height: calc(100vh - 184px);
+	width: 100%;
+	background-color: #ddd;
+	display: -webkit-flex;
+	display: flex;
+	-webkit-flex-direction: column;
+	flex-direction: column;
+	-webkit-align-items: center;
+	align-items: center;
+	-webkit-justify-content: center;
+	justify-content: center;
 }

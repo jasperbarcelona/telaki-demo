@@ -134,6 +134,7 @@ class Conversation(db.Model):
     client_no = db.Column(db.String(32))
     contact_name = db.Column(db.String(100), default=None)
     msisdn = db.Column(db.String(30))
+    display_name = db.Column(db.String(100))
     status = db.Column(db.String(30),default='unread')
     latest_content = db.Column(db.Text())
     latest_date = db.Column(db.String(20))

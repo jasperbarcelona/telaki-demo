@@ -29,16 +29,40 @@
 {% endif %}
 <div id="contentBody" class="content-body">
 	<table class="table content-table">
-		<tbody id="groups">
+		<thead>
+			<tr class="search-panel conversation">
+				<td class="icon-td">
+					<span id="clearGroupsSearch" class="hidden link" onclick="show_groups('reset')">Clear Search</span>
+				</td>
+				<td class="group-name-td">
+					<input type="text" id="searchGroupsName" class="form-control search-groups search-text" placeholder="Name">
+				</td>
+				<td class="group-size-td align-right"></td>
+			</tr>
+		</thead>
+		<tbody id="groupsTbody">
 			{% for group in groups %}
 			<tr id="{{ group.id }}" data-toggle="modal" data-target="#groupMembersModal" onclick="open_group(this.id)">
 				<td class="group-icon-td">
 					<i class="material-icons">&#xE835;</i>
 				</td>
 				<td class="group-name-td">{{ group.name }}</td>
-				<td class="group-size-td align-right">{{ group.size }} members</td>
+				<td class="group-size-td align-right">{{ group.size }} member/s</td>
 			</tr>
 			{% endfor %}
 		</tbody>
 	</table>
 </div>
+
+<script type="text/javascript">
+$(".datepicker").datepicker({
+    dateFormat: "MM dd, yy"
+});
+
+$('.search-groups').keypress(function(e){
+    if (e.which == 13) {
+        search_groups()
+    }
+});
+
+</script>

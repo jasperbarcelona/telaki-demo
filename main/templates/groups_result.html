@@ -1,9 +1,9 @@
 {% for group in groups %}
 <tr id="{{ group.id }}" data-toggle="modal" data-target="#groupMembersModal" onclick="open_group(this.id)">
-	<td class="group-icon-td">
+	<td class="icon-td">
 		<i class="material-icons">&#xE835;</i>
 	</td>
 	<td class="group-name-td">{{ group.name }}</td>
-	<td class="group-size-td align-right">{{ group.size }} members</td>
+	<td class="group-size-td align-right">{{ group.size }} member/s</td>
 </tr>
 {% endfor %}

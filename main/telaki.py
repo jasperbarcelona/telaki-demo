@@ -84,6 +84,86 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+def search_conversations(**kwargs):
+    query = 'Conversation.query.filter(Conversation.client_no.ilike("'+session['client_no']+'"),'
+    for arg_name in kwargs:
+        if kwargs[arg_name]:
+            query += 'Conversation.' + arg_name + '.ilike("%'+kwargs[arg_name]+'%"),'
+    query += ').order_by(Conversation.created_at.desc())'
+    return eval(query)
+
+def search_conversations_count(**kwargs):
+    query = 'Conversation.query.filter(Conversation.client_no.ilike("'+session['client_no']+'"),'
+    for arg_name in kwargs:
+        if kwargs[arg_name]:
+            query += 'Conversation.' + arg_name + '.ilike("%'+kwargs[arg_name]+'%"),'
+    query += ').count()'
+    return eval(query)
+
+def search_blasts(**kwargs):
+    query = 'Batch.query.filter(Batch.client_no.ilike("'+session['client_no']+'"),'
+    for arg_name in kwargs:
+        if kwargs[arg_name]:
+            query += 'Batch.' + arg_name + '.ilike("%'+kwargs[arg_name]+'%"),'
+    query += ').order_by(Batch.created_at.desc())'
+    return eval(query)
+
+def search_blasts_count(**kwargs):
+    query = 'Batch.query.filter(Batch.client_no.ilike("'+session['client_no']+'"),'
+    for arg_name in kwargs:
+        if kwargs[arg_name]:
+            query += 'Batch.' + arg_name + '.ilike("%'+kwargs[arg_name]+'%"),'
+    query += ').count()'
+    return eval(query)
+
+def search_reminders(**kwargs):
+    query = 'ReminderBatch.query.filter(ReminderBatch.client_no.ilike("'+session['client_no']+'"),'
+    for arg_name in kwargs:
+        if kwargs[arg_name]:
+            query += 'ReminderBatch.' + arg_name + '.ilike("%'+kwargs[arg_name]+'%"),'
+    query += ').order_by(ReminderBatch.created_at.desc())'
+    return eval(query)
+
+def search_reminders_count(**kwargs):
+    query = 'ReminderBatch.query.filter(ReminderBatch.client_no.ilike("'+session['client_no']+'"),'
+    for arg_name in kwargs:
+        if kwargs[arg_name]:
+            query += 'ReminderBatch.' + arg_name + '.ilike("%'+kwargs[arg_name]+'%"),'
+    query += ').count()'
+    return eval(query)
+
+def search_contacts(**kwargs):
+    query = 'Contact.query.filter(Contact.client_no.ilike("'+session['client_no']+'"),'
+    for arg_name in kwargs:
+        if kwargs[arg_name]:
+            query += 'Contact.' + arg_name + '.ilike("%'+kwargs[arg_name]+'%"),'
+    query += ').order_by(Contact.name)'
+    return eval(query)
+
+def search_contacts_count(**kwargs):
+    query = 'Contact.query.filter(Contact.client_no.ilike("'+session['client_no']+'"),'
+    for arg_name in kwargs:
+        if kwargs[arg_name]:
+            query += 'Contact.' + arg_name + '.ilike("%'+kwargs[arg_name]+'%"),'
+    query += ').count()'
+    return eval(query)
+
+def search_groups(**kwargs):
+    query = 'Group.query.filter(Group.client_no.ilike("'+session['client_no']+'"),'
+    for arg_name in kwargs:
+        if kwargs[arg_name]:
+            query += 'Group.' + arg_name + '.ilike("%'+kwargs[arg_name]+'%"),'
+    query += ').order_by(Group.name)'
+    return eval(query)
+
+def search_groups_count(**kwargs):
+    query = 'Group.query.filter(Group.client_no.ilike("'+session['client_no']+'"),'
+    for arg_name in kwargs:
+        if kwargs[arg_name]:
+            query += 'Group.' + arg_name + '.ilike("%'+kwargs[arg_name]+'%"),'
+    query += ').count()'
+    return eval(query)
+
 
 @app.route('/',methods=['GET','POST'])
 @nocache
@@ -713,7 +793,7 @@ def prepare_contacts_upload():
         db.session.add(new_contact_upload)
         db.session.commit()
 
-        upload_contacts.delay(new_contact_upload.id, session['client_no'],session['user_id'], session['user_name'])      
+        upload_contacts.delay(new_contact_upload.id,session['client_no'],session['user_id'],session['user_name'])      
 
         existing = Contact.query.filter_by(batch_id=str(new_contact_upload.id)).count()
         new_contact_upload.pending = new_contact_upload.batch_size - existing
@@ -902,6 +982,7 @@ def send_reply():
         conversation.latest_content = message_content
         conversation.latest_date = reply.date
         conversation.latest_time = reply.time
+        conversation.created_at = reply.created_at
         db.session.commit()
         return jsonify(
             status='success',
@@ -1011,9 +1092,10 @@ def save_contact():
         group_size = ContactGroup.query.filter_by(group_id=int(item)).count()
         group.size = group_size
     
-    conversation = Conversation.query.filter_by(msisdn=data['msisdn']).first()
+    conversation = Conversation.query.filter_by(msisdn=new_contact.msisdn).first()
     if conversation or conversation != None:
-        conversation.contact_name = data['name'].title()
+        conversation.contact_name = new_contact.name
+        conversation.display_name = new_contact.name
 
     db.session.commit()
 
@@ -1218,6 +1300,61 @@ def display_contact_upload_summary():
     return flask.render_template('contact_report.html', batch=batch)
 
 
+@app.route('/conversations/search',methods=['GET','POST'])
+def search_from_conversations():
+    data = flask.request.args.to_dict()
+    result = search_conversations(latest_date=data['date'], latest_content=data['content'],display_name=data['name'])
+    count = search_conversations_count(latest_date=data['date'], latest_content=data['content'],display_name=data['name'])
+    return jsonify(
+        count = count,
+        template = flask.render_template('conversations_result.html',conversations=result)
+        )
+
+
+@app.route('/blasts/search',methods=['GET','POST'])
+def search_from_blasts():
+    data = flask.request.args.to_dict()
+    result = search_blasts(sender_name=data['sender'], content=data['content'],date=data['date'])
+    count = search_blasts_count(sender_name=data['sender'], content=data['content'],date=data['date'])
+    return jsonify(
+        count = count,
+        template = flask.render_template('blasts_result.html',blasts=result)
+        )
+
+
+@app.route('/reminders/search',methods=['GET','POST'])
+def search_from_reminders():
+    data = flask.request.args.to_dict()
+    result = search_reminders(sender_name=data['sender'], file_name=data['filename'],date=data['date'])
+    count = search_reminders_count(sender_name=data['sender'], file_name=data['filename'],date=data['date'])
+    return jsonify(
+        count = count,
+        template = flask.render_template('reminders_result.html',reminders=result)
+        )
+
+
+@app.route('/contacts/search',methods=['GET','POST'])
+def search_from_contacts():
+    data = flask.request.args.to_dict()
+    result = search_contacts(name=data['name'], contact_type=data['contact_type'],msisdn=data['msisdn'])
+    count = search_contacts_count(name=data['name'], contact_type=data['contact_type'],msisdn=data['msisdn'])
+    return jsonify(
+        count = count,
+        template = flask.render_template('contacts_result.html',contacts=result)
+        )
+
+
+@app.route('/groups/search',methods=['GET','POST'])
+def search_from_groups():
+    data = flask.request.args.to_dict()
+    result = search_groups(name=data['name'])
+    count = search_groups_count(name=data['name'])
+    return jsonify(
+        count = count,
+        template = flask.render_template('groups_result.html',groups=result)
+        )
+
+
 @app.route('/db/rebuild',methods=['GET','POST'])
 def rebuild_database():
     db.drop_all()
@@ -1278,6 +1415,7 @@ def rebuild_database():
         client_no='at-ic2017',
         contact_name='ABAC, AILYN-AGN'.title(),
         msisdn='09994282203',
+        display_name='ABAC, AILYN-AGN'.title(),
         status='read',
         latest_content='This is a sample message.',
         latest_date='November 14, 2017',
@@ -1288,6 +1426,7 @@ def rebuild_database():
     conversations1 = Conversation(
         client_no='at-ic2017',
         msisdn='09176214704',
+        display_name='09176214704',
         status='unread',
         latest_content='This is another sample message.',
         latest_date='November 13, 2017',
@@ -1300,7 +1439,7 @@ def rebuild_database():
         message_type='inbound',
         date='November 14, 2017',
         time='11:30 AM',
-        content='This is another sample message.',
+        content='This is a sample message.',
         created_at='2017-11-14 11:30:49:270418'
         )
 
@@ -1323,8 +1462,41 @@ def rebuild_database():
         date='November 14, 2017',
         time='07:36 AM',
         content='This is a sample text blast.',
+        done=3,
+        failed=0,
+        pending=0,
         created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
         ) 
+
+    blast_message = OutboundMessage(
+        batch_id=1,
+        date='November 14, 2017',
+        time='07:36 AM',
+        contact_name='ABAC, AILYN-AGN'.title(),
+        msisdn='09994282203',
+        status='success',
+        created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
+        )
+    
+    blast_message1 = OutboundMessage(
+        batch_id=1,
+        date='November 14, 2017',
+        time='07:36 AM',
+        contact_name='ABAD, LANDELINA ORCIGA-ANB'.title(),
+        msisdn='09183132539',
+        status='success',
+        created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
+        )
+
+    blast_message2 = OutboundMessage(
+        batch_id=1,
+        date='November 14, 2017',
+        time='07:36 AM',
+        contact_name='ABAD, NELSON M.-JNC'.title(),
+        msisdn='09071755339',
+        status='success',
+        created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
+        )
 
     reminder = ReminderBatch(
         client_no='at-ic2017',
@@ -1334,6 +1506,42 @@ def rebuild_database():
         date='November 14, 2017',
         time='11:36 AM',
         file_name='payment_reminders.xls',
+        done=3,
+        failed=0,
+        pending=0,
+        created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
+        )
+
+    reminder_message = ReminderMessage(
+        batch_id=1,
+        date='November 14, 2017',
+        time='11:36 AM',
+        contact_name='ABAC, AILYN-AGN'.title(),
+        content='This is a sample payment reminder.',
+        msisdn='09994282203',
+        status='success',
+        created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
+        )
+
+    reminder_message1 = ReminderMessage(
+        batch_id=1,
+        date='November 14, 2017',
+        time='11:36 AM',
+        contact_name='ABAD, LANDELINA ORCIGA-ANB'.title(),
+        content='This is a sample payment reminder.',
+        msisdn='09183132539',
+        status='success',
+        created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
+        )
+
+    reminder_message2 = ReminderMessage(
+        batch_id=1,
+        date='November 14, 2017',
+        time='11:36 AM',
+        contact_name='ABAD, NELSON M.-JNC'.title(),
+        content='This is a sample payment reminder.',
+        msisdn='09071755339',
+        status='success',
         created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
         )
 
@@ -1399,17 +1607,17 @@ def rebuild_database():
 
     contact_group = ContactGroup(
         group_id=1,
-        user_id=1
+        contact_id=1
         )
 
     contact_group1 = ContactGroup(
         group_id=2,
-        user_id=2
+        contact_id=2
         )
 
     contact_group2 = ContactGroup(
         group_id=3,
-        user_id=3
+        contact_id=3
         )
     
     db.session.add(client)
@@ -1433,6 +1641,13 @@ def rebuild_database():
     db.session.add(contact_group)
     db.session.add(contact_group1)
     db.session.add(contact_group2)
+
+    db.session.add(blast_message)
+    db.session.add(blast_message1)
+    db.session.add(blast_message2)
+    db.session.add(reminder_message)
+    db.session.add(reminder_message1)
+    db.session.add(reminder_message2)
 
     db.session.commit()
 

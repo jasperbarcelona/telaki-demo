@@ -29,15 +29,30 @@
 {% endif %}
 <div id="contentBody" class="content-body">
 	<table class="table content-table">
-		<tbody id="reminders">
+		<thead>
+			<tr class="search-panel conversation">
+				<td class="icon-td">
+					<span id="clearRemindersSearch" class="hidden link" onclick="show_reminders('reset')">Clear Search</span>
+				</td>
+				<td class="blast-recipient-td">
+					<input type="text" id="searchRemindersSender" class="form-control search-reminders search-text" placeholder="Sender">
+				</td>
+				<td class="blast-message-td">
+					<input type="text" id="searchRemindersFile" class="form-control search-reminders search-text" placeholder="File Name">
+				</td>
+				<td class="blast-date-td align-right">
+					<input type="text" id="searchRemindersDate" class="form-control search-reminders search-text align-right datepicker" placeholder="Date">
+				</td>
+			</tr>
+		</thead>
+		<tbody id="remindersTbody">
 			{% for entry in reminders %}
 			<tr onclick="open_reminder({{ entry.id }})" data-toggle="modal" data-target="#viewReminderModal">
-				<td class="blast-icon-td">
+				<td class="icon-td">
 					<i class="material-icons">&#xE835;</i>
 				</td>
 				<td class="blast-recipient-td">{{ entry.sender_name }}</td>
 				<td class="blast-message-td">{{ entry.file_name }}</td>
-				<td class="blast-sent-td">{{ entry.done }} / {{ entry.batch_size }} done</td>
 				<td class="blast-date-td align-right">{{ entry.date }}</td>
 			</tr>
 			{% endfor %}
@@ -50,4 +65,15 @@ $('#addBlastBtn').on('click', function (e) {
     $('#messageContainer').removeClass('minimized');
     $('#messageBody').focus();
 });
+
+$(".datepicker").datepicker({
+    dateFormat: "MM dd, yy"
+});
+
+$('.search-reminders').keypress(function(e){
+    if (e.which == 13) {
+        search_reminders()
+    }
+});
+
 </script>

@@ -28,7 +28,23 @@
 {% endif %}
 <div id="contentBody" class="content-body">
 	<table class="table content-table">
-		<tbody id="conversations">
+		<thead>
+				<tr class="search-panel conversation">
+					<td class="icon-td">
+						<span id="clearConversationsSearch" class="hidden link" onclick="show_conversations('reset')">Clear Search</span>
+					</td>
+					<td class="msisdn-td">
+						<input type="text" id="searchConversationName" class="form-control search-conversations search-text" placeholder="Name / Phone">
+					</td>
+					<td class="message-td">
+						<input type="text" id="searchConversationContent" class="form-control search-conversations search-text" placeholder="Message content">
+					</td>
+					<td class="date-td align-right">
+						<input type="text" id="searchConversationDate" class="form-control search-conversations search-text align-right datepicker" placeholder="Date">
+					</td>
+				</tr>
+			</thead>
+		<tbody id="conversationsTbody">
 			{% for entry in conversations %}
 			{% if entry.status == 'unread' %}
 			<tr onclick="open_conversation({{ entry.id }})" class="unread">
@@ -39,11 +55,7 @@
 					<i class="material-icons">&#xE835;</i>
 					<i class="material-icons">&#xE83A;</i>
 				</td>
-				{% if entry.contact_name != None %}
-				<td class="msisdn-td">{{ entry.contact_name }}</td>
-				{% else %}
-				<td class="msisdn-td">{{ entry.msisdn }}</td>
-				{% endif %}
+				<td class="msisdn-td">{{ entry.display_name }}</td>
 				<td class="message-td">{{ entry.latest_content }}</td>
 				<td class="date-td align-right">{{ entry.latest_date }}</td>
 			</tr>
@@ -51,3 +63,14 @@
 		</tbody>
 	</table>
 </div>
+<script type="text/javascript">
+	$(".datepicker").datepicker({
+	    dateFormat: "MM dd, yy"
+	});
+
+	$('.search-conversations').keypress(function(e){
+	    if (e.which == 13) {
+	        search_conversations()
+	    }
+	});
+</script>

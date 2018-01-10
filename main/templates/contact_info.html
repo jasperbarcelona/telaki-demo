@@ -30,7 +30,9 @@
     <span id="createGroupFromContact" class="link underline" data-toggle="modal" data-target="#createGroupModal">Create Group</span>
     {% else %}
     <input type="text" id="searchGroupFromContact" class="form-control" placeholder="Search groups">
-    <span id="addGroupFromContact" class="link underline">Add Group</span>
+    <div class="add-group-container">
+        <span id="addGroupFromContactEdit" class="link underline" data-toggle="modal" data-target="#createGroupModal">Add Group</span>
+    </div>
     <div class="contact-group-container">
         {% for group in groups %}
         {% if group.id in contact_groups %}

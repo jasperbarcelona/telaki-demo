@@ -30,21 +30,60 @@
 {% endif %}
 <div id="contentBody" class="content-body">
 	<table class="table content-table">
-		<tbody id="contacts">
+		<thead>
+			<tr class="search-panel conversation">
+				<td class="icon-td">
+					<span id="clearContactsSearch" class="hidden link" onclick="show_contacts('reset')">Clear Search</span>
+				</td>
+				<td class="contact-name-td">
+					<input type="text" id="searchContactsName" class="form-control search-contacts search-text" placeholder="Name">
+				</td>
+				<td class="contact-type-td">
+					<select id="searchContactsType" class="form-control search-contacts search-text">
+						<option value="" disabled selected>Type</option>
+						<option value="">All</option>
+						<option value="Customer">Customer</option>
+						<option value="Staff">Staff</option>
+						<option value="Both">Customer & Staff</option>
+					</select>
+				</td>
+				<td class="contact-msisdn-td align-right">
+					<input type="text" id="searchContactsMsisdn" class="form-control search-contacts search-text align-right datepicker" placeholder="Mobile Number">
+				</td>
+			</tr>
+		</thead>
+		<tbody id="contactsTbody">
 			{% for contact in contacts %}
 			<tr id="{{ contact.msisdn }}" data-toggle="modal" data-target="#editContactModal" onclick="supply_info_from_contacts(this.id)">
-				<td class="contact-icon-td">
+				<td class="icon-td">
 					<i class="material-icons">&#xE835;</i>
 				</td>
 				<td class="contact-name-td">{{ contact.name }}</td>
 				{% if contact.contact_type == 'Both' %}
-				<td class="contact-td">Customer & Staff</td>
+				<td class="contact-type-td">Customer & Staff</td>
 				{% else %}
-				<td class="contact-td">{{ contact.contact_type }}</td>
+				<td class="contact-type-td">{{ contact.contact_type }}</td>
 				{% endif %}
-				<td class="contact-td align-right">{{ contact.msisdn }}</td>
+				<td class="contact-msisdn-td align-right">{{ contact.msisdn }}</td>
 			</tr>
 			{% endfor %}
 		</tbody>
 	</table>
 </div>
+
+<script type="text/javascript">
+$(".datepicker").datepicker({
+    dateFormat: "MM dd, yy"
+});
+
+$('.search-contacts').keypress(function(e){
+    if (e.which == 13) {
+        search_contacts()
+    }
+});
+
+$('.search-contacts').change(function(){
+    search_contacts()
+});
+
+</script>

@@ -630,7 +630,7 @@ function send_text_blast() {
       initialize_recipients();
       $('#blastOverlay .blast-overlay-body').html(data['template']);
       $('#blastOverlay').removeClass('hidden');
-
+      $('body').css('overflow-y','hidden');
       if (data['pending'] != 0) {
         refresh_blast_progress(data['batch_id']);
       }
@@ -690,6 +690,7 @@ function refresh_contacts_progress(batch_id) {
 
 function hide_blast_progress() {
   $('#blastOverlay').addClass('hidden');
+  $('body').css('overflow-y','scroll');
 }
 
 function display_blast_report(batch_id) {
@@ -740,6 +741,7 @@ function send_reminder() {
             $('#addReminderModal').modal('hide');
             $('#blastOverlay .blast-overlay-body').html(data['template']);
             $('#blastOverlay').removeClass('hidden');
+            $('body').css('overflow-y','hidden');
             if (data['pending'] != 0) {
               refresh_reminder_progress(data['batch_id']);
             }
@@ -776,7 +778,7 @@ function upload_contacts() {
             $('#uploadContactsModal').modal('hide');
             $('#blastOverlay .blast-overlay-body').html(data['template']);
             $('#blastOverlay').removeClass('hidden');
-            alert(data['pending']);
+            $('body').css('overflow-y','hidden');
             if (data['pending'] != 0) {
               refresh_contacts_progress(data['batch_id']);
             }
@@ -847,5 +849,141 @@ function check_upload_progress() {
           refresh_reminder_progress(data['batch_id']);
         }
       }
+    });
+}
+
+function search_conversations() {
+  $('#conversationsTbody').html('');
+  $('#searchLoader').removeClass('hidden');
+  $('#clearConversationsSearch').removeClass('hidden');
+  var name = $('#searchConversationName').val();
+  var content = $('#searchConversationContent').val();
+  var date = $('#searchConversationDate').val();
+  $.get('/conversations/search',
+    {
+      name:name,
+      content:content,
+      date:date
+    },
+    function(data){
+      $('#conversationsTbody').html(data['template']);
+      $('#searchLoader').addClass('hidden');
+      if (data['count'] != 0) {
+        var start_from = 1;
+      }
+      else {
+        var start_from = 0;
+      }
+      $('#paginationShowingConversation').html(start_from+' to '+data['count']);
+      $('#paginationTotalConversation').html(data['count']);
+      $('.pagination-btn').attr('disabled',true);
+    });
+}
+
+function search_blasts() {
+  $('#blastsTbody').html('');
+  $('#searchLoader').removeClass('hidden');
+  $('#clearBlastsSearch').removeClass('hidden');
+  var sender = $('#searchBlastsSender').val();
+  var content = $('#searchBlastsContent').val();
+  var date = $('#searchBlastsDate').val();
+  $.get('/blasts/search',
+    {
+      sender:sender,
+      content:content,
+      date:date
+    },
+    function(data){
+      $('#blastsTbody').html(data['template']);
+      $('#searchLoader').addClass('hidden');
+      if (data['count'] != 0) {
+        var start_from = 1;
+      }
+      else {
+        var start_from = 0;
+      }
+      $('#paginationShowingBlasts').html(start_from+' to '+data['count']);
+      $('#paginationTotalBlasts').html(data['count']);
+      $('.pagination-btn').attr('disabled',true);
+    });
+}
+
+function search_reminders() {
+  $('#remindersTbody').html('');
+  $('#searchLoader').removeClass('hidden');
+  $('#clearRemindersSearch').removeClass('hidden');
+  var sender = $('#searchRemindersSender').val();
+  var filename = $('#searchRemindersFile').val();
+  var date = $('#searchRemindersDate').val();
+  $.get('/reminders/search',
+    {
+      sender:sender,
+      filename:filename,
+      date:date
+    },
+    function(data){
+      $('#remindersTbody').html(data['template']);
+      $('#searchLoader').addClass('hidden');
+      if (data['count'] != 0) {
+        var start_from = 1;
+      }
+      else {
+        var start_from = 0;
+      }
+      $('#paginationShowingReminders').html(start_from+' to '+data['count']);
+      $('#paginationTotalReminders').html(data['count']);
+      $('.pagination-btn').attr('disabled',true);
+    });
+}
+
+function search_contacts() {
+  $('#contactsTbody').html('');
+  $('#searchLoader').removeClass('hidden');
+  $('#clearContactsSearch').removeClass('hidden');
+  var name = $('#searchContactsName').val();
+  var contact_type = $('#searchContactsType').val();
+  var msisdn = $('#searchContactsMsisdn').val();
+  $.get('/contacts/search',
+    {
+      name:name,
+      contact_type:contact_type,
+      msisdn:msisdn
+    },
+    function(data){
+      $('#contactsTbody').html(data['template']);
+      $('#searchLoader').addClass('hidden');
+      if (data['count'] != 0) {
+        var start_from = 1;
+      }
+      else {
+        var start_from = 0;
+      }
+      $('#paginationShowingContacts').html(start_from+' to '+data['count']);
+      $('#paginationTotalContacts').html(data['count']);
+      $('.pagination-btn').attr('disabled',true);
+    });
+}
+
+function search_groups() {
+  $('#groupsTbody').html('');
+  $('#searchLoader').removeClass('hidden');
+  $('#clearGroupsSearch').removeClass('hidden');
+  var name = $('#searchGroupsName').val();
+  $.get('/groups/search',
+    {
+      name:name
+    },
+    function(data){
+      $('#groupsTbody').html(data['template']);
+      $('#searchLoader').addClass('hidden');
+      if (data['count'] != 0) {
+        var start_from = 1;
+      }
+      else {
+        var start_from = 0;
+      }
+      $('#paginationShowingGroups').html(start_from+' to '+data['count']);
+      $('#paginationTotalGroups').html(data['count']);
+      $('.pagination-btn').attr('disabled',true);
     });
 }

@@ -2,7 +2,7 @@
 {% block content %}
 <div class="left-panel">
 	<div class="compose-btn-container">
-		<button id="composeMessage" class="btn btn-danger">Compose Message</button>
+		<button id="composeMessage" class="btn btn-danger">Compose SMS Blast</button>
 	</div>
 	<div class="lower-panel-container">
 		<div id="navConversations" class="panel-nav-item active" onclick="show_conversations('reset')">
@@ -70,20 +70,27 @@
 	</div>
 	{% endif %}
 	<div class="content-body">
+		<div id="searchLoader" class="hidden">
+			Loading..
+		</div>
 		<table class="table content-table">
-			<tbody id="conversations">
+			<thead>
 				<tr class="search-panel conversation">
-					<td class="icon-td"></td>
+					<td class="icon-td">
+						<span id="clearConversationsSearch" class="hidden link" onclick="show_conversations('reset')">Clear Search</span>
+					</td>
 					<td class="msisdn-td">
-						<input type="text" id="searchConversationName" class="form-control search-text" placeholder="Name / Phone">
+						<input type="text" id="searchConversationName" class="form-control search-conversations search-text" placeholder="Name / Phone">
 					</td>
 					<td class="message-td">
-						<input type="text" id="searchConversationContent" class="form-control search-text" placeholder="Message content">
+						<input type="text" id="searchConversationContent" class="form-control search-conversations search-text" placeholder="Message content">
 					</td>
 					<td class="date-td align-right">
-						<input type="text" id="searchConversationDate" class="form-control search-text align-right datepicker" placeholder="Date">
+						<input type="text" id="searchConversationDate" class="form-control search-conversations search-text align-right datepicker" placeholder="Date">
 					</td>
 				</tr>
+			</thead>
+			<tbody id="conversationsTbody">
 				{% for entry in conversations %}
 				{% if entry.status == 'unread' %}
 				<tr onclick="open_conversation({{ entry.id }})" class="unread">

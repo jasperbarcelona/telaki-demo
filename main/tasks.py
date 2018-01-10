@@ -98,6 +98,13 @@ def upload_contacts(batch_id,client_no,user_id,user_name):
             db.session.add(contact)
             db.session.commit()
 
+        conversation = Conversation.query.filter_by(msisdn=contact.msisdn).first()
+        if conversation or conversation != None:
+            conversation.contact_name = contact.name
+            conversation.display_name = contact.name
+
+        db.session.commit()
+
         if not group or group == None:
             group = Group(
                 client_no=client_no,

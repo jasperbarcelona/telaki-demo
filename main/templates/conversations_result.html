@@ -8,12 +8,16 @@
 		<i class="material-icons">&#xE835;</i>
 		<i class="material-icons">&#xE83A;</i>
 	</td>
-	{% if entry.contact_name != None %}
-	<td class="msisdn-td">{{ entry.contact_name }}</td>
-	{% else %}
-	<td class="msisdn-td">{{ entry.msisdn }}</td>
-	{% endif %}
+	<td class="msisdn-td">{{ entry.display_name }}</td>
 	<td class="message-td">{{ entry.latest_content }}</td>
 	<td class="date-td align-right">{{ entry.latest_date }}</td>
 </tr>
 {% endfor %}
+
+<script type="text/javascript">
+	$('.search-conversations').keypress(function(e){
+	    if (e.which == 13) {
+	        search_conversations()
+	    }
+	});
+</script>
