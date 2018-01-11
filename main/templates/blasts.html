@@ -47,13 +47,13 @@
 		</thead>
 		<tbody id="blastsTbody">
 			{% for entry in blasts %}
-			<tr onclick="open_blast({{ entry.id }})">
+			<tr>
 				<td class="icon-td">
-					<i class="material-icons">&#xE835;</i>
+					<i data-id="{{ entry.id }}" class="blasts-check material-icons">&#xE835;</i>
 				</td>
-				<td class="blast-recipient-td">{{ entry.sender_name }}</td>
-				<td class="blast-message-td">{{ entry.content }}</td>
-				<td class="blast-date-td align-right">{{ entry.date }}</td>
+				<td class="blast-recipient-td" onclick="open_blast({{ entry.id }})">{{ entry.sender_name }}</td>
+				<td class="blast-message-td" onclick="open_blast({{ entry.id }})">{{ entry.content }}</td>
+				<td class="blast-date-td align-right" onclick="open_blast({{ entry.id }})">{{ entry.date }}</td>
 			</tr>
 			{% endfor %}
 		</tbody>
@@ -75,5 +75,20 @@ $('.search-blasts').keypress(function(e){
         search_blasts()
     }
 });
+
+$('.blasts-check').on('click', function () {
+  var entry_id = $(this).attr('data-id');
+  if ($(this).hasClass('checked')) {
+    $(this).removeClass('checked');
+    $(this).html('&#xE835;');
+    deselect_blast(entry_id);
+  }
+  else {
+    $(this).addClass('checked');
+    $(this).html('&#xE834;');
+    select_blast(entry_id);
+  }
+});
+
 
 </script>

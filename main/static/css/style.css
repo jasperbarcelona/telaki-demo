@@ -572,7 +572,7 @@ a,a:hover,a:active,a:focus {
 	box-shadow: none;
 }
 
-.content-table tr:hover {
+.content-table tbody tr:hover {
 	background-color: #eee !important;
 }
 
@@ -743,7 +743,8 @@ a,a:hover,a:active,a:focus {
 #saveContactModal .modal-body,
 #editContactModal .modal-body,
 #addContactModal .modal-body,
-#viewReminderModal .modal-body {
+#viewReminderModal .modal-body,
+#groupMembersModal .modal-body {
 	height: calc(100vh - 180px);
 	padding-left: 30px;
 	padding-right: 30px;
@@ -762,7 +763,8 @@ a,a:hover,a:active,a:focus {
 #editContactModal .modal-dialog,
 #addRecipientModal .modal-dialog,
 #addContactModal .modal-dialog,
-#viewReminderModal .modal-dialog {
+#viewReminderModal .modal-dialog,
+#groupMembersModal .modal-dialog {
 	width: 900px;
 }
 
@@ -775,11 +777,12 @@ a,a:hover,a:active,a:focus {
 #editContactModal .form-control,
 #createGroupModal .form-control,
 #addContactModal .form-control,
-#addReminderModal .form-control {
+#addReminderModal .form-control,
+#groupMembersModal .form-control:not(.search-members) {
 	margin-bottom: 10px;
 	text-transform: capitalize;
 	outline: none !important;
-	height: 40px !important;
+	height: 40px;
 	margin-bottom: 20px;
 	border-top: 0 !important;
 	border-left: 0 !important;
@@ -788,6 +791,12 @@ a,a:hover,a:active,a:focus {
 	box-shadow: none !important;
 	border-radius: 0 !important;
 	font-size: 15px;
+}
+
+.group-members-container {
+	float: left;
+	width: 100%;
+	margin-top: 20px;
 }
 
 #createGroupModal .form-control {
@@ -1402,4 +1411,34 @@ a,a:hover,a:active,a:focus {
 	align-items: center;
 	-webkit-justify-content: center;
 	justify-content: center;
+}
+
+.item-star.checked {
+	color: #f0ad4e !important;
+}
+
+.delete-member-btn {
+	color: #d9534f !important;
+	font-size: 16px !important;
+	padding: 0;
+	cursor: pointer;
+}
+
+.delete-member-btn:hover,
+.delete-member-btn:focus,
+.delete-member-btn:active {
+	color: #c9302c !important;
+}
+
+.delete-icon-td {
+	width: 5%;
+}
+
+.members-table tbody tr:hover {
+	background-color: #eee !important;
+}
+
+#groupName {
+	height: 60px !important;
+	font-size: 24px !important;
 }

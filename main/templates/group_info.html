@@ -1,0 +1,43 @@
+<input type="text" id="groupName" class="form-control floatlabel" data-class="input-label" placeholder="Group Name" value="{{ group.name }}">
+
+<div class="group-members-container">
+	<table class="table members-table">
+		<thead>
+			<tr class="search-panel conversation">
+					<td class="contact-name-td">
+						<input type="text" id="searchMemberName" class="form-control search-members search-text" placeholder="Name">
+					</td>
+					<td class="contact-type-td">
+						<select id="searchMembersType" class="form-control search-members search-text">
+							<option value="" disabled selected>Type</option>
+							<option value="">All</option>
+							<option value="Customer">Customer</option>
+							<option value="Staff">Staff</option>
+							<option value="Both">Customer & Staff</option>
+						</select>
+					</td>
+					<td class="contact-msisdn-td align-right">
+						<input type="text" id="searchMemberMsisdn" class="form-control search-members search-text align-right" placeholder="Mobile Number">
+					</td>
+					<td class="delete-icon-td align-right"></td>
+				</tr>
+		</thead>
+		<tbody>
+			{% for member in members %}
+			<tr>
+				<td class="contact-name-td">{{ member.name }}</td>
+				<td class="contact-type-td">{{ member.contact_type }}</td>
+				<td class="contact-msisdn-td align-right">{{ member.msisdn }}</td>
+				<td class="delete-icon-td align-right">
+					<i class="material-icons delete-member-btn">&#xE5CD;</i>
+				</td>
+			</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+</div>
+<script type="text/javascript">
+	$('.form-control.floatlabel').floatlabel({
+	    labelEndTop:'-2px'
+	});
+</script>

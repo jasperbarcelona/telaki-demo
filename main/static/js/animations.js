@@ -1,5 +1,7 @@
 $(document).ready(function(){
 
+initialize_selected_entries();
+
 $(window).load(function(){
   check_upload_progress();
   setTimeout(function() {
@@ -111,11 +113,6 @@ $('#saveContactModal').on('hidden.bs.modal', function () {
     }, 500);
 });
 
-
-
-
-
-
 svg = $('#loaderSVG').drawsvg({
   callback: function() {
     animate();
@@ -133,6 +130,99 @@ $('.search-conversations').keypress(function(e){
         search_conversations()
     }
 });
+
+
+
+
+
+
+
+
+
+$('.conversations-check').on('click', function () {
+  var entry_id = $(this).attr('data-id');
+  if ($(this).hasClass('checked')) {
+    $(this).removeClass('checked');
+    $(this).html('&#xE835;');
+    deselect_conversation(entry_id);
+  }
+  else {
+    $(this).addClass('checked');
+    $(this).html('&#xE834;');
+    select_conversation(entry_id);
+  }
+});
+
+$('.conversations-star').on('click', function () {
+  if ($(this).hasClass('checked')) {
+    $(this).removeClass('checked');
+    $(this).html('&#xE83A;');
+  }
+  else {
+    $(this).addClass('checked');
+    $(this).html('&#xE838;');
+  }
+});
+
+$('.blasts-check').on('click', function () {
+  var entry_id = $(this).attr('data-id');
+  if ($(this).hasClass('checked')) {
+    $(this).removeClass('checked');
+    $(this).html('&#xE835;');
+    deselect_blast(entry_id);
+  }
+  else {
+    $(this).addClass('checked');
+    $(this).html('&#xE834;');
+    select_blast(entry_id);
+  }
+});
+
+$('.reminders-check').on('click', function () {
+  var entry_id = $(this).attr('data-id');
+  if ($(this).hasClass('checked')) {
+    $(this).removeClass('checked');
+    $(this).html('&#xE835;');
+    deselect_reminder(entry_id);
+  }
+  else {
+    $(this).addClass('checked');
+    $(this).html('&#xE834;');
+    select_reminder(entry_id);
+  }
+});
+
+$('.contacts-check').on('click', function () {
+  var entry_id = $(this).attr('data-id');
+  if ($(this).hasClass('checked')) {
+    $(this).removeClass('checked');
+    $(this).html('&#xE835;');
+    deselect_contact(entry_id);
+  }
+  else {
+    $(this).addClass('checked');
+    $(this).html('&#xE834;');
+    select_contact(entry_id);
+  }
+});
+
+$('.groups-check').on('click', function () {
+  var entry_id = $(this).attr('data-id');
+  if ($(this).hasClass('checked')) {
+    $(this).removeClass('checked');
+    $(this).html('&#xE835;');
+    deselect_group(entry_id);
+  }
+  else {
+    $(this).addClass('checked');
+    $(this).html('&#xE834;');
+    select_group(entry_id);
+  }
+});
+
+
+
+
 
 
 });

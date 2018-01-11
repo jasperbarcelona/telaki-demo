@@ -1,9 +1,24 @@
 {% for group in groups %}
-<tr id="{{ group.id }}" data-toggle="modal" data-target="#groupMembersModal" onclick="open_group(this.id)">
+<tr>
 	<td class="icon-td">
-		<i class="material-icons">&#xE835;</i>
+		<i data-id="{{ group.id }}" class="groups-check material-icons">&#xE835;</i>
 	</td>
-	<td class="group-name-td">{{ group.name }}</td>
-	<td class="group-size-td align-right">{{ group.size }} member/s</td>
+	<td class="group-name-td"  id="{{ group.id }}" data-toggle="modal" data-target="#groupMembersModal" onclick="open_group(this.id)">{{ group.name }}</td>
+	<td class="group-size-td align-right"  id="{{ group.id }}" data-toggle="modal" data-target="#groupMembersModal" onclick="open_group(this.id)">{{ group.size }} member/s</td>
 </tr>
 {% endfor %}
+<script type="text/javascript">
+$('.groups-check').on('click', function () {
+  var entry_id = $(this).attr('data-id');
+  if ($(this).hasClass('checked')) {
+    $(this).removeClass('checked');
+    $(this).html('&#xE835;');
+    deselect_group(entry_id);
+  }
+  else {
+    $(this).addClass('checked');
+    $(this).html('&#xE834;');
+    select_group(entry_id);
+  }
+});
+</script>

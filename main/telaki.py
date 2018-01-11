@@ -1150,6 +1150,13 @@ def get_contact_info():
         ),200
 
 
+@app.route('/group',methods=['GET','POST'])
+def get_group_info():
+    group_id = flask.request.args.get('group_id')
+    group = Group.query.filter_by(id=group_id).first()
+    members = Contact.query.join(ContactGroup, Contact.id==ContactGroup.contact_id).add_columns(Contact.name, Contact.contact_type, Contact.msisdn).filter(Contact.id == ContactGroup.contact_id).filter(ContactGroup.group_id == group_id).all()
+    return flask.render_template('group_info.html',group=group,members=members)
+
 @app.route('/recipients/add', methods=['GET', 'POST'])
 def add_recipients():
     individual_recipients_name = flask.request.form.getlist('individual_recipients_name[]')

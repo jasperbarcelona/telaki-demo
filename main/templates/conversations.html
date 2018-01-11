@@ -47,17 +47,17 @@
 		<tbody id="conversationsTbody">
 			{% for entry in conversations %}
 			{% if entry.status == 'unread' %}
-			<tr onclick="open_conversation({{ entry.id }})" class="unread">
+			<tr class="unread">
 			{% else %}
-			<tr onclick="open_conversation({{ entry.id }})">
+			<tr>
 			{% endif %}
 				<td class="icon-td">
-					<i class="material-icons">&#xE835;</i>
-					<i class="material-icons">&#xE83A;</i>
+					<i data-id="{{ entry.id }}" class="conversations-check material-icons">&#xE835;</i>
+					<i data-id="{{ entry.id }}" class="conversations-star material-icons">&#xE83A;</i>
 				</td>
-				<td class="msisdn-td">{{ entry.display_name }}</td>
-				<td class="message-td">{{ entry.latest_content }}</td>
-				<td class="date-td align-right">{{ entry.latest_date }}</td>
+				<td class="msisdn-td" onclick="open_conversation({{ entry.id }})">{{ entry.display_name }}</td>
+				<td class="message-td" onclick="open_conversation({{ entry.id }})">{{ entry.latest_content }}</td>
+				<td class="date-td align-right" onclick="open_conversation({{ entry.id }})">{{ entry.latest_date }}</td>
 			</tr>
 			{% endfor %}
 		</tbody>
@@ -72,5 +72,30 @@
 	    if (e.which == 13) {
 	        search_conversations()
 	    }
+	});
+
+	$('.conversations-check').on('click', function () {
+	  var entry_id = $(this).attr('data-id');
+	  if ($(this).hasClass('checked')) {
+	    $(this).removeClass('checked');
+	    $(this).html('&#xE835;');
+	    deselect_conversation(entry_id);
+	  }
+	  else {
+	    $(this).addClass('checked');
+	    $(this).html('&#xE834;');
+	    select_conversation(entry_id);
+	  }
+	});
+
+	$('.conversations-star').on('click', function () {
+	  if ($(this).hasClass('checked')) {
+	    $(this).removeClass('checked');
+	    $(this).html('&#xE83A;');
+	  }
+	  else {
+	    $(this).addClass('checked');
+	    $(this).html('&#xE838;');
+	  }
 	});
 </script>

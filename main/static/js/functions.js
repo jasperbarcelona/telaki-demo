@@ -8,6 +8,7 @@ function show_conversations(slice_from) {
     slice_from:slice_from
   },
     function(data){
+      initialize_selected_entries();
       $('.content').html(data);
     });
 }
@@ -20,6 +21,7 @@ function show_blasts(slice_from) {
     slice_from:slice_from
   },
     function(data){
+      initialize_selected_entries();
       $('.content').html(data);
     });
 }
@@ -32,6 +34,7 @@ function show_payment_reminders(slice_from) {
     slice_from:slice_from
   },
     function(data){
+      initialize_selected_entries();
       $('.content').html(data);
     });
 }
@@ -44,6 +47,7 @@ function show_contacts(slice_from) {
     slice_from:slice_from
   },
     function(data){
+      initialize_selected_entries();
       $('.content').html(data);
     });
 }
@@ -56,6 +60,7 @@ function show_groups(slice_from) {
     slice_from:slice_from
   },
     function(data){
+      initialize_selected_entries();
       $('.content').html(data);
     });
 }
@@ -67,6 +72,7 @@ function show_groups(slice_from) {
 function conversation_next_page() {
   $.post('/conversations/next',
     function(data){
+      initialize_selected_entries();
       $('#conversations').html(data['template']);
       $('#paginationShowingConversation').html(data['showing']);
       $('#paginationTotalConversation').html(data['total_entries']);
@@ -91,6 +97,7 @@ function conversation_next_page() {
 function conversation_prev_page() {
   $.post('/conversations/prev',
     function(data){
+      initialize_selected_entries();
       $('#conversations').html(data['template']);
       $('#paginationShowingConversation').html(data['showing']);
       $('#paginationTotalConversation').html(data['total_entries']);
@@ -115,6 +122,7 @@ function conversation_prev_page() {
 function blast_next_page() {
   $.post('/blasts/next',
     function(data){
+      initialize_selected_entries();
       $('#blasts').html(data['template']);
       $('#paginationShowingBlasts').html(data['showing']);
       $('#paginationTotalBlasts').html(data['total_entries']);
@@ -139,6 +147,7 @@ function blast_next_page() {
 function blast_prev_page() {
   $.post('/blasts/prev',
     function(data){
+      initialize_selected_entries();
       $('#blasts').html(data['template']);
       $('#paginationShowingBlasts').html(data['showing']);
       $('#paginationTotalBlasts').html(data['total_entries']);
@@ -163,6 +172,7 @@ function blast_prev_page() {
 function reminder_next_page() {
   $.post('/reminders/next',
     function(data){
+      initialize_selected_entries();
       $('#reminders').html(data['template']);
       $('#paginationShowingReminders').html(data['showing']);
       $('#paginationTotalReminders').html(data['total_entries']);
@@ -187,6 +197,7 @@ function reminder_next_page() {
 function reminder_prev_page() {
   $.post('/reminders/prev',
     function(data){
+      initialize_selected_entries();
       $('#reminders').html(data['template']);
       $('#paginationShowingReminders').html(data['showing']);
       $('#paginationTotalReminders').html(data['total_entries']);
@@ -211,6 +222,7 @@ function reminder_prev_page() {
 function contact_next_page() {
   $.post('/contacts/next',
     function(data){
+      initialize_selected_entries();
       $('#contacts').html(data['template']);
       $('#paginationShowingContacts').html(data['showing']);
       $('#paginationTotalContacts').html(data['total_entries']);
@@ -235,6 +247,7 @@ function contact_next_page() {
 function contact_prev_page() {
   $.post('/contacts/prev',
     function(data){
+      initialize_selected_entries();
       $('#contacts').html(data['template']);
       $('#paginationShowingContacts').html(data['showing']);
       $('#paginationTotalContacts').html(data['total_entries']);
@@ -259,6 +272,7 @@ function contact_prev_page() {
 function group_next_page() {
   $.post('/groups/next',
     function(data){
+      initialize_selected_entries();
       $('#groups').html(data['template']);
       $('#paginationShowingGroups').html(data['showing']);
       $('#paginationTotalGroups').html(data['total_entries']);
@@ -283,6 +297,7 @@ function group_next_page() {
 function group_prev_page() {
   $.post('/groups/prev',
     function(data){
+      initialize_selected_entries();
       $('#groups').html(data['template']);
       $('#paginationShowingGroups').html(data['showing']);
       $('#paginationTotalGroups').html(data['total_entries']);
@@ -334,6 +349,7 @@ function open_conversation(conversation_id) {
       conversation_id:conversation_id
     },
     function(data){
+      initialize_selected_entries();
       $('.content').html(data);
     });
 }
@@ -475,8 +491,21 @@ function supply_info_from_contacts(msisdn) {
       msisdn:msisdn
     },
     function(data){
+      initialize_selected_entries();
       $('#editContactModal .modal-content').html(data);
       $('#editContactModal .form-control').change();
+    });
+}
+
+function open_group(group_id) {
+  $.get('/group',
+    {
+      group_id:group_id
+    },
+    function(data){
+      initialize_selected_entries();
+      $('#groupMembersModal .modal-body').html(data);
+      $('#groupMembersModal .form-control').change();
     });
 }
 
@@ -509,6 +538,20 @@ function send_reply() {
         }, 4000);
       }
     });
+}
+
+function initialize_selected_entries() {
+  selected_conversations = [];
+  selected_blasts = [];
+  selected_reminders = [];
+  selected_contacts = [];
+  selected_groups = [];
+
+  $('#deleteConversationsBtn').addClass('hidden');
+  $('#deleteBlastsBtn').addClass('hidden');
+  $('#deleteRemindersBtn').addClass('hidden');
+  $('#deleteContactsBtn').addClass('hidden');
+  $('#deleteGroupsBtn').addClass('hidden');
 }
 
 function initialize_recipients() {
@@ -818,6 +861,7 @@ function open_blast(batch_id) {
       batch_id:batch_id
     },
     function(data){
+      initialize_selected_entries();
       $('.content').html(data);
     });
 }
@@ -828,6 +872,7 @@ function open_reminder(reminder_id) {
       reminder_id:reminder_id
     },
     function(data){
+      initialize_selected_entries();
       $('#viewReminderModal .modal-body').html(data);
     });
 }
@@ -986,4 +1031,57 @@ function search_groups() {
       $('#paginationTotalGroups').html(data['count']);
       $('.pagination-btn').attr('disabled',true);
     });
+}
+
+function select_conversation(entry_id) {
+  selected_conversations.push(entry_id);
+}
+
+function deselect_conversation(entry_id) {
+  var entry_index = selected_conversations.indexOf(entry_id);
+  selected_conversations.splice(entry_index, 1);
+}
+
+function select_blast(entry_id) {
+  selected_blasts.push(entry_id);
+  alert(selected_blasts);
+}
+
+function deselect_blast(entry_id) {
+  var entry_index = selected_blasts.indexOf(entry_id);
+  selected_blasts.splice(entry_index, 1);
+  alert(selected_blasts);
+}
+
+function select_reminder(entry_id) {
+  selected_reminders.push(entry_id);
+  alert(selected_reminders);
+}
+
+function deselect_reminder(entry_id) {
+  var entry_index = selected_reminders.indexOf(entry_id);
+  selected_reminders.splice(entry_index, 1);
+  alert(selected_reminders);
+}
+
+function select_contact(entry_id) {
+  selected_contacts.push(entry_id);
+  alert(selected_contacts);
+}
+
+function deselect_contact(entry_id) {
+  var entry_index = selected_contacts.indexOf(entry_id);
+  selected_contacts.splice(entry_index, 1);
+  alert(selected_contacts);
+}
+
+function select_group(entry_id) {
+  selected_groups.push(entry_id);
+  alert(selected_groups);
+}
+
+function deselect_group(entry_id) {
+  var entry_index = selected_groups.indexOf(entry_id);
+  selected_groups.splice(entry_index, 1);
+  alert(selected_groups);
 }

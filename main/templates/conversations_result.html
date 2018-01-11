@@ -5,8 +5,8 @@
 <tr onclick="open_conversation({{ entry.id }})">
 {% endif %}
 	<td class="icon-td">
-		<i class="material-icons">&#xE835;</i>
-		<i class="material-icons">&#xE83A;</i>
+		<i data-id="{{ entry.id }}" class="conversations-check material-icons">&#xE835;</i>
+		<i data-id="{{ entry.id }}" class="conversations-star material-icons">&#xE83A;</i>
 	</td>
 	<td class="msisdn-td">{{ entry.display_name }}</td>
 	<td class="message-td">{{ entry.latest_content }}</td>
@@ -15,9 +15,28 @@
 {% endfor %}
 
 <script type="text/javascript">
-	$('.search-conversations').keypress(function(e){
-	    if (e.which == 13) {
-	        search_conversations()
-	    }
+	$('.conversations-check').on('click', function () {
+	  var entry_id = $(this).attr('data-id');
+	  if ($(this).hasClass('checked')) {
+	    $(this).removeClass('checked');
+	    $(this).html('&#xE835;');
+	    deselect_conversation(entry_id);
+	  }
+	  else {
+	    $(this).addClass('checked');
+	    $(this).html('&#xE834;');
+	    select_conversation(entry_id);
+	  }
+	});
+
+	$('.conversations-star').on('click', function () {
+	  if ($(this).hasClass('checked')) {
+	    $(this).removeClass('checked');
+	    $(this).html('&#xE83A;');
+	  }
+	  else {
+	    $(this).addClass('checked');
+	    $(this).html('&#xE838;');
+	  }
 	});
 </script>

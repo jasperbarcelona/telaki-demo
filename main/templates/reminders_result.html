@@ -1,10 +1,25 @@
 {% for entry in reminders %}
-<tr onclick="open_reminder({{ entry.id }})">
+<tr>
 	<td class="blast-icon-td">
-		<i class="material-icons">&#xE835;</i>
+		<i data-id="{{ entry.id }}" class="reminders-check material-icons">&#xE835;</i>
 	</td>
-	<td class="blast-recipient-td">{{ entry.sender_name }}</td>
-	<td class="blast-message-td">{{ entry.file_name }}</td>
-	<td class="blast-date-td align-right">{{ entry.date }}</td>
+	<td class="blast-recipient-td" onclick="open_reminder({{ entry.id }})" data-toggle="modal" data-target="#viewReminderModal">{{ entry.sender_name }}</td>
+	<td class="blast-message-td" onclick="open_reminder({{ entry.id }})" data-toggle="modal" data-target="#viewReminderModal">{{ entry.file_name }}</td>
+	<td class="blast-date-td align-right" onclick="open_reminder({{ entry.id }})" data-toggle="modal" data-target="#viewReminderModal">{{ entry.date }}</td>
 </tr>
 {% endfor %}
+<script type="text/javascript">
+	$('.reminders-check').on('click', function () {
+	  var entry_id = $(this).attr('data-id');
+	  if ($(this).hasClass('checked')) {
+	    $(this).removeClass('checked');
+	    $(this).html('&#xE835;');
+	    deselect_reminder(entry_id);
+	  }
+	  else {
+	    $(this).addClass('checked');
+	    $(this).html('&#xE834;');
+	    select_reminder(entry_id);
+	  }
+	});
+</script>
