@@ -725,6 +725,35 @@ function refresh_reminder_progress(batch_id) {
     });
 }
 
+function search_contact_groups() {
+  $('#recipientGroupLoading').removeClass('hidden');
+  var group_name = $('#searchContactGroups').val();
+  $.post('/contacts/groups/search',
+    {
+      group_name:group_name,
+      group_recipients:group_recipients
+    },
+    function(data){
+      $('#recipientGroupContainer').html(data);
+      $('#recipientGroupLoading').addClass('hidden');
+    });
+}
+
+function search_contact_recipients() {
+  $('#recipientContactLoading').removeClass('hidden');
+  var name = $('#searchRecipientName').val();
+  $.post('/contacts/indiv/search',
+    {
+      name:name,
+      individual_recipients:individual_recipients
+    },
+    function(data){
+      $('#recipientContactContainer').html(data);
+      $('#recipientContactLoading').addClass('hidden');
+    });
+}
+
+
 function refresh_contacts_progress(batch_id) {
   $.post('/contacts/progress',
     {
@@ -1050,9 +1079,9 @@ function search_contacts(active_text) {
     },
     function(data){
       initialize_selected_entries();
+      $('#clearContactsSearch').addClass('hidden');
       $('.content').html(data);
       $('#searchLoader').addClass('hidden');
-      $('#clearContactsSearch').addClass('hidden');
       $('#'+active_text).focus();
     });
   }

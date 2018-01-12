@@ -1,0 +1,18 @@
+{% for group in groups %}
+{% if group.id|string in selected_groups %}
+<div id="{{ group.id }}" class="recipient-group selected" onclick="add_recipient({{ group.id }}, '{{ group.name }}', {{ group.size }})">
+{% else %}
+<div id="{{ group.id }}" class="recipient-group" onclick="add_recipient({{ group.id }}, '{{ group.name }}', {{ group.size }})">
+{% endif %}
+    <div class="recipient-group-left">
+        <span class="recipient-group-name">{{ group.name }}</span>
+    </div>
+    <div class="recipient-group-right align-right">
+        {% if group.size == 1 %}
+        <span class="recipient-group-members">{{ group.size }} member</span>
+        {% else %}
+        <span class="recipient-group-members">{{ group.size }} members</span>
+        {% endif %}
+    </div>
+</div>
+{% endfor %}

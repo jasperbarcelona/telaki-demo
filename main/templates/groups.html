@@ -47,7 +47,13 @@
 					<i data-id="{{ group.id }}" class="groups-check material-icons">&#xE835;</i>
 				</td>
 				<td class="group-name-td" id="{{ group.id }}" data-toggle="modal" data-target="#groupMembersModal" onclick="open_group(this.id)">{{ group.name }}</td>
-				<td class="group-size-td align-right" id="{{ group.id }}" data-toggle="modal" data-target="#groupMembersModal" onclick="open_group(this.id)">{{ group.size }} member/s</td>
+				<td class="group-size-td align-right" id="{{ group.id }}" data-toggle="modal" data-target="#groupMembersModal" onclick="open_group(this.id)">
+					{% if group.size == 1 %}
+					{{ group.size }} member
+					{% else %}
+					{{ group.size }} members
+					{% endif %}
+				</td>
 			</tr>
 			{% endfor %}
 		</tbody>

@@ -1056,6 +1056,7 @@ a,a:hover,a:active,a:focus {
 }
 
 .recipient-tab-pane {
+	position: relative;
 	height: 100%;
 	border-right: 2px solid #eee;
 	overflow-y: scroll;
@@ -1441,4 +1442,27 @@ a,a:hover,a:active,a:focus {
 #groupName {
 	height: 60px !important;
 	font-size: 24px !important;
+}
+
+#recipientGroupContainer,
+#recipientContactContainer {
+	position: relative;
+	height: calc(100% - 50px);
+}
+
+#recipientGroupLoading,
+#recipientContactLoading {
+	position: absolute;
+	height: calc(100% - 50px);
+	width: 100%;
+	z-index: 9;
+	background-color: #FFFFFF;
+	display: -webkit-flex;
+	display: flex;
+	-webkit-flex-direction: column;
+	flex-direction: column;
+	-webkit-align-items: center;
+	align-items: center;
+	-webkit-justify-content: center;
+	justify-content: center;
 }

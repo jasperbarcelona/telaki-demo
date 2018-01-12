@@ -100,34 +100,40 @@
                     <div class="tab-content recipient-tab-content">
                         <div class="tab-pane recipient-tab-pane active" id="groupContactTab">
                             <div class="recipient-group-search-container">
-                                <input type="text" class="form-control" placeholder="Search contact groups">
+                                <input type="text" id="searchContactGroups" class="form-control" placeholder="Search contact groups">
                             </div>
-                            {% for group in groups %}
-                            <div id="{{ group.id }}" class="recipient-group" onclick="add_recipient({{ group.id }}, '{{ group.name }}', {{ group.size }})">
-                                <div class="recipient-group-left">
-                                    <span class="recipient-group-name">{{ group.name }}</span>
+                            <div id="recipientGroupLoading" class="hidden">Loading..</div>
+                            <div id="recipientGroupContainer">
+                                {% for group in groups %}
+                                <div id="{{ group.id }}" class="recipient-group" onclick="add_recipient({{ group.id }}, '{{ group.name }}', {{ group.size }})">
+                                    <div class="recipient-group-left">
+                                        <span class="recipient-group-name">{{ group.name }}</span>
+                                    </div>
+                                    <div class="recipient-group-right align-right">
+                                        {% if group.size == 1 %}
+                                        <span class="recipient-group-members">{{ group.size }} member</span>
+                                        {% else %}
+                                        <span class="recipient-group-members">{{ group.size }} members</span>
+                                        {% endif %}
+                                    </div>
                                 </div>
-                                <div class="recipient-group-right align-right">
-                                    {% if group.size == 1 %}
-                                    <span class="recipient-group-members">{{ group.size }} contact</span>
-                                    {% else %}
-                                    <span class="recipient-group-members">{{ group.size }} contacts</span>
-                                    {% endif %}
-                                </div>
+                                {% endfor %}
                             </div>
-                            {% endfor %}
                         </div>
                         <div class="tab-pane recipient-tab-pane" id="individualContactTab">
                             <div class="recipient-individual-search-container">
-                                <input type="text" class="form-control" placeholder="Search contacts">
+                                <input type="text" id="searchRecipientName" class="form-control" placeholder="Search contacts">
                             </div>
-                            {% for contact in contacts %}
-                            <div id="{{ contact.id }}" class="recipient-contact" onclick="add_individual_recipient({{ contact.id }}, '{{ contact.name }}')">
-                                <div class="recipient-contact-left">
-                                    <span class="recipient-contact-name">{{ contact.name }}</span>
+                            <div id="recipientContactLoading" class="hidden">Loading..</div>
+                            <div id="recipientContactContainer">
+                                {% for contact in contacts %}
+                                <div id="{{ contact.id }}" class="recipient-contact" onclick="add_individual_recipient({{ contact.id }}, '{{ contact.name }}')">
+                                    <div class="recipient-contact-left">
+                                        <span class="recipient-contact-name">{{ contact.name }}</span>
+                                    </div>
                                 </div>
+                                {% endfor %}
                             </div>
-                            {% endfor %}
                         </div>
                     </div>
                 </div>

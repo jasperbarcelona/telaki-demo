@@ -1362,6 +1362,22 @@ def search_from_groups():
         )
 
 
+@app.route('/contacts/groups/search',methods=['GET','POST'])
+def search_group_recipients():
+    group_name = flask.request.form.get('group_name')
+    selected_groups = flask.request.form.getlist('group_recipients[]')
+    groups = Group.query.filter(Group.name.ilike('%'+group_name+'%')).order_by(Group.name)
+    return flask.render_template('group_recipients_result.html',groups=groups,selected_groups=selected_groups)
+
+
+@app.route('/contacts/indiv/search',methods=['GET','POST'])
+def search_indiv_recipients():
+    name = flask.request.form.get('name')
+    selected_contacts = flask.request.form.getlist('individual_recipients[]')
+    contacts = Contact.query.filter(Contact.name.ilike('%'+name+'%')).order_by(Contact.name)
+    return flask.render_template('indiv_recipients_result.html',contacts=contacts, selected_contacts=selected_contacts)
+
+
 @app.route('/db/rebuild',methods=['GET','POST'])
 def rebuild_database():
     db.drop_all()

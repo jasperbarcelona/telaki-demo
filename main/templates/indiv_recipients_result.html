@@ -1,0 +1,11 @@
+{% for contact in contacts %}
+{% if contact.id|string in selected_contacts %}
+<div id="{{ contact.id }}" class="recipient-contact selected" onclick="add_individual_recipient({{ contact.id }}, '{{ contact.name }}')">
+{% else %}
+<div id="{{ contact.id }}" class="recipient-contact" onclick="add_individual_recipient({{ contact.id }}, '{{ contact.name }}')">
+{% endif %}
+    <div class="recipient-contact-left">
+        <span class="recipient-contact-name">{{ contact.name }}</span>
+    </div>
+</div>
+{% endfor %}

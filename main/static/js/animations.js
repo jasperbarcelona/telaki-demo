@@ -131,6 +131,18 @@ $('.search-conversations').keypress(function(e){
     }
 });
 
+$('#searchContactGroups').keypress(function(e){
+    if (e.which == 13) {
+      search_contact_groups();
+    }
+});
+
+$('#searchRecipientName').keypress(function(e){
+    if (e.which == 13) {
+      search_contact_recipients();
+    }
+});
+
 $('.conversations-check').on('click', function () {
   var entry_id = $(this).attr('data-id');
   if ($(this).hasClass('checked')) {
