@@ -72,7 +72,7 @@ $(".datepicker").datepicker({
 
 $('.search-reminders').keypress(function(e){
 	if (e.which == 13) {
-	    search_reminders()
+	    search_reminders($(this).attr('id'));
 	}
 });
 

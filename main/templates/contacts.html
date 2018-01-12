@@ -78,12 +78,12 @@ $(".datepicker").datepicker({
 
 $('.search-contacts').keypress(function(e){
     if (e.which == 13) {
-        search_contacts()
+    	search_contacts($(this).attr('id'));
     }
 });
 
 $('.search-contacts').change(function(){
-    search_contacts()
+    search_contacts($(this).attr('id'));
 });
 
 $('.contacts-check').on('click', function () {

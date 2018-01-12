@@ -61,7 +61,7 @@ $(".datepicker").datepicker({
 
 $('.search-groups').keypress(function(e){
     if (e.which == 13) {
-        search_groups()
+    	search_groups($(this).attr('id'));
     }
 });
 

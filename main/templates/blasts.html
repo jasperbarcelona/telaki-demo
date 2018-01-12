@@ -72,7 +72,7 @@ $(".datepicker").datepicker({
 
 $('.search-blasts').keypress(function(e){
     if (e.which == 13) {
-        search_blasts()
+        search_blasts($(this).attr('id'));
     }
 });
 

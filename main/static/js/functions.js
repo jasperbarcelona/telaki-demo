@@ -10,6 +10,8 @@ function show_conversations(slice_from) {
     function(data){
       initialize_selected_entries();
       $('.content').html(data);
+      $('#searchLoader').addClass('hidden');
+      $('#clearConversationsSearch').addClass('hidden');
     });
 }
 
@@ -23,6 +25,8 @@ function show_blasts(slice_from) {
     function(data){
       initialize_selected_entries();
       $('.content').html(data);
+      $('#searchLoader').addClass('hidden');
+      $('#clearConversationsSearch').addClass('hidden');
     });
 }
 
@@ -36,6 +40,8 @@ function show_payment_reminders(slice_from) {
     function(data){
       initialize_selected_entries();
       $('.content').html(data);
+      $('#searchLoader').addClass('hidden');
+      $('#clearConversationsSearch').addClass('hidden');
     });
 }
 
@@ -49,6 +55,8 @@ function show_contacts(slice_from) {
     function(data){
       initialize_selected_entries();
       $('.content').html(data);
+      $('#searchLoader').addClass('hidden');
+      $('#clearConversationsSearch').addClass('hidden');
     });
 }
 
@@ -62,6 +70,8 @@ function show_groups(slice_from) {
     function(data){
       initialize_selected_entries();
       $('.content').html(data);
+      $('#searchLoader').addClass('hidden');
+      $('#clearConversationsSearch').addClass('hidden');
     });
 }
 
@@ -897,14 +907,28 @@ function check_upload_progress() {
     });
 }
 
-function search_conversations() {
+function search_conversations(active_text) {
   $('#conversationsTbody').html('');
   $('#searchLoader').removeClass('hidden');
   $('#clearConversationsSearch').removeClass('hidden');
   var name = $('#searchConversationName').val();
   var content = $('#searchConversationContent').val();
   var date = $('#searchConversationDate').val();
-  $.get('/conversations/search',
+  if ((name == '') && (content == '') && (date == '')) {
+    $.get('/conversations',
+    {
+      slice_from:'reset'
+    },
+    function(data){
+      initialize_selected_entries();
+      $('.content').html(data);
+      $('#searchLoader').addClass('hidden');
+      $('#clearConversationsSearch').addClass('hidden');
+      $('#'+active_text).focus();
+    });
+  }
+  else {
+    $.get('/conversations/search',
     {
       name:name,
       content:content,
@@ -923,16 +947,31 @@ function search_conversations() {
       $('#paginationTotalConversation').html(data['count']);
       $('.pagination-btn').attr('disabled',true);
     });
+  }
 }
 
-function search_blasts() {
+function search_blasts(active_text) {
   $('#blastsTbody').html('');
   $('#searchLoader').removeClass('hidden');
   $('#clearBlastsSearch').removeClass('hidden');
   var sender = $('#searchBlastsSender').val();
   var content = $('#searchBlastsContent').val();
   var date = $('#searchBlastsDate').val();
-  $.get('/blasts/search',
+  if ((sender == '') && (content == '') && (date == '')) {
+    $.get('/blasts',
+    {
+      slice_from:'reset'
+    },
+    function(data){
+      initialize_selected_entries();
+      $('.content').html(data);
+      $('#searchLoader').addClass('hidden');
+      $('#clearBlastsSearch').addClass('hidden');
+      $('#'+active_text).focus();
+    });
+  }
+  else {
+    $.get('/blasts/search',
     {
       sender:sender,
       content:content,
@@ -951,16 +990,31 @@ function search_blasts() {
       $('#paginationTotalBlasts').html(data['count']);
       $('.pagination-btn').attr('disabled',true);
     });
+  }
 }
 
-function search_reminders() {
+function search_reminders(active_text) {
   $('#remindersTbody').html('');
   $('#searchLoader').removeClass('hidden');
   $('#clearRemindersSearch').removeClass('hidden');
   var sender = $('#searchRemindersSender').val();
   var filename = $('#searchRemindersFile').val();
   var date = $('#searchRemindersDate').val();
-  $.get('/reminders/search',
+  if ((sender == '') && (filename == '') && (date == '')) {
+    $.get('/reminders',
+    {
+      slice_from:'reset'
+    },
+    function(data){
+      initialize_selected_entries();
+      $('.content').html(data);
+      $('#searchLoader').addClass('hidden');
+      $('#clearRemindersSearch').addClass('hidden');
+      $('#'+active_text).focus();
+    });
+  }
+  else {
+    $.get('/reminders/search',
     {
       sender:sender,
       filename:filename,
@@ -979,16 +1033,31 @@ function search_reminders() {
       $('#paginationTotalReminders').html(data['count']);
       $('.pagination-btn').attr('disabled',true);
     });
+  }
 }
 
-function search_contacts() {
+function search_contacts(active_text) {
   $('#contactsTbody').html('');
   $('#searchLoader').removeClass('hidden');
   $('#clearContactsSearch').removeClass('hidden');
   var name = $('#searchContactsName').val();
   var contact_type = $('#searchContactsType').val();
   var msisdn = $('#searchContactsMsisdn').val();
-  $.get('/contacts/search',
+  if ((name == '') && (contact_type == '') && (msisdn == '')) {
+    $.get('/contacts',
+    {
+      slice_from:'reset'
+    },
+    function(data){
+      initialize_selected_entries();
+      $('.content').html(data);
+      $('#searchLoader').addClass('hidden');
+      $('#clearContactsSearch').addClass('hidden');
+      $('#'+active_text).focus();
+    });
+  }
+  else {
+    $.get('/contacts/search',
     {
       name:name,
       contact_type:contact_type,
@@ -1007,14 +1076,29 @@ function search_contacts() {
       $('#paginationTotalContacts').html(data['count']);
       $('.pagination-btn').attr('disabled',true);
     });
+  }
 }
 
-function search_groups() {
+function search_groups(active_text) {
   $('#groupsTbody').html('');
   $('#searchLoader').removeClass('hidden');
   $('#clearGroupsSearch').removeClass('hidden');
   var name = $('#searchGroupsName').val();
-  $.get('/groups/search',
+  if (name == '') {
+    $.get('/groups',
+    {
+      slice_from:'reset'
+    },
+    function(data){
+      initialize_selected_entries();
+      $('.content').html(data);
+      $('#searchLoader').addClass('hidden');
+      $('#clearGroupsSearch').addClass('hidden');
+      $('#'+active_text).focus();
+    });
+  }
+  else {
+    $.get('/groups/search',
     {
       name:name
     },
@@ -1031,6 +1115,7 @@ function search_groups() {
       $('#paginationTotalGroups').html(data['count']);
       $('.pagination-btn').attr('disabled',true);
     });
+  }
 }
 
 function select_conversation(entry_id) {

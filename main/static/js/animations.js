@@ -127,17 +127,9 @@ animate();
 
 $('.search-conversations').keypress(function(e){
     if (e.which == 13) {
-        search_conversations()
+      search_conversations($(this).attr('id'));
     }
 });
-
-
-
-
-
-
-
-
 
 $('.conversations-check').on('click', function () {
   var entry_id = $(this).attr('data-id');
