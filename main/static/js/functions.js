@@ -596,6 +596,132 @@ function add_recipient(id,name,size) {
   }
 }
 
+function add_everyone_recipient(size) {
+  $('#everyoneRecipient').toggleClass('selected');
+  if ($('#everyoneRecipient').hasClass('selected')) {
+    total_recipients = parseInt(size);
+    $('.recipient-group:not(#everyoneRecipient)').addClass('disabled');
+    $('.recipient-group:not(#everyoneRecipient)').removeClass('selected');
+    $('.recipient-contact').addClass('disabled');
+    $('.recipient-contact').removeClass('selected');
+    $('.active-recipient:not(#everyoneRecipient)').remove();
+    individual_recipients = [];
+    group_recipients = [];
+    individual_recipients_name = [];
+    group_recipients_name = [];
+    $('.add-recipient-right-body').append("<div id='everyoneRecipient' class='active-recipient group'><span class='active-recipient-name'>Everyone ("+size+")</span><div class='remove-recipient-container'><span class='remove-recipient' onclick='remove_everyone_recipient("+size+")'><i class='material-icons remove-recipient-icon'>&#xE5CD;</i></span></div></div>");
+  }
+  else {
+    remove_everyone_recipient(size);
+  }
+  $('#recipientCount').html('('+total_recipients+')');
+  if (total_recipients == 0) {
+    $('.no-recipient').show();
+  }
+  else {
+    $('.no-recipient').hide();
+  }
+}
+
+function add_customers_recipient(size) {
+  $('#customersRecipient').toggleClass('selected');
+  if ($('#customersRecipient').hasClass('selected')) {
+    total_recipients = parseInt(size);
+    $('.recipient-group:not(#customersRecipient)').addClass('disabled');
+    $('.recipient-group:not(#customersRecipient)').removeClass('selected');
+    $('.recipient-contact').addClass('disabled');
+    $('.recipient-contact').removeClass('selected');
+    $('.active-recipient:not(#customersRecipient)').remove();
+    individual_recipients = [];
+    group_recipients = [];
+    individual_recipients_name = [];
+    group_recipients_name = [];
+    $('.add-recipient-right-body').append("<div id='customersRecipient' class='active-recipient group'><span class='active-recipient-name'>All Customers ("+size+")</span><div class='remove-recipient-container'><span class='remove-recipient' onclick='remove_customers_recipient("+size+")'><i class='material-icons remove-recipient-icon'>&#xE5CD;</i></span></div></div>");
+  }
+  else {
+    remove_customers_recipient(size);
+  }
+  $('#recipientCount').html('('+total_recipients+')');
+  if (total_recipients == 0) {
+    $('.no-recipient').show();
+  }
+  else {
+    $('.no-recipient').hide();
+  }
+}
+
+function add_staff_recipient(size) {
+  $('#staffRecipient').toggleClass('selected');
+  if ($('#staffRecipient').hasClass('selected')) {
+    total_recipients = parseInt(size);
+    $('.recipient-group:not(#staffRecipient)').addClass('disabled');
+    $('.recipient-group:not(#staffRecipient)').removeClass('selected');
+    $('.recipient-contact').addClass('disabled');
+    $('.recipient-contact').removeClass('selected');
+    $('.active-recipient:not(#staffRecipient)').remove();
+    individual_recipients = [];
+    group_recipients = [];
+    individual_recipients_name = [];
+    group_recipients_name = [];
+    $('.add-recipient-right-body').append("<div id='staffRecipient' class='active-recipient group'><span class='active-recipient-name'>All Staff ("+size+")</span><div class='remove-recipient-container'><span class='remove-recipient' onclick='remove_staff_recipient("+size+")'><i class='material-icons remove-recipient-icon'>&#xE5CD;</i></span></div></div>");
+  }
+  else {
+    remove_staff_recipient(size);
+  }
+  $('#recipientCount').html('('+total_recipients+')');
+  if (total_recipients == 0) {
+    $('.no-recipient').show();
+  }
+  else {
+    $('.no-recipient').hide();
+  }
+}
+
+function remove_everyone_recipient(size) {
+  total_recipients -= size;
+  $('#everyoneRecipient.active-recipient').remove()
+  $('#everyoneRecipient').removeClass('selected');
+  $('.recipient-group:not(#everyoneRecipient)').removeClass('disabled');
+  $('.recipient-contact').removeClass('disabled');
+  $('#recipientCount').html('('+total_recipients+')');
+  if (total_recipients == 0) {
+    $('.no-recipient').show();
+  }
+  else {
+    $('.no-recipient').hide();
+  }
+}
+
+function remove_customers_recipient(size) {
+  total_recipients -= size;
+  $('#customersRecipient.active-recipient').remove()
+  $('#customersRecipient').removeClass('selected');
+  $('.recipient-group:not(#customersRecipient)').removeClass('disabled');
+  $('.recipient-contact').removeClass('disabled');
+  $('#recipientCount').html('('+total_recipients+')');
+  if (total_recipients == 0) {
+    $('.no-recipient').show();
+  }
+  else {
+    $('.no-recipient').hide();
+  }
+}
+
+function remove_staff_recipient(size) {
+  total_recipients -= size;
+  $('#staffRecipient.active-recipient').remove()
+  $('#staffRecipient').removeClass('selected');
+  $('.recipient-group:not(#staffRecipient)').removeClass('disabled');
+  $('.recipient-contact').removeClass('disabled');
+  $('#recipientCount').html('('+total_recipients+')');
+  if (total_recipients == 0) {
+    $('.no-recipient').show();
+  }
+  else {
+    $('.no-recipient').hide();
+  }
+}
+
 function add_individual_recipient(id,name) {
   $('#'+id+'.recipient-contact').toggleClass('selected');
   if ($('#'+id+'.recipient-contact').hasClass('selected')) {
@@ -653,10 +779,20 @@ function remove_group_recipient(id,size,name) {
 }
 
 function save_recipients() {
+  if ($('#everyoneRecipient').hasClass('selected')) {
+    var special = 'Everyone';
+  }
+  else if ($('#customersRecipient').hasClass('selected')) {
+    var special = 'All Customers';
+  }
+  else if ($('#staffRecipient').hasClass('selected')) {
+    var special = 'All Staff';
+  }
   $.post('/recipients/add',
     {
       individual_recipients_name:individual_recipients_name,
-      group_recipients_name:group_recipients_name
+      group_recipients_name:group_recipients_name,
+      special:special
     },
     function(data){
       $('#addRecipientModal').modal('hide');

@@ -175,6 +175,9 @@ def index():
     conversations = Conversation.query.filter_by(client_no=session['client_no']).order_by(Conversation.created_at.desc()).slice(session['conversation_limit'] - 50, session['conversation_limit'])
     groups = Group.query.filter_by(client_no=session['client_no']).order_by(Group.name)
     contacts = Contact.query.filter_by(client_no=session['client_no']).order_by(Contact.name)
+    contact_count = Contact.query.filter_by(client_no=session['client_no']).count()
+    customers_count = Contact.query.filter_by(client_no=session['client_no'], contact_type='Customer').count()
+    staff_count = Contact.query.filter_by(client_no=session['client_no'], contact_type='Staff').count()
     if total_entries < 50:
         return flask.render_template(
         'index.html',
@@ -187,6 +190,9 @@ def index():
         total_entries=total_entries,
         prev_btn='disabled',
         next_btn='disabled',
+        contact_count=contact_count,
+        customers_count=customers_count,
+        staff_count=staff_count
     )
     return flask.render_template(
         'index.html',
@@ -199,6 +205,9 @@ def index():
         total_entries=total_entries,
         prev_btn='disabled',
         next_btn='enabled',
+        contact_count=contact_count,
+        customers_count=customers_count,
+        staff_count=staff_count
     )
 
 
@@ -1159,10 +1168,12 @@ def get_group_info():
 
 @app.route('/recipients/add', methods=['GET', 'POST'])
 def add_recipients():
+    special = flask.request.form.get('special')
     individual_recipients_name = flask.request.form.getlist('individual_recipients_name[]')
     group_recipients_name = flask.request.form.getlist('group_recipients_name[]')
     return flask.render_template(
         'recipients.html',
+        special=special,
         individual_recipients=individual_recipients_name,
         group_recipients=group_recipients_name,
         )

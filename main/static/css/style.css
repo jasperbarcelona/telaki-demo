@@ -1091,6 +1091,9 @@ a,a:hover,a:active,a:focus {
 	-webkit-justify-content: left;
 	justify-content: left;
 	cursor: pointer;
+	-webkit-user-select: none;
+  	-moz-user-select: none;
+  	-ms-user-select: none;
 }
 
 .recipient-group-left,
@@ -1465,4 +1468,11 @@ a,a:hover,a:active,a:focus {
 	align-items: center;
 	-webkit-justify-content: center;
 	justify-content: center;
+}
+
+.recipient-group.disabled,
+.recipient-contact.disabled {
+	background-color: #eee !important;
+	color: grey !important;
+	pointer-events: none !important;
 }
