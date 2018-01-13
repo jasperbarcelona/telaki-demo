@@ -74,7 +74,14 @@ $('#closeMessage').on('click', function (e) {
 
 (function() {
   $('.contact-type-picker').on('click', function(e){
+    $('.contact-type-picker').removeClass('selected');
     $(this).toggleClass('selected');
+  });
+})();
+
+(function() {
+  $('.profile-settings-btn').on('click', function(e){
+    alert('This feature will be available on paid version.');
   });
 })();
 

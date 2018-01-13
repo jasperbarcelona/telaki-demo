@@ -21,6 +21,13 @@
 		<div id="navGroups" class="panel-nav-item" onclick="show_groups('reset')">
 			<span class="nav-label">Groups</span>
 		</div>
+		<div class="nav-separator"></div>
+		<div id="navUsers" class="panel-nav-item" onclick="show_users('reset')">
+			<span class="nav-label">Users</span>
+		</div>
+		<div id="navUsage" class="panel-nav-item" onclick="show_usage('reset')">
+			<span class="nav-label">Usage</span>
+		</div>
 	</div>
 </div>
 <div id="replyError" class="snackbar snackbar-error">
@@ -44,6 +51,7 @@
 	<div class="content-header">
 		<div class="content-right-btn-container">
 			<button class="btn control-btn"><i class="material-icons">&#xE5D5;</i></button>
+			<button id="deleteConversationsBtn" data-toggle="modal" data-target="#deleteConversationsModal" class="btn control-btn hidden"><i class="material-icons">&#xE872;</i></button>
 			<div class="pagination-btn-container">
 				<div class="pagination-label-container">
 					<span class="pagination-label"><strong id="paginationShowingConversation">1-{{ limit }}</strong></span>
@@ -135,7 +143,7 @@
 	</div>
 	<div class="message-footer-container">
 		<div class="message-footer-left">
-			<button type="button" id="sendMessageBtn" class="btn btn-primary" onclick="send_text_blast()" data-loading-text="Preparing" data-done-text="Send">Send</button>
+			<button type="button" id="sendMessageBtn" class="btn btn-primary" onclick="send_text_blast()" data-loading-text="Preparing" data-complete-text="Send">Send</button>
 		</div>
 		<div class="message-footer-right">
 			<div>

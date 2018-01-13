@@ -772,6 +772,10 @@ a,a:hover,a:active,a:focus {
 	float: left;
 }
 
+.confirm-delete-modal .modal-body {
+	background-color: #FFFFFF;
+}
+
 #saveContactModal .form-control,
 #editContactModal .form-control,
 #editContactModal .form-control,

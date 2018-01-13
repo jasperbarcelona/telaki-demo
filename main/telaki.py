@@ -68,6 +68,7 @@ admin.add_view(SchoolAdmin(Conversation, db.session))
 admin.add_view(SchoolAdmin(ConversationItem, db.session))
 admin.add_view(SchoolAdmin(Group, db.session))
 admin.add_view(SchoolAdmin(ContactGroup, db.session))
+admin.add_view(SchoolAdmin(ContactBatch, db.session))
 
 def nocache(view):
     @wraps(view)
@@ -939,6 +940,14 @@ def check_existing_progress():
             batch_id=reminder.id,
             template=flask.render_template('reminder_status.html', batch=reminder)
             )
+    contact = ContactBatch.query.filter(ContactBatch.uploader_id==session['user_id'],ContactBatch.pending!=0).first()  
+    if contact or contact != None:
+        return jsonify(
+            in_progress='contact',
+            pending=contact.pending,
+            batch_id=contact.id,
+            template=flask.render_template('contact_upload_status.html', batch=contact)
+            )
     return jsonify(in_progress='none')
 
 
@@ -1162,9 +1171,38 @@ def get_contact_info():
 @app.route('/group',methods=['GET','POST'])
 def get_group_info():
     group_id = flask.request.args.get('group_id')
+    session['open_group_id'] = group_id
     group = Group.query.filter_by(id=group_id).first()
-    members = Contact.query.join(ContactGroup, Contact.id==ContactGroup.contact_id).add_columns(Contact.name, Contact.contact_type, Contact.msisdn).filter(Contact.id == ContactGroup.contact_id).filter(ContactGroup.group_id == group_id).all()
+    members = Contact.query.join(ContactGroup, Contact.id==ContactGroup.contact_id).add_columns(Contact.id, Contact.name, Contact.contact_type, Contact.msisdn).filter(Contact.id == ContactGroup.contact_id).filter(ContactGroup.group_id == group_id).all()
     return flask.render_template('group_info.html',group=group,members=members)
+
+
+@app.route('/group/edit',methods=['GET','POST'])
+def edit_group_info():
+    group = Group.query.filter_by(id=session['open_group_id']).first()
+    group.name = flask.request.form.get('group_name')
+    db.session.commit()
+    return jsonify(status='success'),201
+
+
+@app.route('/group/members/delete/get',methods=['GET','POST'])
+def get_delete_members():
+    session['member_id'] = flask.request.form.get('member_id')
+    session['group_id'] = flask.request.form.get('group_id')
+    return jsonify(status='success'),201
+
+
+@app.route('/group/members/delete',methods=['GET','POST'])
+def delete_members():
+    group = Group.query.filter_by(id=session['group_id']).first()
+    contact_group = ContactGroup.query.filter_by(contact_id=session['member_id'], group_id=session['group_id']).first()
+    db.session.delete(contact_group)
+    db.session.commit()
+    group.size = ContactGroup.query.filter_by(group_id=group.id).count()
+    db.session.commit()
+    members = Contact.query.join(ContactGroup, Contact.id==ContactGroup.contact_id).add_columns(Contact.id, Contact.name, Contact.contact_type, Contact.msisdn).filter(Contact.id == ContactGroup.contact_id).filter(ContactGroup.group_id == session['group_id']).all()
+    return flask.render_template('group_info.html',group=group,members=members)
+
 
 @app.route('/recipients/add', methods=['GET', 'POST'])
 def add_recipients():
@@ -1186,6 +1224,51 @@ def send_text_blast():
     individual_recipients_name = flask.request.form.getlist('individual_recipients_name[]')
     group_recipients_name = flask.request.form.getlist('group_recipients_name[]')
     data = flask.request.form.to_dict()
+
+    if ('special' in data) and (data['special'] != None or data['special'] != ''):
+        new_batch = Batch(
+            client_no=session['client_no'],
+            message_type='custom',
+            sender_id=session['user_id'],
+            sender_name=session['user_name'],
+            recipient=data['special'],
+            date=datetime.datetime.now().strftime('%B %d, %Y'),
+            time=time.strftime("%I:%M %p"),
+            content=data['content'],
+            created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
+            )
+        db.session.add(new_batch)
+        db.session.commit()
+
+        if data['special'] == 'Everyone':
+            contacts = Contact.query.filter_by(client_no=session['client_no']).all()
+        elif data['special'] == 'All Customers':
+            contacts = Contact.query.filter_by(client_no=session['client_no'],contact_type='Customer').all()
+        elif data['special'] == 'All Staff':
+            contacts = Contact.query.filter_by(client_no=session['client_no'],contact_type='Staff').all()
+
+        for contact in contacts:
+            new_message = OutboundMessage(
+                batch_id=new_batch.id,
+                date=new_batch.date,
+                time=new_batch.time,
+                contact_name=contact.name,
+                msisdn=contact.msisdn
+                )
+            db.session.add(new_message)
+        db.session.commit()
+
+        new_batch.batch_size = OutboundMessage.query.filter_by(batch_id=new_batch.id).count()
+        new_batch.pending = OutboundMessage.query.filter_by(batch_id=new_batch.id,status='pending').count()
+        db.session.commit()
+
+        blast_sms.delay(new_batch.id,new_batch.date,new_batch.time,data['content'],session['client_no'])
+        return jsonify(
+            pending=new_batch.pending,
+            batch_id=new_batch.id,
+            template=flask.render_template('blast_status.html', batch=new_batch)
+            )
+
     new_batch = Batch(
         client_no=session['client_no'],
         message_type='custom',
@@ -1389,6 +1472,56 @@ def search_indiv_recipients():
     return flask.render_template('indiv_recipients_result.html',contacts=contacts, selected_contacts=selected_contacts)
 
 
+@app.route('/conversations/delete',methods=['GET','POST'])
+def delete_conversations():
+    conversation_ids = flask.request.form.getlist('selected_conversations[]')
+    for conversation_id in conversation_ids:
+        conversation = Conversation.query.filter_by(client_no=session['client_no'],id=conversation_id).first()
+        db.session.delete(conversation)
+        db.session.commit()
+    return jsonify(status='success'),201
+
+
+@app.route('/blasts/delete',methods=['GET','POST'])
+def delete_blasts():
+    blast_ids = flask.request.form.getlist('selected_blasts[]')
+    for blast_id in blast_ids:
+        blast = Batch.query.filter_by(client_no=session['client_no'],id=blast_id).first()
+        db.session.delete(blast)
+        db.session.commit()
+    return jsonify(status='success'),201
+
+
+@app.route('/reminders/delete',methods=['GET','POST'])
+def delete_reminders():
+    reminder_ids = flask.request.form.getlist('selected_reminders[]')
+    for reminder_id in reminder_ids:
+        reminder_batch = ReminderBatch.query.filter_by(client_no=session['client_no'],id=reminder_id).first()
+        db.session.delete(reminder_batch)
+        db.session.commit()
+    return jsonify(status='success'),201
+
+
+@app.route('/contacts/delete',methods=['GET','POST'])
+def delete_contacts():
+    contact_ids = flask.request.form.getlist('selected_contacts[]')
+    for contact_id in contact_ids:
+        contact = Contact.query.filter_by(client_no=session['client_no'],id=contact_id).first()
+        db.session.delete(contact)
+        db.session.commit()
+    return jsonify(status='success'),201
+
+
+@app.route('/groups/delete',methods=['GET','POST'])
+def delete_groups():
+    group_ids = flask.request.form.getlist('selected_groups[]')
+    for group_id in group_ids:
+        group = Group.query.filter_by(client_no=session['client_no'],id=group_id).first()
+        db.session.delete(group)
+        db.session.commit()
+    return jsonify(status='success'),201
+
+
 @app.route('/db/rebuild',methods=['GET','POST'])
 def rebuild_database():
     db.drop_all()
@@ -1434,11 +1567,21 @@ def rebuild_database():
         created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
         )
 
+    admin2 = AdminUser(
+        client_no='at-ic2017',
+        email='ballesteros.alan@gmail.com',
+        password='password',
+        name='Test Admin',
+        join_date=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f'),
+        added_by_name='Super Admin',
+        created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
+        )
+
     contact = Contact(
         client_no='at-ic2017',
         contact_type='Customer',
-        name='ABAC, AILYN-AGN',
-        msisdn='09994282203',
+        name='Alan Ballesteros',
+        msisdn='09183516001',
         added_by=1,
         added_by_name='Super Admin',
         join_date='November 14, 2017',
@@ -1447,44 +1590,44 @@ def rebuild_database():
 
     conversations = Conversation(
         client_no='at-ic2017',
-        contact_name='ABAC, AILYN-AGN'.title(),
-        msisdn='09994282203',
-        display_name='ABAC, AILYN-AGN'.title(),
-        status='read',
-        latest_content='This is a sample message.',
+        contact_name='Alan Ballesteros'.title(),
+        msisdn='09183516001',
+        display_name='Alan Ballesteros'.title(),
+        status='unread',
+        latest_content='This is a sample incoming message. You can try to reply to it',
         latest_date='November 14, 2017',
         latest_time='11:36 AM',
         created_at='2017-11-14 11:36:49:270418',
         )
 
-    conversations1 = Conversation(
-        client_no='at-ic2017',
-        msisdn='09176214704',
-        display_name='09176214704',
-        status='unread',
-        latest_content='This is another sample message.',
-        latest_date='November 13, 2017',
-        latest_time='12:23 PM',
-        created_at='2017-11-13 12:23:49:270418',
-        )
+    # conversations1 = Conversation(
+    #     client_no='at-ic2017',
+    #     msisdn='09176214704',
+    #     display_name='09176214704',
+    #     status='unread',
+    #     latest_content='This is another sample message.',
+    #     latest_date='November 13, 2017',
+    #     latest_time='12:23 PM',
+    #     created_at='2017-11-13 12:23:49:270418',
+    #     )
 
     message = ConversationItem(
         conversation_id=1,
         message_type='inbound',
         date='November 14, 2017',
         time='11:30 AM',
-        content='This is a sample message.',
+        content='This is a sample incoming message. You can try to reply to it.',
         created_at='2017-11-14 11:30:49:270418'
         )
 
-    message2 = ConversationItem(
-        conversation_id=2,
-        message_type='inbound',
-        date='November 13, 2017',
-        time='12:10 PM',
-        content='This is another sample message.',
-        created_at='2017-11-13 12:10:49:270418'
-        )
+    # message2 = ConversationItem(
+    #     conversation_id=2,
+    #     message_type='inbound',
+    #     date='November 13, 2017',
+    #     time='12:10 PM',
+    #     content='This is another sample message.',
+    #     created_at='2017-11-13 12:10:49:270418'
+    #     )
 
     blast = Batch(
         client_no='at-ic2017',
@@ -1579,43 +1722,43 @@ def rebuild_database():
         created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
         )
 
-    contact = Contact(
-        client_no='at-ic2017',
-        contact_type='Customer',
-        name='ABAC, AILYN-AGN'.title(),
-        msisdn='09994282203',
-        added_by=1,
-        added_by_name='Super Admin',
-        join_date='November 10, 2017',
-        created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
-        )
+    # contact = Contact(
+    #     client_no='at-ic2017',
+    #     contact_type='Customer',
+    #     name='ABAC, AILYN-AGN'.title(),
+    #     msisdn='09994282203',
+    #     added_by=1,
+    #     added_by_name='Super Admin',
+    #     join_date='November 10, 2017',
+    #     created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
+    #     )
 
-    contact1 = Contact(
-        client_no='at-ic2017',
-        contact_type='Customer',
-        name='ABAD, LANDELINA ORCIGA-ANB'.title(),
-        msisdn='09183132539',
-        added_by=1,
-        added_by_name='Super Admin',
-        join_date='November 10, 2017',
-        created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
-        )
+    # contact1 = Contact(
+    #     client_no='at-ic2017',
+    #     contact_type='Customer',
+    #     name='ABAD, LANDELINA ORCIGA-ANB'.title(),
+    #     msisdn='09183132539',
+    #     added_by=1,
+    #     added_by_name='Super Admin',
+    #     join_date='November 10, 2017',
+    #     created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
+    #     )
 
-    contact2 = Contact(
-        client_no='at-ic2017',
-        contact_type='Customer',
-        name='ABAD, NELSON M.-JNC'.title(),
-        msisdn='09071755339',
-        added_by=1,
-        added_by_name='Super Admin',
-        join_date='November 10, 2017',
-        created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
-        )
+    # contact2 = Contact(
+    #     client_no='at-ic2017',
+    #     contact_type='Customer',
+    #     name='ABAD, NELSON M.-JNC'.title(),
+    #     msisdn='09071755339',
+    #     added_by=1,
+    #     added_by_name='Super Admin',
+    #     join_date='November 10, 2017',
+    #     created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
+    #     )
 
     new_group = Group(
         client_no='at-ic2017',
         name='AGN',
-        size=1,
+        size=0,
         created_by_id=1,
         created_by_name='Super Admin',
         created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
@@ -1624,7 +1767,7 @@ def rebuild_database():
     new_group1 = Group(
         client_no='at-ic2017',
         name='ANB',
-        size=1,
+        size=0,
         created_by_id=1,
         created_by_name='Super Admin',
         created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
@@ -1633,48 +1776,49 @@ def rebuild_database():
     new_group2 = Group(
         client_no='at-ic2017',
         name='JNC',
-        size=1,
+        size=0,
         created_by_id=1,
         created_by_name='Super Admin',
         created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
         )
 
-    contact_group = ContactGroup(
-        group_id=1,
-        contact_id=1
-        )
+    # contact_group = ContactGroup(
+    #     group_id=1,
+    #     contact_id=1
+    #     )
 
-    contact_group1 = ContactGroup(
-        group_id=2,
-        contact_id=2
-        )
+    # contact_group1 = ContactGroup(
+    #     group_id=2,
+    #     contact_id=2
+    #     )
 
-    contact_group2 = ContactGroup(
-        group_id=3,
-        contact_id=3
-        )
+    # contact_group2 = ContactGroup(
+    #     group_id=3,
+    #     contact_id=3
+    #     )
     
     db.session.add(client)
     db.session.add(client1)
     db.session.add(admin)
     db.session.add(admin1)
+    db.session.add(admin2)
     db.session.add(contact)
     db.session.add(conversations)
-    db.session.add(conversations1)
+    # db.session.add(conversations1)
     db.session.add(message)
-    db.session.add(message2)
+    # db.session.add(message2)
 
     db.session.add(blast)
     db.session.add(reminder)
     db.session.add(contact)
-    db.session.add(contact1)
-    db.session.add(contact2)
+    # db.session.add(contact1)
+    # db.session.add(contact2)
     db.session.add(new_group)
     db.session.add(new_group1)
     db.session.add(new_group2)
-    db.session.add(contact_group)
-    db.session.add(contact_group1)
-    db.session.add(contact_group2)
+    # db.session.add(contact_group)
+    # db.session.add(contact_group1)
+    # db.session.add(contact_group2)
 
     db.session.add(blast_message)
     db.session.add(blast_message1)

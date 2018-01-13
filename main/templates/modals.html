@@ -50,7 +50,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-danger modal-btn" data-dismiss="modal">Close</button>
-                <button id="saveGroupBtn" type="button" class="btn btn-primary modal-btn" onclick="save_group()">Save</button>
+                <button id="saveGroupBtn" type="button" class="btn btn-primary modal-btn" onclick="save_group_change()">Save</button>
             </div>
         </div><!-- /.modal-content -->
     </div><!-- /.modal-dialog -->
@@ -281,8 +281,116 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-danger modal-btn" data-dismiss="modal">Close</button>
-                <button id="addContactBtn" type="button" class="btn btn-primary modal-btn" onclick="add_contact()">Save</button>
+                <button id="addContactBtn" type="button" class="btn btn-primary modal-btn" onclick="add_contact()" data-loading-text="Saving.." data-complete-text="Save">Save</button>
             </div>
         </div><!-- /.modal-content -->
     </div><!-- /.modal-dialog -->
 </div>
+
+
+
+<!-- START OF DELETE ENTRIES -->
+
+<div class="modal fade confirm-delete-modal" id="deleteConversationsModal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="gridSystemModalLabel">Confirm Delete</h4>
+            </div>
+            <div class="modal-body">
+                <span class="confirm-delete-message">Are you sure you want to delete selected item/s?</span>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger modal-btn" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary modal-btn" onclick="delete_conversations()" data-loading-text="Preparing.." data-complete-text="Delete">Delete</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>
+
+<div class="modal fade confirm-delete-modal" id="deleteBlastsModal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="gridSystemModalLabel">Confirm Delete</h4>
+            </div>
+            <div class="modal-body">
+                <span class="confirm-delete-message">Are you sure you want to delete selected item/s?</span>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger modal-btn" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary modal-btn" onclick="delete_blasts()" data-loading-text="Preparing.." data-complete-text="Delete">Delete</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>
+
+<div class="modal fade confirm-delete-modal" id="deleteRemindersModal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="gridSystemModalLabel">Confirm Delete</h4>
+            </div>
+            <div class="modal-body">
+                <span class="confirm-delete-message">Are you sure you want to delete selected item/s?</span>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger modal-btn" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary modal-btn" onclick="delete_reminders()" data-loading-text="Preparing.." data-complete-text="Delete">Delete</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>
+
+<div class="modal fade confirm-delete-modal" id="deleteContactsModal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="gridSystemModalLabel">Confirm Delete</h4>
+            </div>
+            <div class="modal-body">
+                <span class="confirm-delete-message">Are you sure you want to delete selected item/s?</span>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger modal-btn" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary modal-btn" onclick="delete_contacts()" data-loading-text="Preparing.." data-complete-text="Delete">Delete</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>
+
+<div class="modal fade confirm-delete-modal" id="deleteGroupsModal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="gridSystemModalLabel">Confirm Delete</h4>
+            </div>
+            <div class="modal-body">
+                <span class="confirm-delete-message">Are you sure you want to delete selected item/s?</span>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger modal-btn" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary modal-btn" onclick="delete_groups()" data-loading-text="Preparing.." data-complete-text="Delete">Delete</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>
+
+<div class="modal fade confirm-delete-modal" id="deleteMemberModal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="gridSystemModalLabel">Confirm Delete</h4>
+            </div>
+            <div class="modal-body">
+                <span class="confirm-delete-message">Are you sure you want to remove this member from the group?</span>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger modal-btn" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary modal-btn" onclick="delete_group_member()" data-loading-text="Preparing.." data-complete-text="Delete">Remove</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>
+
+<!-- END OF DELETE ENTRIES -->

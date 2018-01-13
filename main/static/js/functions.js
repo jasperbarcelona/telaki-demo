@@ -75,6 +75,18 @@ function show_groups(slice_from) {
     });
 }
 
+function show_users(slice_from) {
+  alert('This feature will be available on paid version.');
+}
+
+function show_usage(slice_from) {
+  alert('This feature will be available on paid version.');
+}
+
+function user_profile() {
+  alert('This feature will be available on paid version.');
+}
+
 /* END OF NAVIGATION */
 
 /* START OF PAGINATION */
@@ -405,6 +417,10 @@ function save_contact() {
       $('#saveContactBtn').button('complete');
       $('#saveContactModal').modal('hide');
       $('.content').html(data);
+      $('#saveContactModal .form-control').val('');
+      $('#saveContactModal .contact-type-picker').removeClass('selected');
+      $('#saveContactModal .group-picker').removeClass('selected');
+      $('#saveContactModal .form-control').change();
     });
 }
 
@@ -441,7 +457,10 @@ function add_contact() {
       $('#addContactModal').modal('hide');
       $('.content').html(data);
       $('#addContactBtn').button('complete');
-      $('#addContactBtn').attr('disabled', true);
+      $('#addContactModal .form-control').val('');
+      $('#addContactModal .contact-type-picker').removeClass('selected');
+      $('#addContactModal .group-picker').removeClass('selected');
+      $('#addContactModal .form-control').change();
     });
 }
 
@@ -519,6 +538,38 @@ function open_group(group_id) {
     });
 }
 
+function save_group_change() {
+  var group_name = $('#editGroupName').val();
+  $.post('/group/edit',
+    {
+      group_name:group_name
+    },
+    function(data){
+      show_groups('continue')
+      $('#groupMembersModal').modal('hide');
+    });
+}
+
+function delete_group_member() {
+  $.post('/group/members/delete',
+  function(data){
+    $('#groupMembersModal .modal-body').html(data);
+    $('#groupMembersModal .form-control').change();
+    $('#deleteMemberModal').modal('hide');
+  });
+}
+
+function get_delete_member(member_id, group_id) {
+  $.post('/group/members/delete/get',
+  {
+    member_id:member_id,
+    group_id:group_id
+  },
+  function(data){
+    $('#deleteMemberModal').modal('show');
+  });
+}
+
 function send_reply() {
   $('#sendReplyBtn').button('loading');
   var content = $('#conversationReply').val();
@@ -569,6 +620,7 @@ function initialize_recipients() {
   individual_recipients = [];
   group_recipients_name = [];
   individual_recipients_name = [];
+  special = undefined;
   total_recipients = 0;
   $('.recipient-group').removeClass('selected');
   $('.recipient-contact').removeClass('selected');
@@ -780,13 +832,13 @@ function remove_group_recipient(id,size,name) {
 
 function save_recipients() {
   if ($('#everyoneRecipient').hasClass('selected')) {
-    var special = 'Everyone';
+    special = 'Everyone';
   }
   else if ($('#customersRecipient').hasClass('selected')) {
-    var special = 'All Customers';
+    special = 'All Customers';
   }
   else if ($('#staffRecipient').hasClass('selected')) {
-    var special = 'All Staff';
+    special = 'All Staff';
   }
   $.post('/recipients/add',
     {
@@ -810,13 +862,21 @@ function send_text_blast() {
       group_recipients:group_recipients,
       individual_recipients_name:individual_recipients_name,
       group_recipients_name:group_recipients_name,
-      total_recipients:total_recipients
+      total_recipients:total_recipients,
+      special:special
     },
     function(data){
       $('#sendMessageBtn').button('complete');
       $('#messageContainer').hide();
       $('#messageBody').val('');
       initialize_recipients();
+      $('.active-recipient').remove()
+      $('.recipient-group').removeClass('selected');
+      $('.recipient-contact').removeClass('selected');
+      $('.recipient-group').removeClass('disabled');
+      $('.recipient-contact').removeClass('disabled');
+      $('#recipientCount').html('('+total_recipients+')');
+
       $('#blastOverlay .blast-overlay-body').html(data['template']);
       $('#blastOverlay').removeClass('hidden');
       $('body').css('overflow-y','hidden');
@@ -1069,6 +1129,13 @@ function check_upload_progress() {
           refresh_reminder_progress(data['batch_id']);
         }
       }
+      else if (data['in_progress'] == 'contact') {
+        $('#blastOverlay .blast-overlay-body').html(data['template']);
+        $('#blastOverlay').removeClass('hidden');
+        if (data['pending'] != 0) {
+          refresh_contacts_progress(data['batch_id']);
+        }
+      }
     });
 }
 
@@ -1285,53 +1352,160 @@ function search_groups(active_text) {
 
 function select_conversation(entry_id) {
   selected_conversations.push(entry_id);
+  if (selected_conversations.length != 0) {
+    $('#deleteConversationsBtn').removeClass('hidden');
+  }
+  else {
+    $('#deleteConversationsBtn').addClass('hidden');
+  }
 }
 
 function deselect_conversation(entry_id) {
   var entry_index = selected_conversations.indexOf(entry_id);
   selected_conversations.splice(entry_index, 1);
+  if (selected_conversations.length != 0) {
+    $('#deleteConversationsBtn').removeClass('hidden');
+  }
+  else {
+    $('#deleteConversationsBtn').addClass('hidden');
+  }
 }
 
 function select_blast(entry_id) {
   selected_blasts.push(entry_id);
-  alert(selected_blasts);
+  if (selected_blasts.length != 0) {
+    $('#deleteBlastsBtn').removeClass('hidden');
+  }
+  else {
+    $('#deleteBlastsBtn').addClass('hidden');
+  }
 }
 
 function deselect_blast(entry_id) {
   var entry_index = selected_blasts.indexOf(entry_id);
   selected_blasts.splice(entry_index, 1);
-  alert(selected_blasts);
+  if (selected_blasts.length != 0) {
+    $('#deleteBlastsBtn').removeClass('hidden');
+  }
+  else {
+    $('#deleteBlastsBtn').addClass('hidden');
+  }
 }
 
 function select_reminder(entry_id) {
   selected_reminders.push(entry_id);
-  alert(selected_reminders);
+  if (selected_reminders.length != 0) {
+    $('#deleteRemindersBtn').removeClass('hidden');
+  }
+  else {
+    $('#deleteRemindersBtn').addClass('hidden');
+  }
 }
 
 function deselect_reminder(entry_id) {
   var entry_index = selected_reminders.indexOf(entry_id);
   selected_reminders.splice(entry_index, 1);
-  alert(selected_reminders);
+  if (selected_reminders.length != 0) {
+    $('#deleteRemindersBtn').removeClass('hidden');
+  }
+  else {
+    $('#deleteRemindersBtn').addClass('hidden');
+  }
 }
 
 function select_contact(entry_id) {
   selected_contacts.push(entry_id);
-  alert(selected_contacts);
+  if (selected_contacts.length != 0) {
+    $('#deleteContactsBtn').removeClass('hidden');
+  }
+  else {
+    $('#deleteContactsBtn').addClass('hidden');
+  }
 }
 
 function deselect_contact(entry_id) {
   var entry_index = selected_contacts.indexOf(entry_id);
   selected_contacts.splice(entry_index, 1);
-  alert(selected_contacts);
+  if (selected_contacts.length != 0) {
+    $('#deleteContactsBtn').removeClass('hidden');
+  }
+  else {
+    $('#deleteContactsBtn').addClass('hidden');
+  }
 }
 
 function select_group(entry_id) {
   selected_groups.push(entry_id);
-  alert(selected_groups);
+  if (selected_groups.length != 0) {
+    $('#deleteGroupsBtn').removeClass('hidden');
+  }
+  else {
+    $('#deleteGroupsBtn').addClass('hidden');
+  }
 }
 
 function deselect_group(entry_id) {
   var entry_index = selected_groups.indexOf(entry_id);
   selected_groups.splice(entry_index, 1);
-  alert(selected_groups);
+  if (selected_groups.length != 0) {
+    $('#deleteGroupsBtn').removeClass('hidden');
+  }
+  else {
+    $('#deleteGroupsBtn').addClass('hidden');
+  }
+}
+
+function delete_conversations() {
+  $.post('/conversations/delete',
+  {
+    selected_conversations:selected_conversations
+  },
+  function(data){
+    show_conversations('continue');
+    $('#deleteConversationsModal').modal('hide');
+  });
+}
+
+function delete_blasts() {
+  $.post('/blasts/delete',
+  {
+    selected_blasts:selected_blasts
+  },
+  function(data){
+    show_blasts('continue');
+    $('#deleteBlastsModal').modal('hide');
+  });
+}
+
+function delete_reminders() {
+  $.post('/reminders/delete',
+  {
+    selected_reminders:selected_reminders
+  },
+  function(data){
+    show_payment_reminders('continue');
+    $('#deleteRemindersModal').modal('hide');
+  });
+}
+
+function delete_contacts() {
+  $.post('/contacts/delete',
+  {
+    selected_contacts:selected_contacts
+  },
+  function(data){
+    show_contacts('continue');
+    $('#deleteContactsModal').modal('hide');
+  });
+}
+
+function delete_groups() {
+  $.post('/groups/delete',
+  {
+    selected_groups:selected_groups
+  },
+  function(data){
+    show_groups('continue');
+    $('#deleteGroupsModal').modal('hide');
+  });
 }

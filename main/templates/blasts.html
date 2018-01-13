@@ -2,6 +2,7 @@
 	<div class="content-right-btn-container">
 		<button class="btn control-btn"><i class="material-icons">&#xE5D5;</i></button>
 		<button id="addBlastBtn" class="btn control-btn"><i class="material-icons md-30">add</i></button>
+		<button id="deleteBlastsBtn" data-toggle="modal" data-target="#deleteBlastsModal" class="btn control-btn hidden"><i class="material-icons">&#xE872;</i></button>
 		<div class="pagination-btn-container">
 			<div class="pagination-label-container">
 				<span class="pagination-label"><strong id="paginationShowingBlasts">{{ showing }}</strong></span>
@@ -89,6 +90,5 @@ $('.blasts-check').on('click', function () {
     select_blast(entry_id);
   }
 });
-
 
 </script>

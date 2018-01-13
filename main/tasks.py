@@ -81,22 +81,22 @@ def upload_contacts(batch_id,client_no,user_id,user_name):
         contact = Contact.query.filter_by(msisdn='0%s'%str(vals[0])[-10:]).first()
         group = Group.query.filter_by(name=vals[2]).first()
         if contact or contact != None:
-            contact.name = vals[1].title()
+            db.session.delete(contact)
             db.session.commit()
-        else:
-            contact = Contact(
-                batch_id=batch.id,
-                client_no=client_no,
-                contact_type='Customer',
-                name=vals[1].title(),
-                msisdn='0%s'%str(vals[0])[-10:],
-                added_by=user_id,
-                added_by_name=user_name,
-                join_date=datetime.datetime.now().strftime('%B %d, %Y'),
-                created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
-                )
-            db.session.add(contact)
-            db.session.commit()
+
+        contact = Contact(
+            batch_id=batch.id,
+            client_no=client_no,
+            contact_type='Customer',
+            name=vals[1].title(),
+            msisdn='0%s'%str(vals[0])[-10:],
+            added_by=user_id,
+            added_by_name=user_name,
+            join_date=datetime.datetime.now().strftime('%B %d, %Y'),
+            created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
+            )
+        db.session.add(contact)
+        db.session.commit()
 
         conversation = Conversation.query.filter_by(msisdn=contact.msisdn).first()
         if conversation or conversation != None:
