@@ -1121,7 +1121,9 @@ a,a:hover,a:active,a:focus {
 }
 
 .recipient-group-search-container,
-.recipient-individual-search-container {
+.recipient-individual-search-container,
+.recipient-number-search-container {
+	position: relative;
 	height: 50px;
 	border-bottom: 1px solid #ddd;
 	display: -webkit-flex;
@@ -1135,7 +1137,8 @@ a,a:hover,a:active,a:focus {
 }
 
 .recipient-group-search-container > .form-control,
-.recipient-individual-search-container > .form-control {
+.recipient-individual-search-container > .form-control,
+.recipient-number-search-container > .form-control {
 	border: none;
 	box-shadow: none;
 }
@@ -1452,7 +1455,8 @@ a,a:hover,a:active,a:focus {
 }
 
 #recipientGroupContainer,
-#recipientContactContainer {
+#recipientContactContainer,
+#recipientNumberContainer {
 	position: relative;
 	height: calc(100% - 50px);
 }
@@ -1479,4 +1483,43 @@ a,a:hover,a:active,a:focus {
 	background-color: #eee !important;
 	color: grey !important;
 	pointer-events: none !important;
+}
+
+.add-number-recipient-container {
+	position: absolute;
+	top: 0;
+	right: 10px;
+	height: 100%;
+	width: 50px;
+	display: -webkit-flex;
+	display: flex;
+	-webkit-flex-direction: column;
+	flex-direction: column;
+	-webkit-align-items: center;
+	align-items: center;
+	-webkit-justify-content: center;
+	justify-content: center;
+}
+
+#addNumberRecipientBtn {
+	height: 30px;
+	padding-top: 0;
+	padding-bottom: 0;
+	display: -webkit-flex;
+	display: flex;
+	-webkit-flex-direction: column;
+	flex-direction: column;
+	-webkit-align-items: center;
+	align-items: center;
+	-webkit-justify-content: center;
+	justify-content: center;
+}
+
+#addNumberRecipientBtn:hover,
+#addNumberRecipientBtn:focus,
+#addNumberRecipientBtn:active {
+	color: #fff;
+  	background-color: #c9302c;
+  	border: none !important;
+  	outline: none !important;
 }

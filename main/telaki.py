@@ -172,6 +172,11 @@ def index():
     if not session:
         return redirect('/login')
     session['conversation_limit'] = 50
+    session['group_recipients'] = []
+    session['individual_recipients'] = []
+    session['group_recipients_name'] = []
+    session['individual_recipients_name'] = []
+    session['number_recipients'] = []
     total_entries = Conversation.query.filter_by(client_no=session['client_no']).count()
     conversations = Conversation.query.filter_by(client_no=session['client_no']).order_by(Conversation.created_at.desc()).slice(session['conversation_limit'] - 50, session['conversation_limit'])
     groups = Group.query.filter_by(client_no=session['client_no']).order_by(Group.name)
@@ -1207,14 +1212,32 @@ def delete_members():
 @app.route('/recipients/add', methods=['GET', 'POST'])
 def add_recipients():
     special = flask.request.form.get('special')
-    individual_recipients_name = flask.request.form.getlist('individual_recipients_name[]')
-    group_recipients_name = flask.request.form.getlist('group_recipients_name[]')
+    group_recipients_name = []
+    individual_recipients_name = []
+    number_recipients = []
+    for group_recipient in session['group_recipients']:
+        group = Group.query.filter_by(client_no=session['client_no'],id=group_recipient).first()
+        group_recipients_name.append(group.name)
+    for individual_recipient in session['individual_recipients']:
+        contact = Contact.query.filter_by(client_no=session['client_no'],id=individual_recipient).first()
+        individual_recipients_name.append(contact.name)
+    for number_recipient in session['number_recipients']:
+        number_recipients.append(number_recipient)
     return flask.render_template(
         'recipients.html',
         special=special,
         individual_recipients=individual_recipients_name,
         group_recipients=group_recipients_name,
+        number_recipients=number_recipients
         )
+
+
+@app.route('/recipients/clear', methods=['GET', 'POST'])
+def clear_recipients():
+    session['group_recipients'] = []
+    session['individual_recipients'] = []
+    session['number_recipients'] = []
+    return '',200
 
 
 @app.route('/blast/send', methods=['GET', 'POST'])
@@ -1520,6 +1543,34 @@ def delete_groups():
         db.session.delete(group)
         db.session.commit()
     return jsonify(status='success'),201
+
+
+@app.route('/recipients/number/add',methods=['GET','POST'])
+def add_number_recipient():
+    recipient = flask.request.form.get('recipient')
+    session['number_recipients'].append(recipient)
+    return flask.render_template('number_recipients.html',recipient=recipient)
+
+
+@app.route('/recipients/group/add',methods=['GET','POST'])
+def add_group_recipient():
+    recipient_id = flask.request.form.get('recipient_id')
+    session['group_recipients'].append(recipient_id)
+    group = Group.query.filter_by(client_no=session['client_no'],id=recipient_id).first()
+    return jsonify(
+        size = group.size,
+        template = flask.render_template('group_recipients.html', group=group)
+        )
+
+
+@app.route('/recipients/individual/add',methods=['GET','POST'])
+def add_individual_recipient():
+    recipient_id = flask.request.form.get('recipient_id')
+    session['individual_recipients'].append(recipient_id)
+    recipient = Contact.query.filter_by(client_no=session['client_no'],id=recipient_id).first()
+    return jsonify(
+        template = flask.render_template('individual_recipients.html', recipient=recipient)
+        )
 
 
 @app.route('/db/rebuild',methods=['GET','POST'])

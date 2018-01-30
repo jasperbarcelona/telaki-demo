@@ -95,6 +95,9 @@
                             <li>
                                 <a href="#individualContactTab" class="tab-item" data-toggle="tab">Individual</a>
                             </li>
+                            <li>
+                                <a href="#numberContactTab" class="tab-item" data-toggle="tab">Number</a>
+                            </li>
                         </ul>
                     </div>
                     <div class="tab-content recipient-tab-content">
@@ -169,6 +172,17 @@
                                     </div>
                                 </div>
                                 {% endfor %}
+                            </div>
+                        </div>
+                        <div class="tab-pane recipient-tab-pane" id="numberContactTab">
+                            <div class="recipient-number-search-container">
+                                <input type="text" id="addNumberRecipient" class="form-control" placeholder="Type number here">
+                                <div class="add-number-recipient-container">
+                                    <button type="button" id="addNumberRecipientBtn" class="btn btn-danger" onclick="add_number_recipient()" disabled>Add</button>
+                                </div>
+                            </div>
+                            <div id="recipientNumberContainer">
+                               
                             </div>
                         </div>
                     </div>

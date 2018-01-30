@@ -138,6 +138,15 @@ $('.search-conversations').keypress(function(e){
     }
 });
 
+$('#addNumberRecipient').keyup(function(e){
+  if (($(this).val() != '') && ($(this).val().length == 11) && (!isNaN($(this).val()))) {
+    $('#addNumberRecipientBtn').attr('disabled',false);
+  }
+  else {
+    $('#addNumberRecipientBtn').attr('disabled',true);
+  }
+});
+
 $('#searchContactGroups').keypress(function(e){
     if (e.which == 13) {
       search_contact_groups();

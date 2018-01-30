@@ -16,4 +16,9 @@
 	<span class="saved-recipient-name individual">{{ contact }}</span>
 </div>
 {% endfor %}
+{% for number in number_recipients %}
+<div class="saved-recipient-container">
+	<span class="saved-recipient-name individual">{{ number }}</span>
+</div>
+{% endfor %}
 {% endif %}

@@ -616,35 +616,38 @@ function initialize_selected_entries() {
 }
 
 function initialize_recipients() {
-  group_recipients = [];
-  individual_recipients = [];
-  group_recipients_name = [];
-  individual_recipients_name = [];
   special = undefined;
   total_recipients = 0;
+  $('.no-recipient').show();
+  $('#recipientCount').html('('+total_recipients+')');
   $('.recipient-group').removeClass('selected');
   $('.recipient-contact').removeClass('selected');
   $('#recipientContainer').html('<span class="empty-recipient-label">Recipients</span>');
   $('.add-recipient-right-body').html('<div class="no-recipient"><span>Empty</span></div>');
 }
 
-function add_recipient(id,name,size) {
-  $('#'+id+'.recipient-group').toggleClass('selected');
-  if ($('#'+id+'.recipient-group').hasClass('selected')) {
-    group_recipients.push(id);
-    group_recipients_name.push(name);
-    total_recipients += parseInt(size);
-    $('.add-recipient-right-body').append("<div id='"+id+"' class='active-recipient group'><span class='active-recipient-name'>"+name+" ("+size+")</span><div class='remove-recipient-container'><span class='remove-recipient' onclick='remove_group_recipient("+id+","+size+","+name+")'><i class='material-icons remove-recipient-icon'>&#xE5CD;</i></span></div></div>");
+function add_recipient(recipient_id) {
+  $('#'+recipient_id+'.recipient-group').toggleClass('selected');
+  if ($('#'+recipient_id+'.recipient-group').hasClass('selected')) {
+    $.post('/recipients/group/add',
+    {
+      recipient_id:recipient_id
+    },
+    function(data){
+      $('.add-recipient-right-body').append(data['template']);
+      total_recipients += parseInt(data['size']);
+      $('#recipientCount').html('('+total_recipients+')');
+      if (total_recipients == 0) {
+        $('.no-recipient').show();
+      }
+      else {
+        $('.no-recipient').hide();
+      }
+    });
   }
+
   else {
-    remove_group_recipient(id,size,name);
-  }
-  $('#recipientCount').html('('+total_recipients+')');
-  if ((group_recipients.length == 0) && (individual_recipients.length == 0)) {
-    $('.no-recipient').show();
-  }
-  else {
-    $('.no-recipient').hide();
+    remove_group_recipient(recipient_id);
   }
 }
 
@@ -774,24 +777,29 @@ function remove_staff_recipient(size) {
   }
 }
 
-function add_individual_recipient(id,name) {
-  $('#'+id+'.recipient-contact').toggleClass('selected');
-  if ($('#'+id+'.recipient-contact').hasClass('selected')) {
-    individual_recipients.push(id);
-    individual_recipients_name.push(name);
-    total_recipients += 1;
-    $('.add-recipient-right-body').append("<div id='"+id+"' class='active-recipient individual'><span class='active-recipient-name'>"+name+"</span><div class='remove-recipient-container'><span class='remove-recipient' onclick='remove_individual_recipient("+id+","+name+")'><i class='material-icons remove-recipient-icon'>&#xE5CD;</i></span></div></div>")
+function add_individual_recipient(recipient_id) {
+  $('#'+recipient_id+'.recipient-contact').toggleClass('selected');
+  if ($('#'+recipient_id+'.recipient-contact').hasClass('selected')) {
+   $.post('/recipients/individual/add',
+    {
+      recipient_id:recipient_id
+    },
+    function(data){
+      $('.add-recipient-right-body').append(data['template']);
+      total_recipients += 1;
+      $('#recipientCount').html('('+total_recipients+')');
+      if (total_recipients == 0) {
+        $('.no-recipient').show();
+      }
+      else {
+        $('.no-recipient').hide();
+      }
+    });
   }
   else {
-    return remove_individual_recipient(id,name);
+    return remove_individual_recipient(recipient_id);
   }
-  $('#recipientCount').html('('+total_recipients+')');
-  if ((group_recipients.length == 0) && (individual_recipients.length == 0)) {
-    $('.no-recipient').show();
-  }
-  else {
-    $('.no-recipient').hide();
-  }
+  
 }
 
 function remove_individual_recipient(id,name) {
@@ -840,10 +848,11 @@ function save_recipients() {
   else if ($('#staffRecipient').hasClass('selected')) {
     special = 'All Staff';
   }
+  else {
+    special = undefined;
+  }
   $.post('/recipients/add',
     {
-      individual_recipients_name:individual_recipients_name,
-      group_recipients_name:group_recipients_name,
       special:special
     },
     function(data){
@@ -1507,5 +1516,27 @@ function delete_groups() {
   function(data){
     show_groups('continue');
     $('#deleteGroupsModal').modal('hide');
+  });
+}
+
+function add_number_recipient() {
+  recipient = $('#addNumberRecipient').val();
+  $.post('/recipients/number/add',
+  {
+    recipient:recipient
+  },
+  function(data){
+    $('.add-recipient-right-body').append(data);
+    $('#addNumberRecipient').val('');
+    $('#addNumberRecipientBtn').attr('disabled',true);
+    $('.no-recipient').hide();
+  });
+}
+
+function close_message() {
+  initialize_recipients();
+  $.post('/recipients/clear',
+  function(data){
+    $('#recipientContainer').html('<span class="empty-recipient-label">Recipients</span>');
   });
 }
