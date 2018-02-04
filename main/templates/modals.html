@@ -7,14 +7,14 @@
             <div class="modal-body">
                 <span id="groupsLabel" class="input-group-label">Basic Info:</span>
                 <div class="input-text-container">
-                    <input type="text" id="saveContactName" class="form-control floatlabel" data-class="input-label" placeholder="Name">
+                    <input type="text" id="saveContactName" class="form-control floatlabel" onkeyup="validate_save()" data-class="input-label" placeholder="Name">
                 </div>
                 <div class="input-text-container">
                     <input type="text" id="saveContactMsisdn" disabled class="form-control floatlabel" data-class="input-label" placeholder="Mobile Number">
                 </div>
                 <span class="input-group-label">Contact Type:</span>
-                <div class="contact-type-picker customer">Customer</div>
-                <div class="contact-type-picker staff">Staff</div>
+                <div class="contact-type-picker customer" onclick="validate_save()">Customer</div>
+                <div class="contact-type-picker staff" onclick="validate_save()">Staff</div>
                 <span id="groupsLabel" class="input-group-label">Groups:</span>
                 {% if not groups[0] %}
                 <span class="no-groups-label">You don't have any groups.</span>
@@ -29,7 +29,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-danger modal-btn" data-dismiss="modal">Close</button>
-                <button id="saveContactBtn" type="button" class="btn btn-primary modal-btn" data-loading-text="Saving.." data-complete-text="Save" onclick="save_contact()">Save</button>
+                <button id="saveContactBtn" type="button" class="btn btn-primary modal-btn" data-loading-text="Saving.." data-complete-text="Save" onclick="save_contact()" disabled>Save</button>
             </div>
         </div><!-- /.modal-content -->
     </div><!-- /.modal-dialog -->
@@ -42,11 +42,10 @@
                 <h4 class="modal-title" id="gridSystemModalLabel">Group</h4>
             </div>
             <div class="modal-body">
-                <input type="text" id="editGroupName" class="form-control floatlabel" data-class="input-label" placeholder="Group Name">
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-danger modal-btn" data-dismiss="modal">Close</button>
-                <button id="saveGroupBtn" type="button" class="btn btn-primary modal-btn" onclick="save_group_change()">Save</button>
+                <button id="saveGroupEditBtn" type="button" class="btn btn-primary modal-btn" onclick="save_group_change()" disabled>Save</button>
             </div>
         </div><!-- /.modal-content -->
     </div><!-- /.modal-dialog -->
@@ -59,12 +58,12 @@
                 <h4 class="modal-title" id="gridSystemModalLabel">New Group</h4>
             </div>
             <div class="modal-body">
-                <input type="text" id="addGroupName" class="form-control floatlabel" data-class="input-label" placeholder="Group Name">
+                <input type="text" id="addGroupName" onkeyup="validate_group()" class="form-control floatlabel" data-class="input-label" placeholder="Group Name">
                 <span id="createGroupError" class="error-text hidden"></span>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-danger modal-btn" data-dismiss="modal">Close</button>
-                <button id="saveGroupBtn" type="button" class="btn btn-primary modal-btn" onclick="save_group()">Save</button>
+                <button id="saveGroupBtn" type="button" class="btn btn-primary modal-btn" onclick="save_group()" disabled>Save</button>
             </div>
         </div><!-- /.modal-content -->
     </div><!-- /.modal-dialog -->
@@ -283,14 +282,14 @@
             <div class="modal-body">
                 <span id="groupsLabel" class="input-group-label">Basic Info:</span>
                 <div class="input-text-container">
-                    <input type="text" id="addContactName" class="form-control floatlabel" data-class="input-label" placeholder="Name">
+                    <input type="text" id="addContactName" class="form-control floatlabel" data-class="input-label" placeholder="Name" onkeyup="validate_add()">
                 </div>
                 <div class="input-text-container">
-                    <input type="text" id="addContactMsisdn" class="form-control floatlabel" data-class="input-label" placeholder="Mobile Number">
+                    <input type="text" id="addContactMsisdn" class="form-control floatlabel" data-class="input-label" placeholder="Mobile Number" onkeyup="validate_add()">
                 </div>
                 <span class="input-group-label">Contact Type:</span>
-                <div class="contact-type-picker customer add-contact-picker">Customer</div>
-                <div class="contact-type-picker staff add-contact-picker">Staff</div>
+                <div class="contact-type-picker customer add-contact-picker" onclick="validate_add()">Customer</div>
+                <div class="contact-type-picker staff add-contact-picker" onclick="validate_add()">Staff</div>
                 <span id="groupsLabel" class="input-group-label">Groups:</span>
                 {% if not groups[0] %}
                 <span class="no-groups-label">You don't have any groups.</span>
@@ -305,7 +304,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-danger modal-btn" data-dismiss="modal">Close</button>
-                <button id="addContactBtn" type="button" class="btn btn-primary modal-btn" onclick="add_contact()" data-loading-text="Saving.." data-complete-text="Save">Save</button>
+                <button id="addContactBtn" type="button" class="btn btn-primary modal-btn" onclick="add_contact()" data-loading-text="Saving.." data-complete-text="Save" disabled>Save</button>
             </div>
         </div><!-- /.modal-content -->
     </div><!-- /.modal-dialog -->

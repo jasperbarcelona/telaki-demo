@@ -115,6 +115,16 @@ $('#saveContactModal').on('hidden.bs.modal', function () {
     }, 500);
 });
 
+$('#groupMembersModal').on('hidden.bs.modal', function () {
+  $('#saveGroupEditBtn').attr('disabled', true);
+});
+
+$('#createGroupModal').on('hidden.bs.modal', function () {
+  $('#addGroupName').val('');
+  $('#addGroupName').change();
+  $('#saveGroupBtn').attr('disabled', true);
+});
+
 $('#addContactModal').on('hidden.bs.modal', function () {
   $('#addContactModal .form-control').val('');
   $('#addContactModal .form-control').change();

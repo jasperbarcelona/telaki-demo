@@ -779,7 +779,8 @@ def add_group():
                 total_entries=total_entries,
                 prev_btn=prev_btn,
                 next_btn=next_btn,
-            )
+            ),
+        group_template=flask.render_template('add_contact_groups.html',groups=groups)
         )
 
 

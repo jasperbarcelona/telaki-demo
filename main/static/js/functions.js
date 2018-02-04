@@ -1100,6 +1100,7 @@ function save_group() {
         $('#addGroupName').change();
         $('#addGroupError').addClass('hidden');
         $('.content').html(data['template']);
+        $('#addContactModal .contact-group-container').html(data['group_template']);
       }
       else {
         $('#addGroupError').html(data['message']);
@@ -1581,4 +1582,51 @@ function toggle_group_add(group_id) {
 
 function toggle_group_edit(group_id) {
   $('#'+group_id+'.group-picker-edit').toggleClass('selected');
+}
+
+function validate_save() {
+  var name = $('#saveContactName').val();
+  setTimeout(function(){
+    var contact_type = $( ".contact-type-picker.selected" ).html();
+    if ((name != '') && (contact_type != undefined)) {
+       $('#saveContactBtn').attr('disabled', false);
+    }
+    else{
+       $('#saveContactBtn').attr('disabled', true);
+    }
+  }, 0);
+}
+
+function validate_add() {
+  var name = $('#addContactName').val();
+  var msisdn = $('#addContactMsisdn').val();
+  setTimeout(function(){
+    var contact_type = $( ".contact-type-picker.selected" ).html();
+    if ((name != '') && (contact_type != undefined) && (msisdn != '') && (!isNaN(msisdn)) && (msisdn.length == 11)) {
+       $('#addContactBtn').attr('disabled', false);
+    }
+    else{
+       $('#addContactBtn').attr('disabled', true);
+    }
+  }, 0);
+}
+
+function validate_group() {
+  var group_name = $('#addGroupName').val();
+  if (group_name != '') {
+    $('#saveGroupBtn').attr('disabled', false);
+  }
+  else {
+    $('#saveGroupBtn').attr('disabled', true);
+  }
+}
+
+function validate_group_edit() {
+  var group_name = $('#editGroupName').val();
+  if (group_name != '') {
+    $('#saveGroupEditBtn').attr('disabled', false);
+  }
+  else {
+    $('#saveGroupEditBtn').attr('disabled', true);
+  }
 }
