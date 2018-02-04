@@ -1,0 +1,15 @@
+{% for group in groups %}
+{% if group.id in contact_groups %}
+<div id="{{ group.id }}" class="edit-contact-picker group-picker selected">{{ group.name }}</div>
+{% else %}
+<div id="{{ group.id }}" class="edit-contact-picker group-picker">{{ group.name }}</div>
+{% endif %}
+{% endfor %}
+
+<script type="text/javascript">
+	(function() {
+	  $('.group-picker').on('click', function(e){
+	    $(this).toggleClass('selected');
+	  });
+	})();
+</script>

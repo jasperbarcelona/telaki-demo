@@ -736,7 +736,9 @@ a,a:hover,a:active,a:focus {
 	width: 100%;
 }
 
-#createGroupModal {
+#createGroupModal,
+#createGroupModalContact,
+#createGroupModalContactSave {
 	z-index: 9999 !important;
 }
 
@@ -755,6 +757,8 @@ a,a:hover,a:active,a:focus {
 
 #addReminderModal .modal-body,
 #createGroupModal .modal-body,
+#createGroupModalContact .modal-body,
+#createGroupModalContactSave .modal-body,
 #uploadContactsModal .modal-body {
 	background-color: #FFFFFF;
 }
@@ -780,6 +784,8 @@ a,a:hover,a:active,a:focus {
 #editContactModal .form-control,
 #editContactModal .form-control,
 #createGroupModal .form-control,
+#createGroupModalContact .form-control,
+#createGroupModalContactSave .form-control,
 #addContactModal .form-control,
 #addReminderModal .form-control,
 #groupMembersModal .form-control:not(.search-members) {
@@ -803,7 +809,9 @@ a,a:hover,a:active,a:focus {
 	margin-top: 20px;
 }
 
-#createGroupModal .form-control {
+#createGroupModal .form-control,
+#createGroupModalContact .form-control,
+#createGroupModalContactSave .form-control {
 	text-transform: none !important;
 }
 
@@ -829,7 +837,9 @@ a,a:hover,a:active,a:focus {
   	-ms-user-select: none;
 }
 
-.group-picker {
+.group-picker-save,
+.group-picker-edit,
+.group-picker-add {
 	float: left;
 	height: 35px;
 	margin-right: 10px;
@@ -865,7 +875,9 @@ a,a:hover,a:active,a:focus {
 
 .contact-type-picker:not(.selected):hover,
 .edit-contact-type-picker:not(.selected):hover,
-.group-picker:not(.selected):hover,
+.group-picker-save:not(.selected):hover,
+.group-picker-add:not(.selected):hover,
+.group-picker-edit:not(.selected):hover,
 .recipient-group:not(.selected):hover,
 .recipient-contact:not(.selected):hover {
 	background-color: #eee;
@@ -880,7 +892,9 @@ a,a:hover,a:active,a:focus {
 
 .contact-type-picker.selected,
 .edit-contact-type-picker.selected,
-.group-picker.selected {
+.group-picker-save.selected,
+.group-picker-edit.selected,
+.group-picker-add.selected {
 	background-color: #d9534f;
 	color: #FFFFFF;
 	border: 1px solid #d9534f;

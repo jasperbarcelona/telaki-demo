@@ -1,8 +1,17 @@
+{% if special == None and not group_recipients and  not individual_recipients and not number_recipients %}
+<span class="empty-recipient-label">Recipients</span>
+{% else %}
 {% if special != None %}
 
 <div class="saved-recipient-container">
 	<span class="saved-recipient-name group">{{ special }}</span>
 </div>
+
+{% for number in number_recipients %}
+<div class="saved-recipient-container">
+	<span class="saved-recipient-name individual">{{ number }}</span>
+</div>
+{% endfor %}
 
 {% else %}
 
@@ -21,4 +30,5 @@
 	<span class="saved-recipient-name individual">{{ number }}</span>
 </div>
 {% endfor %}
+{% endif %}
 {% endif %}

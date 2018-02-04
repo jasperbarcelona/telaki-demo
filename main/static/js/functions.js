@@ -400,7 +400,7 @@ function save_contact() {
     contact_type = $( ".contact-type-picker.selected" ).html();
   }
 
-  $( ".group-picker.selected" ).each(function( index ) {
+  $( ".group-picker-save.selected" ).each(function( index ) {
     groups.push($(this).attr('id'));
   });
   var name = $('#saveContactName').val();
@@ -440,7 +440,7 @@ function add_contact() {
     contact_type = $( ".contact-type-picker.add-contact-picker.selected" ).html();
   }
 
-  $( ".group-picker.add-contact-picker.selected" ).each(function( index ) {
+  $( ".group-picker-add.selected" ).each(function( index ) {
     groups.push($(this).attr('id'));
   });
   var name = $('#addContactName').val();
@@ -479,7 +479,7 @@ function edit_contact(type) {
   else {
     contact_type = $( ".contact-type-picker.edit-contact-picker.selected" ).html();
   }
-  $( ".group-picker.edit-contact-picker.selected" ).each(function( index ) {
+  $( ".group-picker-edit.selected" ).each(function( index ) {
     groups.push($(this).attr('id'));
   });
   var name = $('#editContactName').val();
@@ -659,22 +659,25 @@ function add_everyone_recipient(size) {
     $('.recipient-group:not(#everyoneRecipient)').removeClass('selected');
     $('.recipient-contact').addClass('disabled');
     $('.recipient-contact').removeClass('selected');
-    $('.active-recipient:not(#everyoneRecipient)').remove();
-    individual_recipients = [];
-    group_recipients = [];
-    individual_recipients_name = [];
-    group_recipients_name = [];
+    $('.active-recipient.group').remove();
+    $('.active-recipient.individual').remove();
     $('.add-recipient-right-body').append("<div id='everyoneRecipient' class='active-recipient group'><span class='active-recipient-name'>Everyone ("+size+")</span><div class='remove-recipient-container'><span class='remove-recipient' onclick='remove_everyone_recipient("+size+")'><i class='material-icons remove-recipient-icon'>&#xE5CD;</i></span></div></div>");
+    $.post('/recipients/special/add',
+    function(data){
+      $('.add-recipient-right-body').append(data['template']);
+      total_recipients = parseInt(data['size']);
+      total_recipients += parseInt(size);
+      $('#recipientCount').html('('+total_recipients+')');
+      if (total_recipients == 0) {
+        $('.no-recipient').show();
+      }
+      else {
+        $('.no-recipient').hide();
+      }
+    });
   }
   else {
     remove_everyone_recipient(size);
-  }
-  $('#recipientCount').html('('+total_recipients+')');
-  if (total_recipients == 0) {
-    $('.no-recipient').show();
-  }
-  else {
-    $('.no-recipient').hide();
   }
 }
 
@@ -802,39 +805,43 @@ function add_individual_recipient(recipient_id) {
   
 }
 
-function remove_individual_recipient(id,name) {
-  var id_index = individual_recipients.indexOf(id);
-  var name_index = individual_recipients.indexOf(name);
-  individual_recipients.splice(id_index, 1);
-  individual_recipients_name.splice(name_index, 1);
-  total_recipients -= 1;
-  $('#'+id+'.active-recipient.individual').remove()
-  $('#'+id+'.recipient-contact').removeClass('selected');
-  $('#recipientCount').html('('+total_recipients+')');
-  if ((group_recipients.length == 0) && (individual_recipients.length == 0)) {
-    $('.no-recipient').show();
-  }
-  else {
-    $('.no-recipient').hide();
-  }
+function remove_individual_recipient(recipient_id) {
+  $('#'+recipient_id+'.recipient-contact').removeClass('selected');
+  $.post('/recipients/individual/remove',
+  {
+    recipient_id:recipient_id
+  },
+  function(data){
+    $('#'+recipient_id+'.active-recipient.individual').remove()
+    total_recipients -= 1;
+    $('#recipientCount').html('('+total_recipients+')');
+    if (total_recipients == 0) {
+      $('.no-recipient').show();
+    }
+    else {
+      $('.no-recipient').hide();
+    }
+  });
   return
 }
 
-function remove_group_recipient(id,size,name) {
-  var id_index = group_recipients.indexOf(id);
-  var name_index = group_recipients.indexOf(name);
-  group_recipients.splice(id_index, 1);
-  group_recipients_name.splice(name_index, 1);
-  total_recipients -= parseInt(size);
-  $('#'+id+'.active-recipient.group').remove()
-  $('#'+id+'.recipient-group').removeClass('selected');
-  $('#recipientCount').html('('+total_recipients+')');
-  if ((group_recipients.length == 0) && (individual_recipients.length == 0)) {
-    $('.no-recipient').show();
-  }
-  else {
-    $('.no-recipient').hide();
-  }
+function remove_group_recipient(recipient_id) {
+  $('#'+recipient_id+'.recipient-group').removeClass('selected');
+  $.post('/recipients/group/remove',
+  {
+    recipient_id:recipient_id
+  },
+  function(data){
+    $('#'+recipient_id+'.active-recipient.group').remove()
+    total_recipients -= parseInt(data['size']);
+    $('#recipientCount').html('('+total_recipients+')');
+    if (total_recipients == 0) {
+      $('.no-recipient').show();
+    }
+    else {
+      $('.no-recipient').hide();
+    }
+  });
   return
 }
 
@@ -867,10 +874,6 @@ function send_text_blast() {
   $.post('/blast/send',
     {
       content:content,
-      individual_recipients:individual_recipients,
-      group_recipients:group_recipients,
-      individual_recipients_name:individual_recipients_name,
-      group_recipients_name:group_recipients_name,
       total_recipients:total_recipients,
       special:special
     },
@@ -1094,7 +1097,13 @@ function save_group() {
       if (data['status'] == 'success') {
         $('#createGroupModal').hide();
         $('#addGroupName').val('');
+        $('#addGroupName').change();
+        $('#addGroupError').addClass('hidden');
         $('.content').html(data['template']);
+      }
+      else {
+        $('#addGroupError').html(data['message']);
+        $('#addGroupError').removeClass('hidden');
       }
     });
 }
@@ -1526,11 +1535,32 @@ function add_number_recipient() {
     recipient:recipient
   },
   function(data){
+    total_recipients += 1;
+    $('#recipientCount').html('('+total_recipients+')');
     $('.add-recipient-right-body').append(data);
     $('#addNumberRecipient').val('');
     $('#addNumberRecipientBtn').attr('disabled',true);
     $('.no-recipient').hide();
   });
+}
+
+function remove_number_recipient(msisdn) {
+  $.post('/recipients/number/remove',
+  {
+    msisdn:msisdn
+  },
+  function(data){
+    $('#'+msisdn+'.active-recipient.number').remove()
+    total_recipients -= 1;
+    $('#recipientCount').html('('+total_recipients+')');
+    if (total_recipients == 0) {
+      $('.no-recipient').show();
+    }
+    else {
+      $('.no-recipient').hide();
+    }
+  });
+  return
 }
 
 function close_message() {
@@ -1539,4 +1569,16 @@ function close_message() {
   function(data){
     $('#recipientContainer').html('<span class="empty-recipient-label">Recipients</span>');
   });
+}
+
+function toggle_group_save(group_id) {
+  $('#'+group_id+'.group-picker-save').toggleClass('selected');
+}
+
+function toggle_group_add(group_id) {
+  $('#'+group_id+'.group-picker-add').toggleClass('selected');
+}
+
+function toggle_group_edit(group_id) {
+  $('#'+group_id+'.group-picker-edit').toggleClass('selected');
 }

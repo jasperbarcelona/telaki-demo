@@ -18,15 +18,11 @@
                 <span id="groupsLabel" class="input-group-label">Groups:</span>
                 {% if not groups[0] %}
                 <span class="no-groups-label">You don't have any groups.</span>
-                <span id="createGroupFromContact" class="link underline" data-toggle="modal" data-target="#createGroupModal">Create Group</span>
                 {% else %}
                 <input type="text" id="searchGroupFromContact" class="form-control" placeholder="Search groups">
-                <div class="add-group-container">
-                    <span id="addGroupFromContact" class="link underline" data-toggle="modal" data-target="#createGroupModal">Add Group</span>
-                </div>
                 <div class="contact-group-container">
                     {% for group in groups %}
-                    <div id="{{ group.id }}" class="group-picker">{{ group.name }}</div>
+                    <div id="{{ group.id }}" class="group-picker-save" onclick="toggle_group_save({{group.id}})">{{ group.name }}</div>
                     {% endfor %}
                 </div>
                 {% endif %}
@@ -43,14 +39,32 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h4 class="modal-title" id="gridSystemModalLabel">New Group</h4>
+                <h4 class="modal-title" id="gridSystemModalLabel">Group</h4>
             </div>
             <div class="modal-body">
-                <input type="text" id="addGroupName" class="form-control floatlabel" data-class="input-label" placeholder="Group Name">
+                <input type="text" id="editGroupName" class="form-control floatlabel" data-class="input-label" placeholder="Group Name">
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-danger modal-btn" data-dismiss="modal">Close</button>
                 <button id="saveGroupBtn" type="button" class="btn btn-primary modal-btn" onclick="save_group_change()">Save</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>
+
+<div class="modal fade" id="createGroupModal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="gridSystemModalLabel">New Group</h4>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="addGroupName" class="form-control floatlabel" data-class="input-label" placeholder="Group Name">
+                <span id="createGroupError" class="error-text hidden"></span>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger modal-btn" data-dismiss="modal">Close</button>
+                <button id="saveGroupBtn" type="button" class="btn btn-primary modal-btn" onclick="save_group()">Save</button>
             </div>
         </div><!-- /.modal-content -->
     </div><!-- /.modal-dialog -->
@@ -280,15 +294,11 @@
                 <span id="groupsLabel" class="input-group-label">Groups:</span>
                 {% if not groups[0] %}
                 <span class="no-groups-label">You don't have any groups.</span>
-                <span id="createGroupFromContact" class="link underline" data-toggle="modal" data-target="#createGroupModal">Create Group</span>
                 {% else %}
                 <input type="text" id="searchGroupFromContact" class="form-control" placeholder="Search groups">
-                <div class="add-group-container">
-                    <span id="addGroupFromContact" class="link underline" data-toggle="modal" data-target="#createGroupModal">Add Group</span>
-                </div>
                 <div class="contact-group-container">
                     {% for group in groups %}
-                    <div id="{{ group.id }}" class="group-picker add-contact-picker add-contact-picker">{{ group.name }}</div>
+                    <div id="{{ group.id }}" class="group-picker-add" onclick="toggle_group_add({{group.id}})">{{ group.name }}</div>
                     {% endfor %}
                 </div>
                 {% endif %}

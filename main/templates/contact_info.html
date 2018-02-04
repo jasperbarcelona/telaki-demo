@@ -27,18 +27,14 @@
     <span id="groupsLabel" class="input-group-label">Groups:</span>
     {% if not groups[0] %}
     <span class="no-groups-label">You don't have any groups.</span>
-    <span id="createGroupFromContact" class="link underline" data-toggle="modal" data-target="#createGroupModal">Create Group</span>
     {% else %}
     <input type="text" id="searchGroupFromContact" class="form-control" placeholder="Search groups">
-    <div class="add-group-container">
-        <span id="addGroupFromContactEdit" class="link underline" data-toggle="modal" data-target="#createGroupModal">Add Group</span>
-    </div>
     <div class="contact-group-container">
         {% for group in groups %}
         {% if group.id in contact_groups %}
-        <div id="{{ group.id }}" class="edit-contact-picker group-picker selected">{{ group.name }}</div>
+        <div id="{{ group.id }}" class="edit-contact-picker group-picker-edit selected" onclick="toggle_group_edit({{group.id}})">{{ group.name }}</div>
         {% else %}
-        <div id="{{ group.id }}" class="edit-contact-picker group-picker">{{ group.name }}</div>
+        <div id="{{ group.id }}" class="edit-contact-picker group-picker-edit" onclick="toggle_group_edit({{group.id}})">{{ group.name }}</div>
         {% endif %}
         {% endfor %}
     </div>

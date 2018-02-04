@@ -1024,6 +1024,14 @@ def edit_contact():
     data = flask.request.form.to_dict()
     groups = flask.request.form.getlist('groups[]')
     contact = Contact.query.filter_by(msisdn=session['contact_msisdn']).first()
+
+    if contact.msisdn != data['msisdn']:
+        existing_conversation = Conversation.query.filter_by(msisdn=contact.msisdn).first()
+        if existing_conversation or existing_conversation != None:
+            existing_conversation.contact_name = None
+            existing_conversation.display_name = existing_conversation.msisdn
+            db.session.commit()
+
     contact.name = data['name'].title()
     contact.contact_type = data['contact_type']
     contact.msisdn = '0%s'%data['msisdn'][-10:]
@@ -1037,13 +1045,16 @@ def edit_contact():
             group_id = int(item)
             )
         db.session.add(contact_group)
-        group_size = ContactGroup.query.filter_by(group_id=int(item)).count()
-        group.size = group_size
+
+    groups_to_recount = Group.query.filter_by(client_no=session['client_no'])
+    for _ in groups_to_recount:
+        group_size = ContactGroup.query.filter_by(group_id=_.id).count()
+        _.size = group_size
 
     conversation = Conversation.query.filter_by(msisdn=data['msisdn']).first()
     if conversation or conversation != None:
         conversation.contact_name = data['name'].title()
-
+        conversation.display_name = data['name'].title()
     db.session.commit()
 
     if data['type'] == 'from_convo':
@@ -1237,29 +1248,38 @@ def clear_recipients():
     session['group_recipients'] = []
     session['individual_recipients'] = []
     session['number_recipients'] = []
-    return '',200
+    return '',201
 
 
 @app.route('/blast/send', methods=['GET', 'POST'])
 def send_text_blast():
-    group_recipient_ids = flask.request.form.getlist('group_recipients[]')
-    individual_recipient_ids = flask.request.form.getlist('individual_recipients[]')
-    individual_recipients_name = flask.request.form.getlist('individual_recipients_name[]')
-    group_recipients_name = flask.request.form.getlist('group_recipients_name[]')
     data = flask.request.form.to_dict()
-
     if ('special' in data) and (data['special'] != None or data['special'] != ''):
-        new_batch = Batch(
-            client_no=session['client_no'],
-            message_type='custom',
-            sender_id=session['user_id'],
-            sender_name=session['user_name'],
-            recipient=data['special'],
-            date=datetime.datetime.now().strftime('%B %d, %Y'),
-            time=time.strftime("%I:%M %p"),
-            content=data['content'],
-            created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
-            )
+        if session['number_recipients']:
+            number_recipients = ', '.join(session['number_recipients'])
+            new_batch = Batch(
+                client_no=session['client_no'],
+                message_type='custom',
+                sender_id=session['user_id'],
+                sender_name=session['user_name'],
+                recipient='%s, %s' % (data['special'],number_recipients),
+                date=datetime.datetime.now().strftime('%B %d, %Y'),
+                time=time.strftime("%I:%M %p"),
+                content=data['content'],
+                created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
+                )
+        else :
+            new_batch = Batch(
+                client_no=session['client_no'],
+                message_type='custom',
+                sender_id=session['user_id'],
+                sender_name=session['user_name'],
+                recipient=data['special'],
+                date=datetime.datetime.now().strftime('%B %d, %Y'),
+                time=time.strftime("%I:%M %p"),
+                content=data['content'],
+                created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
+                )
         db.session.add(new_batch)
         db.session.commit()
 
@@ -1280,12 +1300,29 @@ def send_text_blast():
                 )
             db.session.add(new_message)
         db.session.commit()
+        if session['number_recipients']:
+            for msisdn in session['number_recipients']:
+                number_message = OutboundMessage(
+                    batch_id=new_batch.id,
+                    date=new_batch.date,
+                    time=new_batch.time,
+                    msisdn=msisdn
+                    )
+                db.session.add(number_message)
+            db.session.commit()
 
         new_batch.batch_size = OutboundMessage.query.filter_by(batch_id=new_batch.id).count()
         new_batch.pending = OutboundMessage.query.filter_by(batch_id=new_batch.id,status='pending').count()
         db.session.commit()
 
         blast_sms.delay(new_batch.id,new_batch.date,new_batch.time,data['content'],session['client_no'])
+        
+        session['group_recipients'] = []
+        session['individual_recipients'] = []
+        session['group_recipients_name'] = []
+        session['individual_recipients_name'] = []
+        session['number_recipients'] = []
+
         return jsonify(
             pending=new_batch.pending,
             batch_id=new_batch.id,
@@ -1297,7 +1334,7 @@ def send_text_blast():
         message_type='custom',
         sender_id=session['user_id'],
         sender_name=session['user_name'],
-        recipient=', '.join(group_recipients_name+individual_recipients_name),
+        recipient=', '.join(session['group_recipients_name']+session['individual_recipients_name']),
         date=datetime.datetime.now().strftime('%B %d, %Y'),
         time=time.strftime("%I:%M %p"),
         content=data['content'],
@@ -1306,7 +1343,7 @@ def send_text_blast():
     db.session.add(new_batch)
     db.session.commit()
 
-    for group_id in group_recipient_ids:
+    for group_id in session['group_recipients']:
         contact_group = ContactGroup.query.filter_by(group_id=group_id).all()
         for item in contact_group:
             contact = Contact.query.filter_by(id=item.contact_id).first()
@@ -1322,7 +1359,7 @@ def send_text_blast():
                 db.session.add(new_message)
         db.session.commit()
 
-    for individual_id in individual_recipient_ids:
+    for individual_id in session['individual_recipients']:
         contact = Contact.query.filter_by(id=individual_id).first()
         in_list = OutboundMessage.query.filter_by(batch_id=new_batch.id,msisdn=contact.msisdn).first()
         if not in_list or in_list == None:
@@ -1341,6 +1378,11 @@ def send_text_blast():
     db.session.commit()
 
     blast_sms.delay(new_batch.id,new_batch.date,new_batch.time,data['content'],session['client_no'])
+    session['group_recipients'] = []
+    session['individual_recipients'] = []
+    session['group_recipients_name'] = []
+    session['individual_recipients_name'] = []
+    session['number_recipients'] = []
     return jsonify(
         pending=new_batch.pending,
         batch_id=new_batch.id,
@@ -1557,20 +1599,59 @@ def add_group_recipient():
     recipient_id = flask.request.form.get('recipient_id')
     session['group_recipients'].append(recipient_id)
     group = Group.query.filter_by(client_no=session['client_no'],id=recipient_id).first()
+    session['group_recipients_name'].append(group.name)
     return jsonify(
         size = group.size,
         template = flask.render_template('group_recipients.html', group=group)
         )
 
 
+@app.route('/recipients/group/remove',methods=['GET','POST'])
+def remove_group_recipient():
+    recipient_id = flask.request.form.get('recipient_id')
+    session['group_recipients'].remove(recipient_id)
+    group = Group.query.filter_by(client_no=session['client_no'],id=recipient_id).first()
+    session['group_recipients_name'].remove(group.name)
+    return jsonify(
+        size = group.size
+        )
+
 @app.route('/recipients/individual/add',methods=['GET','POST'])
 def add_individual_recipient():
     recipient_id = flask.request.form.get('recipient_id')
     session['individual_recipients'].append(recipient_id)
     recipient = Contact.query.filter_by(client_no=session['client_no'],id=recipient_id).first()
+    session['individual_recipients_name'].append(recipient.name)
     return jsonify(
         template = flask.render_template('individual_recipients.html', recipient=recipient)
         )
+
+
+@app.route('/recipients/individual/remove',methods=['GET','POST'])
+def remove_individual_recipient():
+    recipient_id = flask.request.form.get('recipient_id')
+    session['individual_recipients'].remove(recipient_id)
+    recipient = Contact.query.filter_by(client_no=session['client_no'],id=recipient_id).first()
+    session['individual_recipients_name'].remove(recipient.name)
+    return '',201
+
+
+@app.route('/recipients/number/remove',methods=['GET','POST'])
+def remove_number_recipient():
+    msisdn = flask.request.form.get('msisdn')
+    session['number_recipients'].remove(msisdn)
+    return '',201
+
+
+@app.route('/recipients/special/add',methods=['GET','POST'])
+def add_special_recipient():
+    session['group_recipients'] = []
+    session['individual_recipients'] = []
+    session['group_recipients_name'] = []
+    session['individual_recipients_name'] = []
+    return jsonify(
+        size = len(session['number_recipients'])
+        ),201
 
 
 @app.route('/db/rebuild',methods=['GET','POST'])
@@ -1632,7 +1713,7 @@ def rebuild_database():
         client_no='at-ic2017',
         contact_type='Customer',
         name='Alan Ballesteros',
-        msisdn='09183516001',
+        msisdn='09176214704',
         added_by=1,
         added_by_name='Super Admin',
         join_date='November 14, 2017',
@@ -1642,13 +1723,35 @@ def rebuild_database():
     conversations = Conversation(
         client_no='at-ic2017',
         contact_name='Alan Ballesteros'.title(),
-        msisdn='09183516001',
+        msisdn='09176214704',
         display_name='Alan Ballesteros'.title(),
         status='unread',
         latest_content='This is a sample incoming message. You can try to reply to it',
         latest_date='November 14, 2017',
         latest_time='11:36 AM',
         created_at='2017-11-14 11:36:49:270418',
+        )
+
+    conversations1 = Conversation(
+        client_no='at-ic2017',
+        msisdn='09159484200',
+        display_name='09159484200',
+        status='unread',
+        latest_content='This is a sample incoming message. You can try to reply to it',
+        latest_date='November 14, 2017',
+        latest_time='11:37 AM',
+        created_at='2017-11-14 11:37:49:270418',
+        )
+
+    conversations2 = Conversation(
+        client_no='at-ic2017',
+        msisdn='09189123948',
+        display_name='09189123948',
+        status='unread',
+        latest_content='This is a sample incoming message. You can try to reply to it',
+        latest_date='November 14, 2017',
+        latest_time='11:38 AM',
+        created_at='2017-11-14 11:38:49:270418',
         )
 
     # conversations1 = Conversation(
@@ -1666,7 +1769,25 @@ def rebuild_database():
         conversation_id=1,
         message_type='inbound',
         date='November 14, 2017',
-        time='11:30 AM',
+        time='11:36 AM',
+        content='This is a sample incoming message. You can try to reply to it.',
+        created_at='2017-11-14 11:30:49:270418'
+        )
+
+    message1 = ConversationItem(
+        conversation_id=2,
+        message_type='inbound',
+        date='November 14, 2017',
+        time='11:37 AM',
+        content='This is a sample incoming message. You can try to reply to it.',
+        created_at='2017-11-14 11:30:49:270418'
+        )
+
+    message2 = ConversationItem(
+        conversation_id=3,
+        message_type='inbound',
+        date='November 14, 2017',
+        time='11:38 AM',
         content='This is a sample incoming message. You can try to reply to it.',
         created_at='2017-11-14 11:30:49:270418'
         )
@@ -1855,9 +1976,11 @@ def rebuild_database():
     db.session.add(admin2)
     db.session.add(contact)
     db.session.add(conversations)
-    # db.session.add(conversations1)
+    db.session.add(conversations1)
+    db.session.add(conversations2)
     db.session.add(message)
-    # db.session.add(message2)
+    db.session.add(message1)
+    db.session.add(message2)
 
     db.session.add(blast)
     db.session.add(reminder)

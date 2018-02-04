@@ -86,12 +86,6 @@ $('#closeMessage').on('click', function (e) {
 })();
 
 (function() {
-  $('.group-picker').on('click', function(e){
-    $(this).toggleClass('selected');
-  });
-})();
-
-(function() {
   $('#closeReplyError').on('click', function(e){
     $('#replyError').fadeOut();
   });
@@ -113,10 +107,21 @@ $('#addContactModal').on('shown.bs.modal', function () {
 
 $('#saveContactModal').on('hidden.bs.modal', function () {
   $('#saveContactModal .form-control').val('');
+  $('#saveContactModal .form-control').change();
   $('#saveContactModal .contact-type-picker.selected').removeClass('selected');
-  $('#saveContactModal .group-picker.selected').removeClass('selected');
+  $('#saveContactModal .group-picker-save.selected').removeClass('selected');
   setTimeout(function() {
     $('#saveContactBtn').attr('disabled', true);
+    }, 500);
+});
+
+$('#addContactModal').on('hidden.bs.modal', function () {
+  $('#addContactModal .form-control').val('');
+  $('#addContactModal .form-control').change();
+  $('#addContactModal .contact-type-picker.selected').removeClass('selected');
+  $('#addContactModal .group-picker-add.selected').removeClass('selected');
+  setTimeout(function() {
+    $('#addContactBtn').attr('disabled', true);
     }, 500);
 });
 
