@@ -10,6 +10,8 @@ import datetime
 import time
 from time import sleep
 from flask import jsonify
+import random
+import string
 import xlrd
 
 app = Celery('tasks', broker='amqp://admin:password@rabbitmq/telaki')
@@ -27,17 +29,31 @@ def blast_sms(batch_id,date,time,message_content,client_no):
     messages = OutboundMessage.query.filter_by(batch_id=batch_id).all()
 
     for message in messages:
+        # message_options = {
+        #     'app_id': client.app_id,
+        #     'app_secret': client.app_secret,
+        #     'message': message_content,
+        #     'address': message.msisdn,
+        #     'passphrase': client.passphrase,
+        # }
+        chikka_url = 'https://post.chikka.com/smsapi/request'
         message_options = {
-            'app_id': client.app_id,
-            'app_secret': client.app_secret,
+            'message_type': 'SEND',
+            'mobile_number': message.msisdn,
+            'shortcode': '29290420420',
+            'message_id': ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(32)),
             'message': message_content,
-            'address': message.msisdn,
-            'passphrase': client.passphrase,
+            'client_id': 'ef8cf56d44f93b6ee6165a0caa3fe0d1ebeee9b20546998931907edbb266eb72',
+            'secret_key': 'c4c461cc5aa5f9f89b701bc016a73e9981713be1bf7bb057c875dbfacff86e1d',
         }
 
+
         try:
-            r = requests.post(IPP_URL%client.shortcode,message_options)           
-            if r.status_code == 201:
+            # r = requests.post(IPP_URL%client.shortcode,message_options)           
+            r = requests.post(chikka_url,message_options)
+            print r.content   
+            # if r.status_code == 201:
+            if r.status_code == 200:
                 message.status = 'success'
                 message.timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
             else:

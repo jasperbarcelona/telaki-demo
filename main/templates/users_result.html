@@ -1,0 +1,30 @@
+{% for user in users %}
+<tr>
+  <td class="user-icon-td">
+    <i data-id="{{ user.id }}" class="users-check material-icons">&#xE835;</i>
+  </td>
+  <td class="user-name-td" id="{{ user.id }}" data-toggle="modal" data-target="#userModal" onclick="open_user(this.id)">{{ user.name }}</td>
+  <td class="user-role-td" id="{{ user.id }}" data-toggle="modal" data-target="#userModal" onclick="open_user(this.id)">
+    {{ user.role }}
+  </td>
+  <td class="user-email-td">
+    {{ user.email }}
+  </td>
+</tr>
+{% endfor %}
+
+<script type="text/javascript">
+$('.users-check').on('click', function () {
+  var entry_id = $(this).attr('data-id');
+  if ($(this).hasClass('checked')) {
+    $(this).removeClass('checked');
+    $(this).html('&#xE835;');
+    deselect_user(entry_id);
+  }
+  else {
+    $(this).addClass('checked');
+    $(this).html('&#xE834;');
+    select_user(entry_id);
+  }
+});
+</script>

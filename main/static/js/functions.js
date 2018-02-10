@@ -76,7 +76,18 @@ function show_groups(slice_from) {
 }
 
 function show_users(slice_from) {
-  alert('This feature will be available on paid version.');
+  $('.panel-nav-item').removeClass('active');
+  $('#navUsers').addClass('active');
+  $.get('/users',
+  {
+    slice_from:slice_from
+  },
+    function(data){
+      initialize_selected_entries();
+      $('.content').html(data);
+      $('#searchLoader').addClass('hidden');
+      $('#clearConversationsSearch').addClass('hidden');
+    });
 }
 
 function show_usage(slice_from) {
@@ -95,7 +106,7 @@ function conversation_next_page() {
   $.post('/conversations/next',
     function(data){
       initialize_selected_entries();
-      $('#conversations').html(data['template']);
+      $('#conversationsTbody').html(data['template']);
       $('#paginationShowingConversation').html(data['showing']);
       $('#paginationTotalConversation').html(data['total_entries']);
       $('.pagination-btn').blur();
@@ -120,7 +131,7 @@ function conversation_prev_page() {
   $.post('/conversations/prev',
     function(data){
       initialize_selected_entries();
-      $('#conversations').html(data['template']);
+      $('#conversationsTbody').html(data['template']);
       $('#paginationShowingConversation').html(data['showing']);
       $('#paginationTotalConversation').html(data['total_entries']);
       $('.pagination-btn').blur();
@@ -145,7 +156,7 @@ function blast_next_page() {
   $.post('/blasts/next',
     function(data){
       initialize_selected_entries();
-      $('#blasts').html(data['template']);
+      $('#blastsTbody').html(data['template']);
       $('#paginationShowingBlasts').html(data['showing']);
       $('#paginationTotalBlasts').html(data['total_entries']);
       $('.pagination-btn').blur();
@@ -170,7 +181,7 @@ function blast_prev_page() {
   $.post('/blasts/prev',
     function(data){
       initialize_selected_entries();
-      $('#blasts').html(data['template']);
+      $('#blastsTbody').html(data['template']);
       $('#paginationShowingBlasts').html(data['showing']);
       $('#paginationTotalBlasts').html(data['total_entries']);
       $('.pagination-btn').blur();
@@ -195,7 +206,7 @@ function reminder_next_page() {
   $.post('/reminders/next',
     function(data){
       initialize_selected_entries();
-      $('#reminders').html(data['template']);
+      $('#remindersTbody').html(data['template']);
       $('#paginationShowingReminders').html(data['showing']);
       $('#paginationTotalReminders').html(data['total_entries']);
       $('.pagination-btn').blur();
@@ -220,7 +231,7 @@ function reminder_prev_page() {
   $.post('/reminders/prev',
     function(data){
       initialize_selected_entries();
-      $('#reminders').html(data['template']);
+      $('#remindersTbody').html(data['template']);
       $('#paginationShowingReminders').html(data['showing']);
       $('#paginationTotalReminders').html(data['total_entries']);
       $('.pagination-btn').blur();
@@ -245,7 +256,7 @@ function contact_next_page() {
   $.post('/contacts/next',
     function(data){
       initialize_selected_entries();
-      $('#contacts').html(data['template']);
+      $('#contactsTbody').html(data['template']);
       $('#paginationShowingContacts').html(data['showing']);
       $('#paginationTotalContacts').html(data['total_entries']);
       $('.pagination-btn').blur();
@@ -270,7 +281,7 @@ function contact_prev_page() {
   $.post('/contacts/prev',
     function(data){
       initialize_selected_entries();
-      $('#contacts').html(data['template']);
+      $('#contactsTbody').html(data['template']);
       $('#paginationShowingContacts').html(data['showing']);
       $('#paginationTotalContacts').html(data['total_entries']);
       $('.pagination-btn').blur();
@@ -295,7 +306,7 @@ function group_next_page() {
   $.post('/groups/next',
     function(data){
       initialize_selected_entries();
-      $('#groups').html(data['template']);
+      $('#groupsTbody').html(data['template']);
       $('#paginationShowingGroups').html(data['showing']);
       $('#paginationTotalGroups').html(data['total_entries']);
       $('.pagination-btn').blur();
@@ -320,7 +331,7 @@ function group_prev_page() {
   $.post('/groups/prev',
     function(data){
       initialize_selected_entries();
-      $('#groups').html(data['template']);
+      $('#groupsTbody').html(data['template']);
       $('#paginationShowingGroups').html(data['showing']);
       $('#paginationTotalGroups').html(data['total_entries']);
       $('.pagination-btn').blur();
@@ -337,6 +348,56 @@ function group_prev_page() {
       }
       else {
         $('.pagination-btn.right.group').attr('disabled', false);
+      }
+    });
+}
+
+function user_next_page() {
+  $.post('/users/next',
+    function(data){
+      initialize_selected_entries();
+      $('#usersTbody').html(data['template']);
+      $('#paginationShowingUsers').html(data['showing']);
+      $('#paginationTotalUsers').html(data['total_entries']);
+      $('.pagination-btn').blur();
+
+      if (data['prev_btn'] == 'disabled') {
+        $('.pagination-btn.left.user').attr('disabled', true);
+      }
+      else {
+        $('.pagination-btn.left.user').attr('disabled', false);
+      }
+
+      if (data['next_btn'] == 'disabled') {
+        $('.pagination-btn.right.user').attr('disabled', true);
+      }
+      else {
+        $('.pagination-btn.right.user').attr('disabled', false);
+      }
+    });
+}
+
+function user_prev_page() {
+  $.post('/users/prev',
+    function(data){
+      initialize_selected_entries();
+      $('#usersTbody').html(data['template']);
+      $('#paginationShowingUsers').html(data['showing']);
+      $('#paginationTotalUsers').html(data['total_entries']);
+      $('.pagination-btn').blur();
+
+      if (data['prev_btn'] == 'disabled') {
+        $('.pagination-btn.left.user').attr('disabled', true);
+      }
+      else {
+        $('.pagination-btn.left.user').attr('disabled', false);
+      }
+
+      if (data['next_btn'] == 'disabled') {
+        $('.pagination-btn.right.user').attr('disabled', true);
+      }
+      else {
+        $('.pagination-btn.right.user').attr('disabled', false);
       }
     });
 }
@@ -494,7 +555,8 @@ function edit_contact(type) {
     },
     function(data){
       $('#editContactModal').modal('hide');
-      $('.content').html(data);
+      $('.content').html(data['template']);
+      $('#recipientGroupContainer').html(data['groups_template']);
       $('#editContactBtn').button('complete');
       $('#editContactBtn').attr('disabled', true);
     });
@@ -607,12 +669,14 @@ function initialize_selected_entries() {
   selected_reminders = [];
   selected_contacts = [];
   selected_groups = [];
+  selected_users = [];
 
   $('#deleteConversationsBtn').addClass('hidden');
   $('#deleteBlastsBtn').addClass('hidden');
   $('#deleteRemindersBtn').addClass('hidden');
   $('#deleteContactsBtn').addClass('hidden');
   $('#deleteGroupsBtn').addClass('hidden');
+  $('#deleteUsersBtn').addClass('hidden');
 }
 
 function initialize_recipients() {
@@ -1471,6 +1535,27 @@ function deselect_group(entry_id) {
   }
   else {
     $('#deleteGroupsBtn').addClass('hidden');
+  }
+}
+
+function select_user(entry_id) {
+  selected_users.push(entry_id);
+  if (selected_users.length != 0) {
+    $('#deleteUsersBtn').removeClass('hidden');
+  }
+  else {
+    $('#deleteUsersBtn').addClass('hidden');
+  }
+}
+
+function deselect_user(entry_id) {
+  var entry_index = selected_users.indexOf(entry_id);
+  selected_users.splice(entry_index, 1);
+  if (selected_users.length != 0) {
+    $('#deleteUsersBtn').removeClass('hidden');
+  }
+  else {
+    $('#deleteUsersBtn').addClass('hidden');
   }
 }
 

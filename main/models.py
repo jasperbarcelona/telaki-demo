@@ -46,6 +46,7 @@ class AdminUser(db.Model):
     email = db.Column(db.String(60))
     password = db.Column(db.String(20))
     name = db.Column(db.String(100))
+    role = db.Column(db.String(30))
     status = db.Column(db.String(8), default='Active')
     added_by_id = db.Column(db.Integer)
     added_by_name = db.Column(db.String(100))

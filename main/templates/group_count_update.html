@@ -1,0 +1,50 @@
+<div id="everyoneRecipient" class="recipient-group" onclick="add_everyone_recipient({{ contact_count }})"">
+    <div class="recipient-group-left">
+        <span class="recipient-group-name">Everyone</span>
+    </div>
+    <div class="recipient-group-right align-right">
+        {% if contact_count == 1 %}
+        <span class="recipient-group-members">{{ contact_count }} member</span>
+        {% else %}
+        <span class="recipient-group-members">{{ contact_count }} members</span>
+        {% endif %}
+    </div>
+</div>
+<div id="customersRecipient" class="recipient-group" onclick="add_customers_recipient({{ customers_count }})"">
+    <div class="recipient-group-left">
+        <span class="recipient-group-name">All Customers</span>
+    </div>
+    <div class="recipient-group-right align-right">
+        {% if customers_count == 1 %}
+        <span class="recipient-group-members">{{ customers_count }} member</span>
+        {% else %}
+        <span class="recipient-group-members">{{ customers_count }} members</span>
+        {% endif %}
+    </div>
+</div>
+<div id="staffRecipient" class="recipient-group" onclick="add_staff_recipient({{ staff_count }})"">
+    <div class="recipient-group-left">
+        <span class="recipient-group-name">All Staff</span>
+    </div>
+    <div class="recipient-group-right align-right">
+        {% if staff_count == 1 %}
+        <span class="recipient-group-members">{{ staff_count }} member</span>
+        {% else %}
+        <span class="recipient-group-members">{{ staff_count }} members</span>
+        {% endif %}
+    </div>
+</div>
+{% for group in groups %}
+<div id="{{ group.id }}" class="recipient-group" onclick="add_recipient({{ group.id }}, '{{ group.name }}', {{ group.size }})">
+    <div class="recipient-group-left">
+        <span class="recipient-group-name">{{ group.name }}</span>
+    </div>
+    <div class="recipient-group-right align-right">
+        {% if group.size == 1 %}
+        <span class="recipient-group-members">{{ group.size }} member</span>
+        {% else %}
+        <span class="recipient-group-members">{{ group.size }} members</span>
+        {% endif %}
+    </div>
+</div>
+{% endfor %}

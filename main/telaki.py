@@ -735,6 +735,99 @@ def prev_groups():
         )
 
 
+@app.route('/users',methods=['GET','POST'])
+def users():
+    slice_from = flask.request.args.get('slice_from')
+    prev_btn = 'enabled'
+    if slice_from == 'reset':
+        session['user_limit'] = 50
+        prev_btn = 'disabled'
+    total_entries = AdminUser.query.filter_by(client_no=session['client_no']).count()
+    users = AdminUser.query.filter_by(client_no=session['client_no']).order_by(AdminUser.name).slice(session['user_limit'] - 50, session['user_limit'])
+    if total_entries < 50:
+        showing='1 - %s' % total_entries
+        prev_btn = 'disabled'
+        next_btn='disabled'
+    else:
+        diff = total_entries - (session['user_limit'] - 50)
+        if diff > 50:
+            showing = '%s - %s' % (str(session['user_limit'] - 49),str(session['user_limit']))
+            next_btn='enabled'
+        else:
+            showing = '%s - %s' % (str(session['user_limit'] - 49),str((session['user_limit']-50)+diff))
+            prev_btn = 'enabled'
+            next_btn='disabled'
+
+    return flask.render_template(
+        'users.html',
+        users=users,
+        showing=showing,
+        total_entries=total_entries,
+        prev_btn=prev_btn,
+        next_btn=next_btn,
+    )
+
+
+@app.route('/users/next',methods=['GET','POST'])
+def next_users():
+    session['user_limit'] += 50
+    total_entries = AdminUser.query.filter_by(client_no=session['client_no']).count()
+    users = AdminUser.query.filter_by(client_no=session['client_no']).order_by(AdminUser.name).slice(session['user_limit'] - 50, session['user_limit'])
+    if total_entries < 50:
+        showing = '1 - %s' % str(total_entries)
+        prev_btn = 'disabled'
+        next_btn='disabled'
+    else:
+        diff = total_entries - (session['user_limit'] - 50)
+        if diff > 50:
+            showing = '%s - %s' % (str(session['user_limit'] - 49),str(session['user_limit']))
+            prev_btn = 'enabled'
+            next_btn='enabled'
+        else:
+            showing = '%s - %s' % (str(session['user_limit'] - 49),str((session['user_limit']-50)+diff))
+            prev_btn = 'enabled'
+            next_btn='disabled'
+
+    return jsonify(
+        showing=showing,
+        total_entries=total_entries,
+        prev_btn=prev_btn,
+        next_btn=next_btn,
+        template=flask.render_template(
+            'users_result.html',
+            users=users)
+        )
+
+
+@app.route('/users/prev',methods=['GET','POST'])
+def prev_users():
+    session['user_limit'] -= 50
+    total_entries = AdminUser.query.filter_by(client_no=session['client_no']).count()
+    users = AdminUser.query.filter_by(client_no=session['client_no']).order_by(AdminUser.name).slice(session['user_limit'] - 50, session['user_limit'])
+    if total_entries < 50:
+        showing = '1 - %s' % str(total_entries)
+        prev_btn = 'disabled'
+        next_btn='disabled'
+    else:
+        showing = '%s - %s' % (str(session['user_limit'] - 49),str(session['user_limit']))
+        if session['user_limit'] <= 50:
+            prev_btn = 'disabled'
+            next_btn='enabled'
+        else:
+            prev_btn = 'enabled'
+            next_btn='enabled'
+
+    return jsonify(
+        showing=showing,
+        total_entries=total_entries,
+        prev_btn=prev_btn,
+        next_btn=next_btn,
+        template=flask.render_template(
+            'users_result.html',
+            users=users)
+        )
+
+
 @app.route('/groups/save',methods=['GET','POST'])
 def add_group():
     name = flask.request.form.get('name')
@@ -974,6 +1067,80 @@ def open_conversation():
         ),200
 
 
+@app.route('/conversation/receive',methods=['GET','POST'])
+def receive_message():
+    data = flask.request.form.to_dict()
+    contact = Contact.query.filter_by(msisdn='0%s'%data['mobile_number'][-10:]).first()
+    conversation = Conversation.query.filter_by(msisdn=data['mobile_number']).first()
+    if not conversation or conversation == None:
+        if contact:
+            conversation = Conversation(
+                client_no='at-ic2017',
+                contact_name=contact.name,
+                msisdn=contact.msisdn,
+                display_name=contact.name,
+                )
+        else:
+            conversation = Conversation(
+                client_no='at-ic2017',
+                msisdn='0%s'%data['mobile_number'][-10:],
+                display_name='0%s'%data['mobile_number'][-10:],
+                )
+        db.session.add(conversation)
+        db.session.commit()
+    conversation.status='unread'
+    conversation.latest_content=data['message']
+    conversation.latest_date=datetime.datetime.now().strftime('%B %d, %Y')
+    conversation.latest_time=latest_time=time.strftime("%I:%M %p")
+    conversation.created_at=created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
+    db.session.commit()
+
+    content = 'Thank you for your response. We will process your request.'
+    chikka_url = 'https://post.chikka.com/smsapi/request'
+    message_options = {
+        'message_type': 'REPLY',
+        'mobile_number': '0%s'%data['mobile_number'][-10:],
+        'shortcode': '29290420420',
+        'request_id': data['request_id'],
+        'message_id': ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(32)),
+        'message': content,
+        'request_cost': 'FREE',
+        'client_id': 'ef8cf56d44f93b6ee6165a0caa3fe0d1ebeee9b20546998931907edbb266eb72',
+        'secret_key': 'c4c461cc5aa5f9f89b701bc016a73e9981713be1bf7bb057c875dbfacff86e1d',
+    }
+    try:
+        r = requests.post(chikka_url,message_options)
+        # if r.status_code != 201:
+        if r.status_code != 200:
+            return jsonify(status='failed')
+
+        reply = ConversationItem(
+            conversation_id=conversation.id,
+            message_type='outbound',
+            date=datetime.datetime.now().strftime('%B %d, %Y'),
+            time=time.strftime("%I:%M %p"),
+            content=content,
+            outbound_sender_name='System',
+            created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
+            )
+        db.session.add(reply)
+        db.session.commit()
+        conversation.latest_content = content
+        conversation.latest_date = reply.date
+        conversation.latest_time = reply.time
+        conversation.created_at = reply.created_at
+        db.session.commit()
+
+    except requests.exceptions.ConnectionError as e:
+        return jsonify(
+            status='success'
+            ),201
+
+    return jsonify(
+        status='success'
+        ),201
+
+
 @app.route('/conversation/reply',methods=['GET','POST'])
 def send_reply():
     message_content = flask.request.form.get('content')
@@ -1060,10 +1227,24 @@ def edit_contact():
 
     if data['type'] == 'from_convo':
         messages = ConversationItem.query.filter_by(conversation_id=conversation.id).order_by(ConversationItem.created_at)
-        return flask.render_template(
-            'conversation.html',
-            conversation=conversation,
-            messages=messages 
+        groups = Group.query.filter_by(client_no=session['client_no']).order_by(Group.name)
+        contacts = Contact.query.filter_by(client_no=session['client_no']).order_by(Contact.name)
+        contact_count = Contact.query.filter_by(client_no=session['client_no']).count()
+        customers_count = Contact.query.filter_by(client_no=session['client_no'], contact_type='Customer').count()
+        staff_count = Contact.query.filter_by(client_no=session['client_no'], contact_type='Staff').count()
+        return jsonify(
+            template = flask.render_template(
+                'conversation.html',
+                conversation=conversation,
+                messages=messages 
+                ),
+            groups_template = flask.render_template(
+                'group_count_update.html',
+                contact_count=contact_count,
+                customers_count=customers_count,
+                staff_count=staff_count,
+                groups=groups
+                )
             ),201
 
     if session['contact_msisdn'] != data['msisdn']:
@@ -1089,14 +1270,29 @@ def edit_contact():
             prev_btn = 'enabled'
             next_btn='disabled'
 
-    return flask.render_template(
+    groups = Group.query.filter_by(client_no=session['client_no']).order_by(Group.name)
+    contacts = Contact.query.filter_by(client_no=session['client_no']).order_by(Contact.name)
+    contact_count = Contact.query.filter_by(client_no=session['client_no']).count()
+    customers_count = Contact.query.filter_by(client_no=session['client_no'], contact_type='Customer').count()
+    staff_count = Contact.query.filter_by(client_no=session['client_no'], contact_type='Staff').count()
+
+    return jsonify(
+        template = flask.render_template(
             'contacts.html',
             contacts=contacts,
             showing=showing,
             total_entries=total_entries,
             prev_btn=prev_btn,
             next_btn=next_btn
-            ),201
+            ),
+        groups_template = flask.render_template(
+            'group_count_update.html',
+            contact_count=contact_count,
+            customers_count=customers_count,
+            staff_count=staff_count,
+            groups=groups
+            )
+        ),201
 
 
 @app.route('/contact/save',methods=['GET','POST'])
@@ -1680,11 +1876,26 @@ def rebuild_database():
         created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
         )
 
+    for _ in range(1000):
+        admin = AdminUser(
+            client_no='at-ic2017',
+            email='hello@pisara.tech',
+            password='ratmaxi8',
+            name='Admin%s' % _,
+            role='Administrator',
+            join_date='November 14, 2017',
+            added_by_name='None',
+            created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
+            )
+        db.session.add(admin)
+        db.session.commit()
+
     admin = AdminUser(
         client_no='at-ic2017',
         email='hello@pisara.tech',
         password='ratmaxi8',
         name='Super Admin',
+        role='Administrator',
         join_date='November 14, 2017',
         added_by_name='None',
         created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
@@ -1695,6 +1906,7 @@ def rebuild_database():
         email='hello@pisara.tech',
         password='ratmaxi8',
         name='Super Admin',
+        role='Administrator',
         join_date='November 14, 2017',
         added_by_name='None',
         created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
@@ -1705,6 +1917,7 @@ def rebuild_database():
         email='ballesteros.alan@gmail.com',
         password='password',
         name='Test Admin',
+        role='Administrator',
         join_date=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f'),
         added_by_name='Super Admin',
         created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
@@ -1927,6 +2140,18 @@ def rebuild_database():
     #     join_date='November 10, 2017',
     #     created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
     #     )
+
+    for _ in range(1000):
+        new_group = Group(
+            client_no='at-ic2017',
+            name='AGN%s' % _,
+            size=0,
+            created_by_id=1,
+            created_by_name='Super Admin',
+            created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
+            )
+        db.session.add(new_group)
+        db.session.commit()
 
     new_group = Group(
         client_no='at-ic2017',

@@ -1,0 +1,89 @@
+<div class="content-header">
+	<div class="content-right-btn-container">
+		<button class="btn control-btn" onclick="show_users('reset')"><i class="material-icons">&#xE5D5;</i></button>
+		<button id="addUserBtn" class="btn control-btn" data-toggle="modal" data-target="#addUserModal"><i class="material-icons md-30">add</i></button>
+		<button id="deleteUsersBtn" data-toggle="modal" data-target="#deleteUsersModal" class="btn control-btn hidden"><i class="material-icons">&#xE872;</i></button>
+		<div class="pagination-btn-container">
+			<div class="pagination-label-container">
+				<span class="pagination-label"><strong id="paginationShowingUsers">{{ showing }}</strong></span>
+				<span class="pagination-label separator">of</span>
+				<span class="pagination-label"><strong id="paginationTotalUsers">{{ total_entries }}</strong></span>
+			</div>
+			{% if prev_btn == 'enabled' %}
+			<button class="btn pagination-btn left user" onclick="user_prev_page()"><i class="material-icons">&#xE5CB;</i></button>
+			{% else %}
+			<button class="btn pagination-btn left user" onclick="user_prev_page()" disabled><i class="material-icons">&#xE5CB;</i></button>
+			{% endif %}
+
+			{% if next_btn == 'enabled' %}
+			<button class="btn pagination-btn right user" onclick="user_next_page()"><i class="material-icons">&#xE5CC;</i></button>
+			{% else %}
+			<button class="btn pagination-btn right user" onclick="user_next_page()" disabled><i class="material-icons">&#xE5CC;</i></button>
+			{% endif %}
+		</div>
+	</div>
+</div>
+{% if not users[0] %}
+<div id="emptyBlast" class="empty-overlay">
+	<span class="empty-label">No users yet.</span>
+</div>
+{% endif %}
+<div id="contentBody" class="content-body">
+	<table class="table content-table">
+		<thead>
+			<tr class="search-panel conversation">
+				<td class="icon-td">
+					<span id="clearUsersSearch" class="hidden link" onclick="show_users('reset')">Clear Search</span>
+				</td>
+				<td class="user-name-td">
+					<input type="text" id="searchUsersName" class="form-control search-users search-text" placeholder="Name">
+				</td>
+				<td class="user-role-td">
+					<input type="text" id="searchUsersName" class="form-control search-users search-text" placeholder="Role">
+				</td>
+				<td class="user-email-td">
+					<input type="text" id="searchUsersName" class="form-control search-users search-text" placeholder="Email">
+				</td>
+			</tr>
+		</thead>
+		<tbody id="usersTbody">
+			{% for user in users %}
+			<tr>
+				<td class="user-icon-td">
+					<i data-id="{{ user.id }}" class="users-check material-icons">&#xE835;</i>
+				</td>
+				<td class="user-name-td" id="{{ user.id }}" data-toggle="modal" data-target="#userModal" onclick="open_user(this.id)">{{ user.name }}</td>
+				<td class="user-role-td" id="{{ user.id }}" data-toggle="modal" data-target="#userModal" onclick="open_user(this.id)">
+					{{ user.role }}
+				</td>
+				<td class="user-email-td">
+					{{ user.email }}
+				</td>
+			</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+</div>
+
+<script type="text/javascript">
+$('.search-users').keypress(function(e){
+    if (e.which == 13) {
+    	search_users($(this).attr('id'));
+    }
+});
+
+$('.users-check').on('click', function () {
+  var entry_id = $(this).attr('data-id');
+  if ($(this).hasClass('checked')) {
+    $(this).removeClass('checked');
+    $(this).html('&#xE835;');
+    deselect_user(entry_id);
+  }
+  else {
+    $(this).addClass('checked');
+    $(this).html('&#xE834;');
+    select_user(entry_id);
+  }
+});
+
+</script>

@@ -297,9 +297,13 @@ a,a:hover,a:active,a:focus {
 
 .control-btn:hover,
 .control-btn:focus,
-.control-btn:active {
+.control-btn:active,
+.pagination-btn:hover,
+.pagination-btn:focus,
+.pagination-btn:active {
 	color: #fff;
   	background-color: #c9302c;
+  	outline: none !important;
 }
 
 .content-body {
@@ -354,6 +358,7 @@ a,a:hover,a:active,a:focus {
 .icon-td i,
 .blast-icon-td i,
 .contact-icon-td i,
+.user-icon-td i,
 .group-icon-td i {
 	font-size: 16px !important;
 	margin-right: 10px;
@@ -1252,11 +1257,6 @@ a,a:hover,a:active,a:focus {
 	background-color: #5cb85c;
 }
 
-.contact-name-td,
-.group-name-td {
-	font-weight: bold;
-}
-
 .contact-name-td {
 	width: 35%;
 }
@@ -1536,4 +1536,16 @@ a,a:hover,a:active,a:focus {
   	background-color: #c9302c;
   	border: none !important;
   	outline: none !important;
+}
+
+.conversations-star,
+.conversations-check,
+.blasts-check,
+.reminders-check,
+.contacts-check,
+.groups-check,
+.users-check {
+	-webkit-user-select: none;
+  	-moz-user-select: none;
+  	-ms-user-select: none;
 }
