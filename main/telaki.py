@@ -1111,11 +1111,13 @@ def receive_message():
     content = 'Thank you for your response. We will process your request.'
     chikka_url = 'https://post.chikka.com/smsapi/request'
     message_options = {
-        'message_type': 'SEND',
-        'mobile_number': '0%s'%data['mobile_number'][-10:],
+        'message_type': 'REPLY',
+        'mobile_number': data['mobile_number'],
         'shortcode': '29290420420',
+        'request_id': data['request_id'],
         'message_id': ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(32)),
         'message': content,
+        'request_cost': 'FREE',
         'client_id': 'ef8cf56d44f93b6ee6165a0caa3fe0d1ebeee9b20546998931907edbb266eb72',
         'secret_key': 'c4c461cc5aa5f9f89b701bc016a73e9981713be1bf7bb057c875dbfacff86e1d'
     }
