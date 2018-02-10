@@ -1088,12 +1088,13 @@ def receive_message():
                 )
         db.session.add(conversation)
         db.session.commit()
-    conversation.status='unread'
-    conversation.latest_content=data['message']
-    conversation.latest_date=datetime.datetime.now().strftime('%B %d, %Y')
-    conversation.latest_time=latest_time=time.strftime("%I:%M %p")
-    conversation.created_at=created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
-    db.session.commit()
+    else:
+        conversation.status='unread'
+        conversation.latest_content=data['message']
+        conversation.latest_date=datetime.datetime.now().strftime('%B %d, %Y')
+        conversation.latest_time=latest_time=time.strftime("%I:%M %p")
+        conversation.created_at=created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
+        db.session.commit()
 
     content = 'Thank you for your response. We will process your request.'
     chikka_url = 'https://post.chikka.com/smsapi/request'
@@ -1108,33 +1109,27 @@ def receive_message():
         'client_id': 'ef8cf56d44f93b6ee6165a0caa3fe0d1ebeee9b20546998931907edbb266eb72',
         'secret_key': 'c4c461cc5aa5f9f89b701bc016a73e9981713be1bf7bb057c875dbfacff86e1d',
     }
-    try:
-        r = requests.post(chikka_url,message_options)
-        # if r.status_code != 201:
-        if r.status_code != 200:
-            return jsonify(status='failed')
+    r = requests.post(chikka_url,message_options)
+    # if r.status_code != 201:
+    if r.status_code != 200:
+        return jsonify(status='failed')
 
-        reply = ConversationItem(
-            conversation_id=conversation.id,
-            message_type='outbound',
-            date=datetime.datetime.now().strftime('%B %d, %Y'),
-            time=time.strftime("%I:%M %p"),
-            content=content,
-            outbound_sender_name='System',
-            created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
-            )
-        db.session.add(reply)
-        db.session.commit()
-        conversation.latest_content = content
-        conversation.latest_date = reply.date
-        conversation.latest_time = reply.time
-        conversation.created_at = reply.created_at
-        db.session.commit()
-
-    except requests.exceptions.ConnectionError as e:
-        return jsonify(
-            status='success'
-            ),201
+    reply = ConversationItem(
+        conversation_id=conversation.id,
+        message_type='outbound',
+        date=datetime.datetime.now().strftime('%B %d, %Y'),
+        time=time.strftime("%I:%M %p"),
+        content=content,
+        outbound_sender_name='System',
+        created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
+        )
+    db.session.add(reply)
+    db.session.commit()
+    conversation.latest_content = content
+    conversation.latest_date = reply.date
+    conversation.latest_time = reply.time
+    conversation.created_at = reply.created_at
+    db.session.commit()
 
     return jsonify(
         status='success'
