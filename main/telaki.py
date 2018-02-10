@@ -1071,7 +1071,7 @@ def open_conversation():
 def receive_message():
     data = flask.request.form.to_dict()
     contact = Contact.query.filter_by(msisdn='0%s'%data['mobile_number'][-10:]).first()
-    conversation = Conversation.query.filter_by(msisdn=data['mobile_number']).first()
+    conversation = Conversation.query.filter_by(msisdn='0%s'%data['mobile_number'][-10:]).first()
     if not conversation or conversation == None:
         if contact:
             conversation = Conversation(
@@ -1088,13 +1088,25 @@ def receive_message():
                 )
         db.session.add(conversation)
         db.session.commit()
-    else:
-        conversation.status='unread'
-        conversation.latest_content=data['message']
-        conversation.latest_date=datetime.datetime.now().strftime('%B %d, %Y')
-        conversation.latest_time=latest_time=time.strftime("%I:%M %p")
-        conversation.created_at=created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
-        db.session.commit()
+
+    message = ConversationItem(
+        conversation_id=conversation.id,
+        message_type='inbound',
+        date=datetime.datetime.now().strftime('%B %d, %Y'),
+        time=time.strftime("%I:%M %p"),
+        content=data['message'],
+        created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
+        )
+
+    db.session.add(message)
+    db.session.commit()
+
+    conversation.status='unread'
+    conversation.latest_content=message.content
+    conversation.latest_date=message.date
+    conversation.latest_time=message.time
+    conversation.created_at=message.created_at
+    db.session.commit()
 
     content = 'Thank you for your response. We will process your request.'
     chikka_url = 'https://post.chikka.com/smsapi/request'
