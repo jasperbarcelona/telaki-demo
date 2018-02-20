@@ -29,31 +29,28 @@ def blast_sms(batch_id,date,time,message_content,client_no):
     messages = OutboundMessage.query.filter_by(batch_id=batch_id).all()
 
     for message in messages:
-        # message_options = {
-        #     'app_id': client.app_id,
-        #     'app_secret': client.app_secret,
-        #     'message': message_content,
-        #     'address': message.msisdn,
-        #     'passphrase': client.passphrase,
-        # }
-        chikka_url = 'https://post.chikka.com/smsapi/request'
         message_options = {
-            'message_type': 'SEND',
-            'mobile_number': message.msisdn,
-            'shortcode': '29290420420',
-            'message_id': ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(32)),
+            'app_id': client.app_id,
+            'app_secret': client.app_secret,
             'message': message_content,
-            'client_id': 'ef8cf56d44f93b6ee6165a0caa3fe0d1ebeee9b20546998931907edbb266eb72',
-            'secret_key': 'c4c461cc5aa5f9f89b701bc016a73e9981713be1bf7bb057c875dbfacff86e1d',
+            'address': message.msisdn,
+            'passphrase': client.passphrase,
         }
+        # chikka_url = 'https://post.chikka.com/smsapi/request'
+        # message_options = {
+        #     'message_type': 'SEND',
+        #     'mobile_number': message.msisdn,
+        #     'shortcode': '29290420420',
+        #     'message_id': ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(32)),
+        #     'message': message_content,
+        #     'client_id': 'ef8cf56d44f93b6ee6165a0caa3fe0d1ebeee9b20546998931907edbb266eb72',
+        #     'secret_key': 'c4c461cc5aa5f9f89b701bc016a73e9981713be1bf7bb057c875dbfacff86e1d',
+        # }
 
 
         try:
-            # r = requests.post(IPP_URL%client.shortcode,message_options)           
-            r = requests.post(chikka_url,message_options)
-            print r.content   
-            # if r.status_code == 201:
-            if r.status_code == 200:
+            r = requests.post(IPP_URL%client.shortcode,message_options)           
+            if r.status_code == 201:
                 message.status = 'success'
                 message.timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
             else:
@@ -93,26 +90,28 @@ def upload_contacts(batch_id,client_no,user_id,user_name):
                 vals.append(None)
             else:
                 vals.append(cell.value)
+        msisdn_list = []
+        if not '0%s'%str(vals[0])[-10:] in msisdn_list:
+            contact = Contact.query.filter_by(msisdn='0%s'%str(vals[0])[-10:]).first()
+            group = Group.query.filter_by(name=vals[2]).first()
+            if contact or contact != None:
+                db.session.delete(contact)
+                db.session.commit()
 
-        contact = Contact.query.filter_by(msisdn='0%s'%str(vals[0])[-10:]).first()
-        group = Group.query.filter_by(name=vals[2]).first()
-        if contact or contact != None:
-            db.session.delete(contact)
+            contact = Contact(
+                batch_id=batch.id,
+                client_no=client_no,
+                contact_type='Customer',
+                name=vals[1].title(),
+                msisdn='0%s'%str(vals[0])[-10:],
+                added_by=user_id,
+                added_by_name=user_name,
+                join_date=datetime.datetime.now().strftime('%B %d, %Y'),
+                created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
+                )
+            msisdn_list.append('0%s'%str(vals[0])[-10:])
+            db.session.add(contact)
             db.session.commit()
-
-        contact = Contact(
-            batch_id=batch.id,
-            client_no=client_no,
-            contact_type='Customer',
-            name=vals[1].title(),
-            msisdn='0%s'%str(vals[0])[-10:],
-            added_by=user_id,
-            added_by_name=user_name,
-            join_date=datetime.datetime.now().strftime('%B %d, %Y'),
-            created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
-            )
-        db.session.add(contact)
-        db.session.commit()
 
         conversation = Conversation.query.filter_by(msisdn=contact.msisdn).first()
         if conversation or conversation != None:

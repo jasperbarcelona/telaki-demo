@@ -1034,10 +1034,11 @@ function refresh_contacts_progress(batch_id) {
     function(data){
       $('#blastOverlay .blast-overlay-body').html(data['template']);
       if (data['pending'] != 0) {
-        refresh_contacts_progress(batch_id);
+        console.log(data['batch_id']);
+        refresh_contacts_progress(data['batch_id']);
       }
       else {
-        display_contacts_report(batch_id);
+        display_contacts_report(data['batch_id']);
       }
     });
 }

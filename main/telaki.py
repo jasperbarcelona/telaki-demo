@@ -882,23 +882,38 @@ def prepare_contacts_upload():
     file = flask.request.files['contactsFile']
     filename = secure_filename(file.filename)
     file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+    
     if file and allowed_file(file.filename):
         path = '%s/%s' % (UPLOAD_FOLDER, filename)
         book = xlrd.open_workbook(path)
         sheet = book.sheet_by_index(0)
         rows = sheet.nrows;
         cols = 3
+        msisdn_list = []
+        for row in range(rows):
+            repeated_msisdn = 0
+            cell = sheet.cell(row,0)
+            if cell.value in msisdn_list:
+                repeated_msisdn += 1
+            else:
+                existing_contact = Contact.query.filter_by(msisdn='0%s'%str(cell.value)[-10:]).first()
+                if existing_contact or existing_contact != None:
+                    repeated_msisdn += 1
+                else:
+                    msisdn_list.append(cell.value)
+            
 
         new_contact_upload = ContactBatch(
             client_no=session['client_no'],
             uploader_id=session['user_id'],
             uploader_name=session['user_name'],
-            batch_size=rows,
+            batch_size=rows - repeated_msisdn,
             date=datetime.datetime.now().strftime('%B %d, %Y'),
             time=time.strftime("%I:%M %p"),
             file_name=filename,
             created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
             )
+         
         db.session.add(new_contact_upload)
         db.session.commit()
 
@@ -1069,9 +1084,9 @@ def open_conversation():
 
 @app.route('/conversation/receive',methods=['GET','POST'])
 def receive_message():
-    data = flask.request.form.to_dict()
-    contact = Contact.query.filter_by(msisdn='0%s'%data['mobile_number'][-10:]).first()
-    conversation = Conversation.query.filter_by(msisdn='0%s'%data['mobile_number'][-10:]).first()
+    data = flask.request.form.to_dict()['inboundSMSMessageList']['inboundSMSMessage'][0]
+    contact = Contact.query.filter_by(msisdn='0%s'%data['senderAddress'][-10:]).first()
+    conversation = Conversation.query.filter_by(msisdn='0%s'%data['senderAddress'][-10:]).first()
     if not conversation or conversation == None:
         if contact:
             conversation = Conversation(
@@ -1083,8 +1098,8 @@ def receive_message():
         else:
             conversation = Conversation(
                 client_no='at-ic2017',
-                msisdn='0%s'%data['mobile_number'][-10:],
-                display_name='0%s'%data['mobile_number'][-10:],
+                msisdn='0%s'%data['senderAddress'][-10:],
+                display_name='0%s'%data['senderAddress'][-10:],
                 )
         db.session.add(conversation)
         db.session.commit()
@@ -1108,37 +1123,32 @@ def receive_message():
     conversation.created_at=message.created_at
     db.session.commit()
 
-    content = 'Thank you for your response. We will process your request.'
-    chikka_url = 'https://post.chikka.com/smsapi/request'
+    content = 'Thank you for using our hotline. We will try to get back to you as soon as possible.'
     message_options = {
-        'message_type': 'REPLY',
-        'mobile_number': data['mobile_number'],
-        'shortcode': '29290420420',
-        'request_id': data['request_id'],
-        'message_id': ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(32)),
-        'message': content,
-        'request_cost': 'FREE',
-        'client_id': 'ef8cf56d44f93b6ee6165a0caa3fe0d1ebeee9b20546998931907edbb266eb72',
-        'secret_key': 'c4c461cc5aa5f9f89b701bc016a73e9981713be1bf7bb057c875dbfacff86e1d'
-    }
+            'app_id': client.app_id,
+            'app_secret': client.app_secret,
+            'message': message_content,
+            'address': message.msisdn,
+            'passphrase': client.passphrase,
+        }
     r = requests.post(chikka_url,message_options)
-    # if r.status_code != 201:
-    reply = ConversationItem(
-        conversation_id=conversation.id,
-        message_type='outbound',
-        date=datetime.datetime.now().strftime('%B %d, %Y'),
-        time=time.strftime("%I:%M %p"),
-        content=content,
-        outbound_sender_name='System',
-        created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
-        )
-    db.session.add(reply)
-    db.session.commit()
-    conversation.latest_content = content
-    conversation.latest_date = reply.date
-    conversation.latest_time = reply.time
-    conversation.created_at = reply.created_at
-    db.session.commit()
+    if r.status_code != 201:
+        reply = ConversationItem(
+            conversation_id=conversation.id,
+            message_type='outbound',
+            date=datetime.datetime.now().strftime('%B %d, %Y'),
+            time=time.strftime("%I:%M %p"),
+            content=content,
+            outbound_sender_name='System',
+            created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
+            )
+        db.session.add(reply)
+        db.session.commit()
+        conversation.latest_content = content
+        conversation.latest_date = reply.date
+        conversation.latest_time = reply.time
+        conversation.created_at = reply.created_at
+        db.session.commit()
 
     return jsonify(
         status='success'
@@ -1530,17 +1540,32 @@ def send_text_blast():
             template=flask.render_template('blast_status.html', batch=new_batch)
             )
 
-    new_batch = Batch(
-        client_no=session['client_no'],
-        message_type='custom',
-        sender_id=session['user_id'],
-        sender_name=session['user_name'],
-        recipient=', '.join(session['group_recipients_name']+session['individual_recipients_name']),
-        date=datetime.datetime.now().strftime('%B %d, %Y'),
-        time=time.strftime("%I:%M %p"),
-        content=data['content'],
-        created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
-        )
+    if session['number_recipients']:
+        recipient_string = ', '.join(session['group_recipients_name']+session['individual_recipients_name'])
+        number_recipients = ', '.join(session['number_recipients'])
+        new_batch = Batch(
+            client_no=session['client_no'],
+            message_type='custom',
+            sender_id=session['user_id'],
+            sender_name=session['user_name'],
+            recipient='%s, %s' % (recipient_string,number_recipients),
+            date=datetime.datetime.now().strftime('%B %d, %Y'),
+            time=time.strftime("%I:%M %p"),
+            content=data['content'],
+            created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
+            )
+    else:
+        new_batch = Batch(
+            client_no=session['client_no'],
+            message_type='custom',
+            sender_id=session['user_id'],
+            sender_name=session['user_name'],
+            recipient=', '.join(session['group_recipients_name']+session['individual_recipients_name']),
+            date=datetime.datetime.now().strftime('%B %d, %Y'),
+            time=time.strftime("%I:%M %p"),
+            content=data['content'],
+            created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
+            )
     db.session.add(new_batch)
     db.session.commit()
 
@@ -1573,6 +1598,18 @@ def send_text_blast():
                 )
             db.session.add(new_message)
     db.session.commit()
+
+    if session['number_recipients']:
+        for msisdn in session['number_recipients']:
+            number_message = OutboundMessage(
+                batch_id=new_batch.id,
+                date=new_batch.date,
+                time=new_batch.time,
+                msisdn=msisdn
+                )
+            db.session.add(number_message)
+        db.session.commit()
+
 
     new_batch.batch_size = OutboundMessage.query.filter_by(batch_id=new_batch.id).count()
     new_batch.pending = OutboundMessage.query.filter_by(batch_id=new_batch.id,status='pending').count()
@@ -1639,8 +1676,9 @@ def get_reminder_progress():
 @app.route('/contacts/progress', methods=['GET', 'POST'])
 def get_contact_upload_progress():
     batch_id = flask.request.form.get('batch_id')
-    batch = ContactBatch.query.filter_by(id=batch_id).first()
+    batch = ContactBatch.query.filter_by(id=int(batch_id)).first()
     return jsonify(
+        batch_id=batch.id,
         pending=batch.pending,
         template=flask.render_template('contact_upload_status.html', batch=batch)
         )
@@ -1880,19 +1918,19 @@ def rebuild_database():
         created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
         )
 
-    for _ in range(1000):
-        admin = AdminUser(
-            client_no='at-ic2017',
-            email='hello@pisara.tech',
-            password='ratmaxi8',
-            name='Admin%s' % _,
-            role='Administrator',
-            join_date='November 14, 2017',
-            added_by_name='None',
-            created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
-            )
-        db.session.add(admin)
-        db.session.commit()
+    # for _ in range(1000):
+    #     admin = AdminUser(
+    #         client_no='at-ic2017',
+    #         email='hello@pisara.tech',
+    #         password='ratmaxi8',
+    #         name='Admin%s' % _,
+    #         role='Administrator',
+    #         join_date='November 14, 2017',
+    #         added_by_name='None',
+    #         created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
+    #         )
+    #     db.session.add(admin)
+    #     db.session.commit()
 
     admin = AdminUser(
         client_no='at-ic2017',
@@ -1920,7 +1958,7 @@ def rebuild_database():
         client_no='at-ic2017',
         email='ballesteros.alan@gmail.com',
         password='password',
-        name='Test Admin',
+        name='Alan Ballesteros',
         role='Administrator',
         join_date=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f'),
         added_by_name='Super Admin',
@@ -2024,7 +2062,7 @@ def rebuild_database():
         message_type='custom',
         sender_id=1,
         batch_size=3,
-        sender_name='Super Admin',
+        sender_name='Jasper Barcelona',
         recipient='AGN, ANB, JNC',
         date='November 14, 2017',
         time='07:36 AM',
@@ -2145,17 +2183,17 @@ def rebuild_database():
     #     created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
     #     )
 
-    for _ in range(1000):
-        new_group = Group(
-            client_no='at-ic2017',
-            name='AGN%s' % _,
-            size=0,
-            created_by_id=1,
-            created_by_name='Super Admin',
-            created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
-            )
-        db.session.add(new_group)
-        db.session.commit()
+    # for _ in range(1000):
+    #     new_group = Group(
+    #         client_no='at-ic2017',
+    #         name='AGN%s' % _,
+    #         size=0,
+    #         created_by_id=1,
+    #         created_by_name='Super Admin',
+    #         created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
+    #         )
+    #     db.session.add(new_group)
+    #     db.session.commit()
 
     new_group = Group(
         client_no='at-ic2017',
