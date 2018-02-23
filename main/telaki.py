@@ -41,6 +41,11 @@ from models import *
 import xlrd
 
 IPP_URL = 'https://devapi.globelabs.com.ph/smsmessaging/v1/outbound/%s/requests'
+ALSONS_APP_ID = 'MEoztReRyeHzaiXxaecR65HnqE98tz9g'
+ALSONS_APP_SECRET = '01c5d1f8d3bfa9966786065c5a2d829d7e84cf26fbfb4a47c91552cb7c091608'
+ALSONS_PASSPHRASE = 'PF5H8S9t7u'
+ALSONS_SHORTCODE = '21586853'
+
 ALLOWED_EXTENSIONS = set(['xls', 'xlsx', 'csv'])
 UPLOAD_FOLDER = 'static/records'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -1086,7 +1091,6 @@ def open_conversation():
 def receive_message():
     data = request.json['inboundSMSMessageList']['inboundSMSMessage'][0]
     contact = Contact.query.filter_by(msisdn='0%s'%data['senderAddress'][-10:]).first()
-    client = Client.query.filter_by(client_no=session['client_no'])
     conversation = Conversation.query.filter_by(msisdn='0%s'%data['senderAddress'][-10:]).first()
     if not conversation or conversation == None:
         if contact:
@@ -1126,13 +1130,13 @@ def receive_message():
 
     content = 'Thank you for using our hotline. We will try to get back to you as soon as possible.'
     message_options = {
-            'app_id': client.app_id,
-            'app_secret': client.app_secret,
+            'app_id': ALSONS_APP_ID,
+            'app_secret': ALSONS_APP_SECRET,
             'message': message_content,
             'address': message.msisdn,
-            'passphrase': client.passphrase,
+            'passphrase': ALSONS_PASSPHRASE,
         }
-    r = requests.post(chikka_url,message_options)
+    r = requests.post(IPP_URL%ALSONS_SHORTCODE,message_options)  
     if r.status_code != 201:
         reply = ConversationItem(
             conversation_id=conversation.id,
