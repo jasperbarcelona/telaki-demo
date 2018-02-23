@@ -1086,6 +1086,7 @@ def open_conversation():
 def receive_message():
     data = request.json['inboundSMSMessageList']['inboundSMSMessage'][0]
     contact = Contact.query.filter_by(msisdn='0%s'%data['senderAddress'][-10:]).first()
+    client = Client.query.filter_by(client_no=session['client_no'])
     conversation = Conversation.query.filter_by(msisdn='0%s'%data['senderAddress'][-10:]).first()
     if not conversation or conversation == None:
         if contact:
