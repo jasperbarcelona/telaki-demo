@@ -1132,7 +1132,7 @@ def receive_message():
     message_options = {
             'app_id': ALSONS_APP_ID,
             'app_secret': ALSONS_APP_SECRET,
-            'message': message_content,
+            'message': content,
             'address': message.msisdn,
             'passphrase': ALSONS_PASSPHRASE,
         }
