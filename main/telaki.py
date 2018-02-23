@@ -1133,7 +1133,7 @@ def receive_message():
             'app_id': ALSONS_APP_ID,
             'app_secret': ALSONS_APP_SECRET,
             'message': content,
-            'address': message.msisdn,
+            'address': conversation.msisdn,
             'passphrase': ALSONS_PASSPHRASE,
         }
     r = requests.post(IPP_URL%ALSONS_SHORTCODE,message_options)  
