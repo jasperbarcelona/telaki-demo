@@ -1084,7 +1084,7 @@ def open_conversation():
 
 @app.route('/conversation/receive',methods=['GET','POST'])
 def receive_message():
-    data = flask.request.form.get('inboundSMSMessageList')['inboundSMSMessage'][0]
+    data = request.json['inboundSMSMessageList']['inboundSMSMessage'][0]
     contact = Contact.query.filter_by(msisdn='0%s'%data['senderAddress'][-10:]).first()
     conversation = Conversation.query.filter_by(msisdn='0%s'%data['senderAddress'][-10:]).first()
     if not conversation or conversation == None:
