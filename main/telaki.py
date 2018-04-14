@@ -1904,375 +1904,407 @@ def rebuild_database():
     db.create_all()
 
     client = Client(
-        client_no='at-ic2017',
-        name='Alson\'s Trading',
-        app_id='MEoztReRyeHzaiXxaecR65HnqE98tz9g',
-        app_secret='01c5d1f8d3bfa9966786065c5a2d829d7e84cf26fbfb4a47c91552cb7c091608',
-        passphrase='PF5H8S9t7u',
-        shortcode='21586853',
+        client_no='qpdc',
+        name='Quezon Province Dental Chapter',
+        app_id='EGXMuB5eEgCMLTKxExieqkCGeGeGuBon',
+        app_secret='f3e1ab30e23ea7a58105f058318785ae236378d1d9ebac58fe8b42e1e239e1c3',
+        passphrase='24BUubukMQ',
+        shortcode='21588479',
         created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
         )
-
-    client1 = Client(
-        client_no='jm-ic2017',
-        name='Jayson Marketing',
-        app_id='x65gtry7b7u7oT5dAbi7oKudp6AptkGA',
-        app_secret='72755ee33c36657daaa38a57a50728f8ef2b00189577a0f5fb432f8549386239',
-        passphrase='PF5H8S9t7u',
-        shortcode='21587460',
-        created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
-        )
-
-    # for _ in range(1000):
-    #     admin = AdminUser(
-    #         client_no='at-ic2017',
-    #         email='hello@pisara.tech',
-    #         password='ratmaxi8',
-    #         name='Admin%s' % _,
-    #         role='Administrator',
-    #         join_date='November 14, 2017',
-    #         added_by_name='None',
-    #         created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
-    #         )
-    #     db.session.add(admin)
-    #     db.session.commit()
 
     admin = AdminUser(
-        client_no='at-ic2017',
+        client_no='qpdc',
         email='hello@pisara.tech',
         password='ratmaxi8',
         name='Super Admin',
         role='Administrator',
-        join_date='November 14, 2017',
+        join_date=datetime.datetime.now().strftime('%B %d, %Y'),
         added_by_name='None',
         created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
         )
 
     admin1 = AdminUser(
-        client_no='jm-ic2017',
-        email='hello@pisara.tech',
-        password='ratmaxi8',
-        name='Super Admin',
+        client_no='qpdc',
+        email='cy.lucero@yahoo.com',
+        password='clinic123',
+        name='Cyril Lucero',
         role='Administrator',
-        join_date='November 14, 2017',
+        join_date=datetime.datetime.now().strftime('%B %d, %Y'),
         added_by_name='None',
         created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
         )
 
-    admin2 = AdminUser(
-        client_no='at-ic2017',
-        email='ballesteros.alan@gmail.com',
-        password='password',
-        name='Alan Ballesteros',
-        role='Administrator',
-        join_date=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f'),
-        added_by_name='Super Admin',
-        created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
-        )
-
-    contact = Contact(
-        client_no='at-ic2017',
-        contact_type='Customer',
-        name='Alan Ballesteros',
-        msisdn='09176214704',
-        added_by=1,
-        added_by_name='Super Admin',
-        join_date='November 14, 2017',
-        created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
-        )
-
-    conversations = Conversation(
-        client_no='at-ic2017',
-        contact_name='Alan Ballesteros'.title(),
-        msisdn='09176214704',
-        display_name='Alan Ballesteros'.title(),
-        status='unread',
-        latest_content='This is a sample incoming message. You can try to reply to it',
-        latest_date='November 14, 2017',
-        latest_time='11:36 AM',
-        created_at='2017-11-14 11:36:49:270418',
-        )
-
-    conversations1 = Conversation(
-        client_no='at-ic2017',
-        msisdn='09159484200',
-        display_name='09159484200',
-        status='unread',
-        latest_content='This is a sample incoming message. You can try to reply to it',
-        latest_date='November 14, 2017',
-        latest_time='11:37 AM',
-        created_at='2017-11-14 11:37:49:270418',
-        )
-
-    conversations2 = Conversation(
-        client_no='at-ic2017',
-        msisdn='09189123948',
-        display_name='09189123948',
-        status='unread',
-        latest_content='This is a sample incoming message. You can try to reply to it',
-        latest_date='November 14, 2017',
-        latest_time='11:38 AM',
-        created_at='2017-11-14 11:38:49:270418',
-        )
-
-    # conversations1 = Conversation(
+    # client = Client(
     #     client_no='at-ic2017',
-    #     msisdn='09176214704',
-    #     display_name='09176214704',
-    #     status='unread',
-    #     latest_content='This is another sample message.',
-    #     latest_date='November 13, 2017',
-    #     latest_time='12:23 PM',
-    #     created_at='2017-11-13 12:23:49:270418',
+    #     name='Alson\'s Trading',
+    #     app_id='MEoztReRyeHzaiXxaecR65HnqE98tz9g',
+    #     app_secret='01c5d1f8d3bfa9966786065c5a2d829d7e84cf26fbfb4a47c91552cb7c091608',
+    #     passphrase='PF5H8S9t7u',
+    #     shortcode='21586853',
+    #     created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
     #     )
 
-    message = ConversationItem(
-        conversation_id=1,
-        message_type='inbound',
-        date='November 14, 2017',
-        time='11:36 AM',
-        content='This is a sample incoming message. You can try to reply to it.',
-        created_at='2017-11-14 11:30:49:270418'
-        )
-
-    message1 = ConversationItem(
-        conversation_id=2,
-        message_type='inbound',
-        date='November 14, 2017',
-        time='11:37 AM',
-        content='This is a sample incoming message. You can try to reply to it.',
-        created_at='2017-11-14 11:30:49:270418'
-        )
-
-    message2 = ConversationItem(
-        conversation_id=3,
-        message_type='inbound',
-        date='November 14, 2017',
-        time='11:38 AM',
-        content='This is a sample incoming message. You can try to reply to it.',
-        created_at='2017-11-14 11:30:49:270418'
-        )
-
-    # message2 = ConversationItem(
-    #     conversation_id=2,
-    #     message_type='inbound',
-    #     date='November 13, 2017',
-    #     time='12:10 PM',
-    #     content='This is another sample message.',
-    #     created_at='2017-11-13 12:10:49:270418'
+    # client1 = Client(
+    #     client_no='jm-ic2017',
+    #     name='Jayson Marketing',
+    #     app_id='x65gtry7b7u7oT5dAbi7oKudp6AptkGA',
+    #     app_secret='72755ee33c36657daaa38a57a50728f8ef2b00189577a0f5fb432f8549386239',
+    #     passphrase='PF5H8S9t7u',
+    #     shortcode='21587460',
+    #     created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
     #     )
 
-    blast = Batch(
-        client_no='at-ic2017',
-        message_type='custom',
-        sender_id=1,
-        batch_size=3,
-        sender_name='Jasper Barcelona',
-        recipient='AGN, ANB, JNC',
-        date='November 14, 2017',
-        time='07:36 AM',
-        content='This is a sample text blast.',
-        done=3,
-        failed=0,
-        pending=0,
-        created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
-        ) 
+    # # for _ in range(1000):
+    # #     admin = AdminUser(
+    # #         client_no='at-ic2017',
+    # #         email='hello@pisara.tech',
+    # #         password='ratmaxi8',
+    # #         name='Admin%s' % _,
+    # #         role='Administrator',
+    # #         join_date='November 14, 2017',
+    # #         added_by_name='None',
+    # #         created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
+    # #         )
+    # #     db.session.add(admin)
+    # #     db.session.commit()
 
-    blast_message = OutboundMessage(
-        batch_id=1,
-        date='November 14, 2017',
-        time='07:36 AM',
-        contact_name='ABAC, AILYN-AGN'.title(),
-        msisdn='09994282203',
-        status='success',
-        created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
-        )
-    
-    blast_message1 = OutboundMessage(
-        batch_id=1,
-        date='November 14, 2017',
-        time='07:36 AM',
-        contact_name='ABAD, LANDELINA ORCIGA-ANB'.title(),
-        msisdn='09183132539',
-        status='success',
-        created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
-        )
+    # admin = AdminUser(
+    #     client_no='at-ic2017',
+    #     email='hello@pisara.tech',
+    #     password='ratmaxi8',
+    #     name='Super Admin',
+    #     role='Administrator',
+    #     join_date='November 14, 2017',
+    #     added_by_name='None',
+    #     created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
+    #     )
 
-    blast_message2 = OutboundMessage(
-        batch_id=1,
-        date='November 14, 2017',
-        time='07:36 AM',
-        contact_name='ABAD, NELSON M.-JNC'.title(),
-        msisdn='09071755339',
-        status='success',
-        created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
-        )
+    # admin1 = AdminUser(
+    #     client_no='jm-ic2017',
+    #     email='hello@pisara.tech',
+    #     password='ratmaxi8',
+    #     name='Super Admin',
+    #     role='Administrator',
+    #     join_date='November 14, 2017',
+    #     added_by_name='None',
+    #     created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
+    #     )
 
-    reminder = ReminderBatch(
-        client_no='at-ic2017',
-        sender_id=1,
-        batch_size=3,
-        sender_name='Super Admin',
-        date='November 14, 2017',
-        time='11:36 AM',
-        file_name='payment_reminders.xls',
-        done=3,
-        failed=0,
-        pending=0,
-        created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
-        )
-
-    reminder_message = ReminderMessage(
-        batch_id=1,
-        date='November 14, 2017',
-        time='11:36 AM',
-        contact_name='ABAC, AILYN-AGN'.title(),
-        content='This is a sample payment reminder.',
-        msisdn='09994282203',
-        status='success',
-        created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
-        )
-
-    reminder_message1 = ReminderMessage(
-        batch_id=1,
-        date='November 14, 2017',
-        time='11:36 AM',
-        contact_name='ABAD, LANDELINA ORCIGA-ANB'.title(),
-        content='This is a sample payment reminder.',
-        msisdn='09183132539',
-        status='success',
-        created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
-        )
-
-    reminder_message2 = ReminderMessage(
-        batch_id=1,
-        date='November 14, 2017',
-        time='11:36 AM',
-        contact_name='ABAD, NELSON M.-JNC'.title(),
-        content='This is a sample payment reminder.',
-        msisdn='09071755339',
-        status='success',
-        created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
-        )
+    # admin2 = AdminUser(
+    #     client_no='at-ic2017',
+    #     email='ballesteros.alan@gmail.com',
+    #     password='password',
+    #     name='Alan Ballesteros',
+    #     role='Administrator',
+    #     join_date=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f'),
+    #     added_by_name='Super Admin',
+    #     created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
+    #     )
 
     # contact = Contact(
     #     client_no='at-ic2017',
     #     contact_type='Customer',
-    #     name='ABAC, AILYN-AGN'.title(),
+    #     name='Alan Ballesteros',
+    #     msisdn='09176214704',
+    #     added_by=1,
+    #     added_by_name='Super Admin',
+    #     join_date='November 14, 2017',
+    #     created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
+    #     )
+
+    # conversations = Conversation(
+    #     client_no='at-ic2017',
+    #     contact_name='Alan Ballesteros'.title(),
+    #     msisdn='09176214704',
+    #     display_name='Alan Ballesteros'.title(),
+    #     status='unread',
+    #     latest_content='This is a sample incoming message. You can try to reply to it',
+    #     latest_date='November 14, 2017',
+    #     latest_time='11:36 AM',
+    #     created_at='2017-11-14 11:36:49:270418',
+    #     )
+
+    # conversations1 = Conversation(
+    #     client_no='at-ic2017',
+    #     msisdn='09159484200',
+    #     display_name='09159484200',
+    #     status='unread',
+    #     latest_content='This is a sample incoming message. You can try to reply to it',
+    #     latest_date='November 14, 2017',
+    #     latest_time='11:37 AM',
+    #     created_at='2017-11-14 11:37:49:270418',
+    #     )
+
+    # conversations2 = Conversation(
+    #     client_no='at-ic2017',
+    #     msisdn='09189123948',
+    #     display_name='09189123948',
+    #     status='unread',
+    #     latest_content='This is a sample incoming message. You can try to reply to it',
+    #     latest_date='November 14, 2017',
+    #     latest_time='11:38 AM',
+    #     created_at='2017-11-14 11:38:49:270418',
+    #     )
+
+    # # conversations1 = Conversation(
+    # #     client_no='at-ic2017',
+    # #     msisdn='09176214704',
+    # #     display_name='09176214704',
+    # #     status='unread',
+    # #     latest_content='This is another sample message.',
+    # #     latest_date='November 13, 2017',
+    # #     latest_time='12:23 PM',
+    # #     created_at='2017-11-13 12:23:49:270418',
+    # #     )
+
+    # message = ConversationItem(
+    #     conversation_id=1,
+    #     message_type='inbound',
+    #     date='November 14, 2017',
+    #     time='11:36 AM',
+    #     content='This is a sample incoming message. You can try to reply to it.',
+    #     created_at='2017-11-14 11:30:49:270418'
+    #     )
+
+    # message1 = ConversationItem(
+    #     conversation_id=2,
+    #     message_type='inbound',
+    #     date='November 14, 2017',
+    #     time='11:37 AM',
+    #     content='This is a sample incoming message. You can try to reply to it.',
+    #     created_at='2017-11-14 11:30:49:270418'
+    #     )
+
+    # message2 = ConversationItem(
+    #     conversation_id=3,
+    #     message_type='inbound',
+    #     date='November 14, 2017',
+    #     time='11:38 AM',
+    #     content='This is a sample incoming message. You can try to reply to it.',
+    #     created_at='2017-11-14 11:30:49:270418'
+    #     )
+
+    # # message2 = ConversationItem(
+    # #     conversation_id=2,
+    # #     message_type='inbound',
+    # #     date='November 13, 2017',
+    # #     time='12:10 PM',
+    # #     content='This is another sample message.',
+    # #     created_at='2017-11-13 12:10:49:270418'
+    # #     )
+
+    # blast = Batch(
+    #     client_no='at-ic2017',
+    #     message_type='custom',
+    #     sender_id=1,
+    #     batch_size=3,
+    #     sender_name='Jasper Barcelona',
+    #     recipient='AGN, ANB, JNC',
+    #     date='November 14, 2017',
+    #     time='07:36 AM',
+    #     content='This is a sample text blast.',
+    #     done=3,
+    #     failed=0,
+    #     pending=0,
+    #     created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
+    #     ) 
+
+    # blast_message = OutboundMessage(
+    #     batch_id=1,
+    #     date='November 14, 2017',
+    #     time='07:36 AM',
+    #     contact_name='ABAC, AILYN-AGN'.title(),
     #     msisdn='09994282203',
-    #     added_by=1,
-    #     added_by_name='Super Admin',
-    #     join_date='November 10, 2017',
+    #     status='success',
     #     created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
-    #     )
-
-    # contact1 = Contact(
-    #     client_no='at-ic2017',
-    #     contact_type='Customer',
-    #     name='ABAD, LANDELINA ORCIGA-ANB'.title(),
-    #     msisdn='09183132539',
-    #     added_by=1,
-    #     added_by_name='Super Admin',
-    #     join_date='November 10, 2017',
-    #     created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
-    #     )
-
-    # contact2 = Contact(
-    #     client_no='at-ic2017',
-    #     contact_type='Customer',
-    #     name='ABAD, NELSON M.-JNC'.title(),
-    #     msisdn='09071755339',
-    #     added_by=1,
-    #     added_by_name='Super Admin',
-    #     join_date='November 10, 2017',
-    #     created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
-    #     )
-
-    # for _ in range(1000):
-    #     new_group = Group(
-    #         client_no='at-ic2017',
-    #         name='AGN%s' % _,
-    #         size=0,
-    #         created_by_id=1,
-    #         created_by_name='Super Admin',
-    #         created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
-    #         )
-    #     db.session.add(new_group)
-    #     db.session.commit()
-
-    new_group = Group(
-        client_no='at-ic2017',
-        name='AGN',
-        size=0,
-        created_by_id=1,
-        created_by_name='Super Admin',
-        created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
-        )
-
-    new_group1 = Group(
-        client_no='at-ic2017',
-        name='ANB',
-        size=0,
-        created_by_id=1,
-        created_by_name='Super Admin',
-        created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
-        )
-
-    new_group2 = Group(
-        client_no='at-ic2017',
-        name='JNC',
-        size=0,
-        created_by_id=1,
-        created_by_name='Super Admin',
-        created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
-        )
-
-    # contact_group = ContactGroup(
-    #     group_id=1,
-    #     contact_id=1
-    #     )
-
-    # contact_group1 = ContactGroup(
-    #     group_id=2,
-    #     contact_id=2
-    #     )
-
-    # contact_group2 = ContactGroup(
-    #     group_id=3,
-    #     contact_id=3
     #     )
     
+    # blast_message1 = OutboundMessage(
+    #     batch_id=1,
+    #     date='November 14, 2017',
+    #     time='07:36 AM',
+    #     contact_name='ABAD, LANDELINA ORCIGA-ANB'.title(),
+    #     msisdn='09183132539',
+    #     status='success',
+    #     created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
+    #     )
+
+    # blast_message2 = OutboundMessage(
+    #     batch_id=1,
+    #     date='November 14, 2017',
+    #     time='07:36 AM',
+    #     contact_name='ABAD, NELSON M.-JNC'.title(),
+    #     msisdn='09071755339',
+    #     status='success',
+    #     created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
+    #     )
+
+    # reminder = ReminderBatch(
+    #     client_no='at-ic2017',
+    #     sender_id=1,
+    #     batch_size=3,
+    #     sender_name='Super Admin',
+    #     date='November 14, 2017',
+    #     time='11:36 AM',
+    #     file_name='payment_reminders.xls',
+    #     done=3,
+    #     failed=0,
+    #     pending=0,
+    #     created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
+    #     )
+
+    # reminder_message = ReminderMessage(
+    #     batch_id=1,
+    #     date='November 14, 2017',
+    #     time='11:36 AM',
+    #     contact_name='ABAC, AILYN-AGN'.title(),
+    #     content='This is a sample payment reminder.',
+    #     msisdn='09994282203',
+    #     status='success',
+    #     created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
+    #     )
+
+    # reminder_message1 = ReminderMessage(
+    #     batch_id=1,
+    #     date='November 14, 2017',
+    #     time='11:36 AM',
+    #     contact_name='ABAD, LANDELINA ORCIGA-ANB'.title(),
+    #     content='This is a sample payment reminder.',
+    #     msisdn='09183132539',
+    #     status='success',
+    #     created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
+    #     )
+
+    # reminder_message2 = ReminderMessage(
+    #     batch_id=1,
+    #     date='November 14, 2017',
+    #     time='11:36 AM',
+    #     contact_name='ABAD, NELSON M.-JNC'.title(),
+    #     content='This is a sample payment reminder.',
+    #     msisdn='09071755339',
+    #     status='success',
+    #     created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
+    #     )
+
+    # # contact = Contact(
+    # #     client_no='at-ic2017',
+    # #     contact_type='Customer',
+    # #     name='ABAC, AILYN-AGN'.title(),
+    # #     msisdn='09994282203',
+    # #     added_by=1,
+    # #     added_by_name='Super Admin',
+    # #     join_date='November 10, 2017',
+    # #     created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
+    # #     )
+
+    # # contact1 = Contact(
+    # #     client_no='at-ic2017',
+    # #     contact_type='Customer',
+    # #     name='ABAD, LANDELINA ORCIGA-ANB'.title(),
+    # #     msisdn='09183132539',
+    # #     added_by=1,
+    # #     added_by_name='Super Admin',
+    # #     join_date='November 10, 2017',
+    # #     created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
+    # #     )
+
+    # # contact2 = Contact(
+    # #     client_no='at-ic2017',
+    # #     contact_type='Customer',
+    # #     name='ABAD, NELSON M.-JNC'.title(),
+    # #     msisdn='09071755339',
+    # #     added_by=1,
+    # #     added_by_name='Super Admin',
+    # #     join_date='November 10, 2017',
+    # #     created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
+    # #     )
+
+    # # for _ in range(1000):
+    # #     new_group = Group(
+    # #         client_no='at-ic2017',
+    # #         name='AGN%s' % _,
+    # #         size=0,
+    # #         created_by_id=1,
+    # #         created_by_name='Super Admin',
+    # #         created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
+    # #         )
+    # #     db.session.add(new_group)
+    # #     db.session.commit()
+
+    # new_group = Group(
+    #     client_no='at-ic2017',
+    #     name='AGN',
+    #     size=0,
+    #     created_by_id=1,
+    #     created_by_name='Super Admin',
+    #     created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
+    #     )
+
+    # new_group1 = Group(
+    #     client_no='at-ic2017',
+    #     name='ANB',
+    #     size=0,
+    #     created_by_id=1,
+    #     created_by_name='Super Admin',
+    #     created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
+    #     )
+
+    # new_group2 = Group(
+    #     client_no='at-ic2017',
+    #     name='JNC',
+    #     size=0,
+    #     created_by_id=1,
+    #     created_by_name='Super Admin',
+    #     created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
+    #     )
+
+    # # contact_group = ContactGroup(
+    # #     group_id=1,
+    # #     contact_id=1
+    # #     )
+
+    # # contact_group1 = ContactGroup(
+    # #     group_id=2,
+    # #     contact_id=2
+    # #     )
+
+    # # contact_group2 = ContactGroup(
+    # #     group_id=3,
+    # #     contact_id=3
+    # #     )
+    
     db.session.add(client)
-    db.session.add(client1)
+    # db.session.add(client1)
     db.session.add(admin)
     db.session.add(admin1)
-    db.session.add(admin2)
-    db.session.add(contact)
-    db.session.add(conversations)
-    db.session.add(conversations1)
-    db.session.add(conversations2)
-    db.session.add(message)
-    db.session.add(message1)
-    db.session.add(message2)
+    # db.session.add(admin2)
+    # db.session.add(contact)
+    # db.session.add(conversations)
+    # db.session.add(conversations1)
+    # db.session.add(conversations2)
+    # db.session.add(message)
+    # db.session.add(message1)
+    # db.session.add(message2)
 
-    db.session.add(blast)
-    db.session.add(reminder)
-    db.session.add(contact)
-    # db.session.add(contact1)
-    # db.session.add(contact2)
-    db.session.add(new_group)
-    db.session.add(new_group1)
-    db.session.add(new_group2)
-    # db.session.add(contact_group)
-    # db.session.add(contact_group1)
-    # db.session.add(contact_group2)
+    # db.session.add(blast)
+    # db.session.add(reminder)
+    # db.session.add(contact)
+    # # db.session.add(contact1)
+    # # db.session.add(contact2)
+    # db.session.add(new_group)
+    # db.session.add(new_group1)
+    # db.session.add(new_group2)
+    # # db.session.add(contact_group)
+    # # db.session.add(contact_group1)
+    # # db.session.add(contact_group2)
 
-    db.session.add(blast_message)
-    db.session.add(blast_message1)
-    db.session.add(blast_message2)
-    db.session.add(reminder_message)
-    db.session.add(reminder_message1)
-    db.session.add(reminder_message2)
+    # db.session.add(blast_message)
+    # db.session.add(blast_message1)
+    # db.session.add(blast_message2)
+    # db.session.add(reminder_message)
+    # db.session.add(reminder_message1)
+    # db.session.add(reminder_message2)
 
     db.session.commit()
 
