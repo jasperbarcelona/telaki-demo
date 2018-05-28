@@ -19,7 +19,7 @@
                 {% if not groups[0] %}
                 <span class="no-groups-label">You don't have any groups.</span>
                 {% else %}
-                <input type="text" id="searchGroupFromContact" class="form-control" placeholder="Search groups">
+                <input type="text" id="searchGroupFromContactSave" class="form-control" placeholder="Search groups">
                 <div class="contact-group-container">
                     {% for group in groups %}
                     <div id="{{ group.id }}" class="group-picker-save" onclick="toggle_group_save({{group.id}})">{{ group.name }}</div>
@@ -34,6 +34,43 @@
         </div><!-- /.modal-content -->
     </div><!-- /.modal-dialog -->
 </div>
+
+<div class="modal fade" id="addUserModal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="gridSystemModalLabel">New User</h4>
+            </div>
+            <div class="modal-body">
+                <div class="input-container whole">
+                    <input type="text" id="addUserName" onblur="validate_blank(this,this.value)" onchange="validate_blank(this,this.value)" data-error="errorUserName" class="form-control floatlabel" data-class="input-label" placeholder="Full Name">
+                    <div id="errorUserName" class="error-icon-container hidden tooltip" title="This field is required." title="This field is required."><i class="material-icons">&#xE001;</i></div>
+                </div>
+                <div class="input-container whole">
+                    <input type="text" id="addUserEmail" onblur="validate_blank(this,this.value)" onchange="validate_blank(this,this.value)" data-error="errorUserEmail" class="form-control floatlabel" data-class="input-label" placeholder="Email">
+                    <div id="errorUserEmail" class="error-icon-container hidden tooltip" title="This field is required." title="This field is required."><i class="material-icons">&#xE001;</i></div>
+                </div>
+                <div class="input-container whole">
+                    <input type="password" id="addUserPassword" onblur="validate_blank(this,this.value)" onchange="validate_blank(this,this.value)" data-error="errorUserPassword" class="form-control floatlabel" data-class="input-label" placeholder="Temporary Password">
+                    <div id="errorUserPassword" class="error-icon-container hidden tooltip" title="This field is required." title="This field is required."><i class="material-icons">&#xE001;</i></div>
+                </div>
+                <div class="input-container whole">
+                    <select class="form-control" id="addUserRole" onblur="validate_blank(this,this.value)" onchange="validate_blank(this,this.value);" data-error="errorUserRole" class="form-control">
+                        <option value="" selected disabled>Role</option>
+                        <option value="Administrator">Administrator</option>
+                        <option value="Normal User">Normal User</option>
+                    </select>
+                    <div id="errorUserRole" class="error-icon-container hidden tooltip" title="This field is required." title="This field is required."><i class="material-icons">&#xE001;</i></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="cancelUserBtn" class="btn btn-danger modal-btn" data-dismiss="modal">Cancel</button>
+                <button type="button" id="saveUserBtn" class="btn btn-primary modal-btn" disabled onclick="save_user()">Save</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>
+
 
 <div class="modal fade" id="groupMembersModal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -58,12 +95,38 @@
                 <h4 class="modal-title" id="gridSystemModalLabel">New Group</h4>
             </div>
             <div class="modal-body">
-                <input type="text" id="addGroupName" onkeyup="validate_group()" class="form-control floatlabel" data-class="input-label" placeholder="Group Name">
+                <div class="input-container whole">
+                    <input type="text" id="addGroupName" onblur="validate_blank(this,this.value)" onchange="validate_blank(this,this.value)" onkeyup="validate_group()" data-error="errorGroupName" class="form-control floatlabel" data-class="input-label" placeholder="Group Name">
+                    <div id="errorGroupName" class="error-icon-container hidden tooltip" title="This field is required." title="This field is required."><i class="material-icons">&#xE001;</i></div>
+                </div>
                 <span id="createGroupError" class="error-text hidden"></span>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-danger modal-btn" data-dismiss="modal">Close</button>
                 <button id="saveGroupBtn" type="button" class="btn btn-primary modal-btn" onclick="save_group()" disabled>Save</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>
+
+<div class="modal fade" id="changePasswordModal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="gridSystemModalLabel">Change Password</h4>
+            </div>
+            <div class="modal-body">
+                <div class="input-container whole">
+                    <input type="password" id="changePasswordText" onblur="validate_password(this,this.value)" onchange="validate_password(this,this.value)" data-error="errorPassword" class="form-control floatlabel" data-class="input-label" placeholder="Password">
+                    <div id="errorPassword" class="error-icon-container hidden tooltip" title="Must be atleast 8 characters."><i class="material-icons">&#xE001;</i></div>
+                </div>
+                <div class="input-container whole">
+                    <input type="password" id="changePasswordConfirmText" onblur="validate_password_confirm(this,this.value)" onchange="validate_password_confirm(this,this.value)" data-error="errorPasswordConfirm" class="form-control floatlabel" data-class="input-label" placeholder="Confirm Password">
+                    <div id="errorPasswordConfirm" class="error-icon-container hidden tooltip" title="Passwords don't match."><i class="material-icons">&#xE001;</i></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="savePasswordBtn" type="button" class="btn btn-primary modal-btn" onclick="save_password()" disabled  data-loading-text="Saving.." data-complete-text="Save">Save</button>
             </div>
         </div><!-- /.modal-content -->
     </div><!-- /.modal-dialog -->
@@ -120,7 +183,11 @@
                             </div>
                             <div id="recipientGroupLoading" class="hidden">Loading..</div>
                             <div id="recipientGroupContainer">
+                                {% if contact_count == 0 %}
+                                <div id="everyoneRecipient" class="recipient-group" onclick="empty_popup()">
+                                {% else %}
                                 <div id="everyoneRecipient" class="recipient-group" onclick="add_everyone_recipient({{ contact_count }})"">
+                                {% endif %}
                                     <div class="recipient-group-left">
                                         <span class="recipient-group-name">Everyone</span>
                                     </div>
@@ -132,7 +199,11 @@
                                         {% endif %}
                                     </div>
                                 </div>
-                                <div id="customersRecipient" class="recipient-group" onclick="add_customers_recipient({{ customers_count }})"">
+                                {% if customers_count == 0 %}
+                                <div id="customersRecipient" class="recipient-group" onclick="empty_popup()">
+                                {% else %}
+                                <div id="customersRecipient" class="recipient-group" onclick="add_customers_recipient({{ customers_count }})">
+                                {% endif %}
                                     <div class="recipient-group-left">
                                         <span class="recipient-group-name">All Customers</span>
                                     </div>
@@ -144,7 +215,11 @@
                                         {% endif %}
                                     </div>
                                 </div>
-                                <div id="staffRecipient" class="recipient-group" onclick="add_staff_recipient({{ staff_count }})"">
+                                {% if staff_count == 0 %}
+                                <div id="staffRecipient" class="recipient-group" onclick="empty_popup()">
+                                {% else %}
+                                <div id="staffRecipient" class="recipient-group" onclick="add_staff_recipient({{ staff_count }})">
+                                {% endif %}
                                     <div class="recipient-group-left">
                                         <span class="recipient-group-name">All Staff</span>
                                     </div>
@@ -157,7 +232,11 @@
                                     </div>
                                 </div>
                                 {% for group in groups %}
+                                {% if group.size == 0 %}
+                                <div id="{{ group.id }}" class="recipient-group" onclick="empty_popup()">
+                                {% else %}
                                 <div id="{{ group.id }}" class="recipient-group" onclick="add_recipient({{ group.id }}, '{{ group.name }}', {{ group.size }})">
+                                {% endif %}
                                     <div class="recipient-group-left">
                                         <span class="recipient-group-name">{{ group.name }}</span>
                                     </div>
@@ -281,26 +360,28 @@
             </div>
             <div class="modal-body">
                 <span id="groupsLabel" class="input-group-label">Basic Info:</span>
-                <div class="input-text-container">
-                    <input type="text" id="addContactName" class="form-control floatlabel" data-class="input-label" placeholder="Name" onkeyup="validate_add()">
+                <div class="input-container whole">
+                    <input type="text" id="addContactName" onblur="validate_blank(this,this.value)" onchange="validate_blank(this,this.value)" onkeyup="validate_add()" data-error="errorContactName" class="form-control floatlabel" data-class="input-label" placeholder="Full Name">
+                    <div id="errorContactName" class="error-icon-container hidden tooltip" title="This field is required." title="This field is required."><i class="material-icons">&#xE001;</i></div>
                 </div>
-                <div class="input-text-container">
-                    <input type="text" id="addContactMsisdn" class="form-control floatlabel" data-class="input-label" placeholder="Mobile Number" onkeyup="validate_add()">
+                <div class="input-container whole">
+                    <input type="text" id="addContactMsisdn" data-error="errorContactMsisdn" onblur="validate_blank(this,this.value); validate_msisdn(this,this.value);" class="form-control floatlabel" data-class="input-label" placeholder="Mobile Number">
+                    <div id="errorContactMsisdn" class="error-icon-container hidden tooltip" title="Must be exactly 11 characters."><i class="material-icons">&#xE001;</i></div>
                 </div>
                 <span class="input-group-label">Contact Type:</span>
                 <div class="contact-type-picker customer add-contact-picker" onclick="validate_add()">Customer</div>
                 <div class="contact-type-picker staff add-contact-picker" onclick="validate_add()">Staff</div>
                 <span id="groupsLabel" class="input-group-label">Groups:</span>
-                {% if not groups[0] %}
-                <span class="no-groups-label">You don't have any groups.</span>
-                {% else %}
                 <input type="text" id="searchGroupFromContact" class="form-control" placeholder="Search groups">
                 <div class="contact-group-container">
+                    {% if not groups[0] %}
+                    <span class="no-groups-label">You don't have any groups.</span>
+                    {% else %}
                     {% for group in groups %}
                     <div id="{{ group.id }}" class="group-picker-add" onclick="toggle_group_add({{group.id}})">{{ group.name }}</div>
                     {% endfor %}
+                    {% endif %}
                 </div>
-                {% endif %}
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-danger modal-btn" data-dismiss="modal">Close</button>

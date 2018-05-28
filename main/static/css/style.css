@@ -762,6 +762,8 @@ a,a:hover,a:active,a:focus {
 
 #addReminderModal .modal-body,
 #createGroupModal .modal-body,
+#addUserModal .modal-body,
+#changePasswordModal .modal-body,
 #createGroupModalContact .modal-body,
 #createGroupModalContactSave .modal-body,
 #uploadContactsModal .modal-body {
@@ -789,6 +791,7 @@ a,a:hover,a:active,a:focus {
 #editContactModal .form-control,
 #editContactModal .form-control,
 #createGroupModal .form-control,
+#addUserModal .form-control:not(#addUserEmail):not(#addUserPassword),
 #createGroupModalContact .form-control,
 #createGroupModalContactSave .form-control,
 #addContactModal .form-control,
@@ -802,7 +805,23 @@ a,a:hover,a:active,a:focus {
 	border-top: 0 !important;
 	border-left: 0 !important;
 	border-right: 0 !important;
-	border-bottom: 1px solid #999 !important;
+	border-bottom: 1px solid #999;
+	box-shadow: none !important;
+	border-radius: 0 !important;
+	font-size: 15px;
+}
+
+#addUserEmail,
+#addUserPassword,
+#changePasswordModal .form-control {
+	margin-bottom: 10px;
+	outline: none !important;
+	height: 40px;
+	margin-bottom: 20px;
+	border-top: 0 !important;
+	border-left: 0 !important;
+	border-right: 0 !important;
+	border-bottom: 1px solid #999;
 	box-shadow: none !important;
 	border-radius: 0 !important;
 	font-size: 15px;
@@ -974,6 +993,63 @@ a,a:hover,a:active,a:focus {
 	background-color: #d9534f;
 }
 
+.input-container {
+	position: relative;
+	height: 60px;
+}
+
+.input-container .form-control {
+	padding-right: 50px;
+}
+
+.input-container.left .error-icon-container {
+	right: 35px;
+}
+
+.input-container.right .error-icon-container,
+.input-container.whole .error-icon-container {
+	right: 15px;
+}
+
+.input-container .error-icon-container {
+	position: absolute;
+	top: 0;
+	height: 100%;
+	padding-bottom: 25px !important;
+	display: -webkit-flex;
+	display: flex;
+	-webkit-flex-direction: column;
+	flex-direction: column;
+	-webkit-align-items: center;
+	align-items: center;
+	-webkit-justify-content: center;
+	justify-content: center;
+}
+
+.input-container:not(.whole) {
+	float: left;
+	width: 50%;
+}
+
+.input-container.whole {
+	float: left;
+	width: 100%;
+}
+
+.input-container.left {
+	padding-right: 20px;
+}
+
+.input-container.right {
+	padding-left: 20px;
+}
+
+.error-icon-container i {
+	color: #d9534f !important;
+	font-size: 25px !important;
+	cursor: pointer;
+}
+
 .error-text {
 	color: #d9534f;
 	font-weight: bold;
@@ -1059,6 +1135,7 @@ a,a:hover,a:active,a:focus {
 .add-recipient-left,
 .add-recipient-right {
 	float: left;
+	position: relative;
 	height: calc(100vh - 200px);
 }
 
@@ -1545,6 +1622,25 @@ a,a:hover,a:active,a:focus {
 .contacts-check,
 .groups-check,
 .users-check {
+	-webkit-user-select: none;
+  	-moz-user-select: none;
+  	-ms-user-select: none;
+}
+
+.refresh-recipients-container {
+	position: absolute;
+	right: 0;
+	top: 0;
+	display: -webkit-flex;
+	display: flex;
+	-webkit-flex-direction: column;
+	flex-direction: column;
+	-webkit-align-items: center;
+	align-items: center;
+	-webkit-justify-content: center;
+	justify-content: center;
+	height: 40px;
+	cursor: pointer;
 	-webkit-user-select: none;
   	-moz-user-select: none;
   	-ms-user-select: none;

@@ -146,11 +146,28 @@ def search_contacts(**kwargs):
     query += ').order_by(Contact.name)'
     return eval(query)
 
+
 def search_contacts_count(**kwargs):
     query = 'Contact.query.filter(Contact.client_no.ilike("'+session['client_no']+'"),'
     for arg_name in kwargs:
         if kwargs[arg_name]:
             query += 'Contact.' + arg_name + '.ilike("%'+kwargs[arg_name]+'%"),'
+    query += ').count()'
+    return eval(query)
+
+def search_users(**kwargs):
+    query = 'AdminUser.query.filter(AdminUser.client_no.ilike("'+session['client_no']+'"),'
+    for arg_name in kwargs:
+        if kwargs[arg_name]:
+            query += 'AdminUser.' + arg_name + '.ilike("%'+kwargs[arg_name]+'%"),'
+    query += ').order_by(AdminUser.name)'
+    return eval(query)
+
+def search_users_count(**kwargs):
+    query = 'AdminUser.query.filter(AdminUser.client_no.ilike("'+session['client_no']+'"),'
+    for arg_name in kwargs:
+        if kwargs[arg_name]:
+            query += 'AdminUser.' + arg_name + '.ilike("%'+kwargs[arg_name]+'%"),'
     query += ').count()'
     return eval(query)
 
@@ -189,6 +206,13 @@ def index():
     contact_count = Contact.query.filter_by(client_no=session['client_no']).count()
     customers_count = Contact.query.filter_by(client_no=session['client_no'], contact_type='Customer').count()
     staff_count = Contact.query.filter_by(client_no=session['client_no'], contact_type='Staff').count()
+
+    user = AdminUser.query.filter_by(id=session['user_id']).first()
+    if user.password == user.temp_pw:
+        change_pw = 'yes'
+    else:
+        change_pw = 'no'
+
     if total_entries < 50:
         return flask.render_template(
         'index.html',
@@ -203,7 +227,8 @@ def index():
         next_btn='disabled',
         contact_count=contact_count,
         customers_count=customers_count,
-        staff_count=staff_count
+        staff_count=staff_count,
+        change_pw=change_pw
     )
     return flask.render_template(
         'index.html',
@@ -218,7 +243,8 @@ def index():
         next_btn='enabled',
         contact_count=contact_count,
         customers_count=customers_count,
-        staff_count=staff_count
+        staff_count=staff_count,
+        change_pw=change_pw
     )
 
 
@@ -241,13 +267,67 @@ def authenticate_user():
         return jsonify(status='failed', error='Invalid email or password.')
     if user.client_no != client.client_no:
         return jsonify(status='failed', error='Not authorized.')
-    if user.status != 'Active':
-        return jsonify(status='failed', error='Your account has been deactivated.')
     session['user_name'] = user.name
     session['user_id'] = user.id
     session['client_no'] = client.client_no
     session['client_name'] = client.name
+
     return jsonify(status='success', error=''),200
+
+
+@app.route('/user/add',methods=['GET','POST'])
+def add_user():
+    data = flask.request.form.to_dict()
+
+    new_user = AdminUser(
+        client_no=session['client_no'],
+        email=data['email'],
+        password=data['temp_pw'],
+        temp_pw=data['temp_pw'],
+        name=data['name'].title(),
+        role=data['role'],
+        added_by_id=session['user_id'],
+        added_by_name=session['user_name'],
+        join_date=datetime.datetime.now().strftime('%B %d, %Y'),
+        created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
+        )
+
+    db.session.add(new_user)
+    db.session.commit()
+
+    total_entries = AdminUser.query.filter_by(client_no=session['client_no']).count()
+    users = AdminUser.query.filter_by(client_no=session['client_no']).order_by(AdminUser.name).slice(session['user_limit'] - 50, session['user_limit'])
+    if total_entries < 50:
+        showing='1 - %s' % total_entries
+        prev_btn = 'disabled'
+        next_btn='disabled'
+    else:
+        diff = total_entries - (session['user_limit'] - 50)
+        if diff > 50:
+            showing = '%s - %s' % (str(session['user_limit'] - 49),str(session['user_limit']))
+            next_btn='enabled'
+        else:
+            showing = '%s - %s' % (str(session['user_limit'] - 49),str((session['user_limit']-50)+diff))
+            prev_btn = 'enabled'
+            next_btn='disabled'
+
+    return flask.render_template(
+        'users.html',
+        users=users,
+        showing=showing,
+        total_entries=total_entries,
+        prev_btn=prev_btn,
+        next_btn=next_btn,
+    )
+
+
+@app.route('/user/password/save',methods=['GET','POST'])
+def save_password():
+    password = flask.request.form.get('password')
+    user = AdminUser.query.filter_by(id=session['user_id']).first()
+    user.password = password
+    db.session.commit()
+    return jsonify(status='success', message='')
 
 
 @app.route('/logout', methods=['GET', 'POST'])
@@ -868,6 +948,10 @@ def add_group():
             prev_btn = 'enabled'
             next_btn='disabled'
 
+    complete_groups = Group.query.filter_by(client_no=session['client_no']).order_by(Group.name)
+    contact_count = Contact.query.filter_by(client_no=session['client_no']).count()
+    customers_count = Contact.query.filter_by(client_no=session['client_no'], contact_type='Customer').count()
+    staff_count = Contact.query.filter_by(client_no=session['client_no'], contact_type='Staff').count()
     return jsonify(
         status='success',
         template=flask.render_template(
@@ -878,7 +962,41 @@ def add_group():
                 prev_btn=prev_btn,
                 next_btn=next_btn,
             ),
-        group_template=flask.render_template('add_contact_groups.html',groups=groups)
+        group_template=flask.render_template('add_contact_groups.html',groups=complete_groups),
+        recipient_template=flask.render_template(
+            'group_recipients_refresh.html',
+            groups=complete_groups,
+            contact_count=contact_count,
+            customers_count=customers_count,
+            staff_count=staff_count,
+            selected_groups=session['group_recipients']
+            )
+        )
+
+
+@app.route('/recipients/groups/refresh', methods=['GET', 'POST'])
+def refresh_group_recipients():
+    groups = Group.query.filter_by(client_no=session['client_no']).order_by(Group.name)
+    contact_count = Contact.query.filter_by(client_no=session['client_no']).count()
+    customers_count = Contact.query.filter_by(client_no=session['client_no'], contact_type='Customer').count()
+    staff_count = Contact.query.filter_by(client_no=session['client_no'], contact_type='Staff').count()
+    return flask.render_template(
+        'group_recipients_refresh.html',
+        groups=groups,
+        contact_count=contact_count,
+        customers_count=customers_count,
+        staff_count=staff_count,
+        selected_groups=session['group_recipients']
+        )
+
+
+@app.route('/recipients/individual/refresh', methods=['GET', 'POST'])
+def refresh_individual_recipients():
+    contacts = Contact.query.filter_by(client_no=session['client_no']).order_by(Contact.name)
+    return flask.render_template(
+        'individual_recipients_refresh.html',
+        contacts=contacts,
+        selected_contacts=session['individual_recipients']
         )
 
 
@@ -1247,7 +1365,7 @@ def edit_contact():
     if data['type'] == 'from_convo':
         messages = ConversationItem.query.filter_by(conversation_id=conversation.id).order_by(ConversationItem.created_at)
         groups = Group.query.filter_by(client_no=session['client_no']).order_by(Group.name)
-        contacts = Contact.query.filter_by(client_no=session['client_no']).order_by(Contact.name)
+        complete_contacts = Contact.query.filter_by(client_no=session['client_no']).order_by(Contact.name)
         contact_count = Contact.query.filter_by(client_no=session['client_no']).count()
         customers_count = Contact.query.filter_by(client_no=session['client_no'], contact_type='Customer').count()
         staff_count = Contact.query.filter_by(client_no=session['client_no'], contact_type='Staff').count()
@@ -1263,6 +1381,11 @@ def edit_contact():
                 customers_count=customers_count,
                 staff_count=staff_count,
                 groups=groups
+                ),
+            recipient_template=flask.render_template(
+                'individual_recipients_refresh.html',
+                contacts=complete_contacts,
+                selected_contacts=session['individual_recipients']
                 )
             ),201
 
@@ -1273,7 +1396,6 @@ def edit_contact():
             db.session.commit()
 
     total_entries = Contact.query.filter_by(client_no=session['client_no']).count()
-    contacts = Contact.query.filter_by(client_no=session['client_no']).order_by(Contact.name).slice(session['contact_limit'] - 50, session['contact_limit'])
     if total_entries < 50:
         showing = '1 - %s' % str(total_entries)
         prev_btn = 'disabled'
@@ -1290,7 +1412,8 @@ def edit_contact():
             next_btn='disabled'
 
     groups = Group.query.filter_by(client_no=session['client_no']).order_by(Group.name)
-    contacts = Contact.query.filter_by(client_no=session['client_no']).order_by(Contact.name)
+    contacts = Contact.query.filter_by(client_no=session['client_no']).order_by(Contact.name).slice(session['contact_limit'] - 50, session['contact_limit'])
+    complete_contacts = Contact.query.filter_by(client_no=session['client_no']).order_by(Contact.name)
     contact_count = Contact.query.filter_by(client_no=session['client_no']).count()
     customers_count = Contact.query.filter_by(client_no=session['client_no'], contact_type='Customer').count()
     staff_count = Contact.query.filter_by(client_no=session['client_no'], contact_type='Staff').count()
@@ -1310,6 +1433,11 @@ def edit_contact():
             customers_count=customers_count,
             staff_count=staff_count,
             groups=groups
+            ),
+        recipient_template=flask.render_template(
+            'individual_recipients_refresh.html',
+            contacts=complete_contacts,
+            selected_contacts=session['individual_recipients']
             )
         ),201
 
@@ -1349,13 +1477,35 @@ def save_contact():
 
     db.session.commit()
 
+    complete_contacts = Contact.query.filter_by(client_no=session['client_no']).order_by(Contact.name)
+
+    complete_groups = Group.query.filter_by(client_no=session['client_no']).order_by(Group.name)
+    contact_count = Contact.query.filter_by(client_no=session['client_no']).count()
+    customers_count = Contact.query.filter_by(client_no=session['client_no'], contact_type='Customer').count()
+    staff_count = Contact.query.filter_by(client_no=session['client_no'], contact_type='Staff').count()
+
     if data['type'] == 'save':
         messages = ConversationItem.query.filter_by(conversation_id=conversation.id).order_by(ConversationItem.created_at)
-        return flask.render_template(
-            'conversation.html',
-            conversation=conversation,
-            messages=messages 
-            ),201
+        return jsonify(
+                template=flask.render_template(
+                    'conversation.html',
+                    conversation=conversation,
+                    messages=messages 
+                    ),
+                recipient_template=flask.render_template(
+                    'individual_recipients_refresh.html',
+                    contacts=complete_contacts,
+                    selected_contacts=session['individual_recipients']
+                    ),
+                group_template=flask.render_template(
+                    'group_recipients_refresh.html',
+                    groups=complete_groups,
+                    contact_count=contact_count,
+                    customers_count=customers_count,
+                    staff_count=staff_count,
+                    selected_groups=session['group_recipients']
+                    )
+            )
     prev_btn='enabled'
     total_entries = Contact.query.filter_by(client_no=session['client_no']).count()
     contacts = Contact.query.filter_by(client_no=session['client_no']).order_by(Contact.name).slice(session['contact_limit'] - 50, session['contact_limit'])
@@ -1373,13 +1523,28 @@ def save_contact():
             prev_btn = 'enabled'
             next_btn='disabled'
 
-    return flask.render_template(
-        'contacts.html',
-        contacts=contacts,
-        showing=showing,
-        total_entries=total_entries,
-        prev_btn=prev_btn,
-        next_btn=next_btn,
+    return jsonify(
+        template=flask.render_template(
+            'contacts.html',
+            contacts=contacts,
+            showing=showing,
+            total_entries=total_entries,
+            prev_btn=prev_btn,
+            next_btn=next_btn,
+        ),
+        recipient_template=flask.render_template(
+            'individual_recipients_refresh.html',
+            contacts=complete_contacts,
+            selected_contacts=session['individual_recipients']
+            ),
+        group_template=flask.render_template(
+            'group_recipients_refresh.html',
+            groups=complete_groups,
+            contact_count=contact_count,
+            customers_count=customers_count,
+            staff_count=staff_count,
+            selected_groups=session['group_recipients']
+            )
     )
 
 
@@ -1754,6 +1919,17 @@ def search_from_contacts():
         )
 
 
+@app.route('/users/search',methods=['GET','POST'])
+def search_from_users():
+    data = flask.request.args.to_dict()
+    result = search_users(name=data['name'], role=data['role'],email=data['email'])
+    count = search_users_count(name=data['name'], role=data['role'],email=data['email'])
+    return jsonify(
+        count = count,
+        template = flask.render_template('users_result.html',users=result)
+        )
+
+
 @app.route('/groups/search',methods=['GET','POST'])
 def search_from_groups():
     data = flask.request.args.to_dict()
@@ -1768,17 +1944,29 @@ def search_from_groups():
 @app.route('/contacts/groups/search',methods=['GET','POST'])
 def search_group_recipients():
     group_name = flask.request.form.get('group_name')
-    selected_groups = flask.request.form.getlist('group_recipients[]')
-    groups = Group.query.filter(Group.name.ilike('%'+group_name+'%')).order_by(Group.name)
-    return flask.render_template('group_recipients_result.html',groups=groups,selected_groups=selected_groups)
+    if group_name and group_name != '': 
+        groups = Group.query.filter(Group.name.ilike('%'+group_name+'%')).filter(Group.client_no==session['client_no']).order_by(Group.name)
+        return flask.render_template('group_recipients_result.html',groups=groups,selected_groups=session['group_recipients'])
+
+    groups = Group.query.filter_by(client_no=session['client_no']).order_by(Group.name)
+    contact_count = Contact.query.filter_by(client_no=session['client_no']).count()
+    customers_count = Contact.query.filter_by(client_no=session['client_no'], contact_type='Customer').count()
+    staff_count = Contact.query.filter_by(client_no=session['client_no'], contact_type='Staff').count()
+    return flask.render_template(
+        'group_recipients_refresh.html',
+        groups=groups,
+        contact_count=contact_count,
+        customers_count=customers_count,
+        staff_count=staff_count,
+        selected_groups=session['group_recipients']
+        )
 
 
 @app.route('/contacts/indiv/search',methods=['GET','POST'])
 def search_indiv_recipients():
     name = flask.request.form.get('name')
-    selected_contacts = flask.request.form.getlist('individual_recipients[]')
-    contacts = Contact.query.filter(Contact.name.ilike('%'+name+'%')).order_by(Contact.name)
-    return flask.render_template('indiv_recipients_result.html',contacts=contacts, selected_contacts=selected_contacts)
+    contacts = Contact.query.filter(Contact.name.ilike('%'+name+'%')).filter(Contact.client_no==session['client_no']).order_by(Contact.name)
+    return flask.render_template('indiv_recipients_result.html',contacts=contacts, selected_contacts=session['individual_recipients'])
 
 
 @app.route('/conversations/delete',methods=['GET','POST'])

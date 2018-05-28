@@ -39,10 +39,14 @@
 					<input type="text" id="searchUsersName" class="form-control search-users search-text" placeholder="Name">
 				</td>
 				<td class="user-role-td">
-					<input type="text" id="searchUsersName" class="form-control search-users search-text" placeholder="Role">
+					<select id="searchUsersRole" class="form-control search-users search-text">
+						<option value="" selected>All</option>
+						<option value="Administrator">Administrator</option>
+						<option value="Normal User">Normal User</option>
+					</select>
 				</td>
 				<td class="user-email-td">
-					<input type="text" id="searchUsersName" class="form-control search-users search-text" placeholder="Email">
+					<input type="text" id="searchUsersEmail" class="form-control search-users search-text" placeholder="Email">
 				</td>
 			</tr>
 		</thead>
@@ -70,6 +74,10 @@ $('.search-users').keypress(function(e){
     if (e.which == 13) {
     	search_users($(this).attr('id'));
     }
+});
+
+$('.search-users').change(function(){
+	search_users($(this).attr('id'));
 });
 
 $('.users-check').on('click', function () {
