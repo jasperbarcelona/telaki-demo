@@ -1,0 +1,55 @@
+<div class="input-container whole">
+    <input type="text" id="editUserName" onblur="validate_blank(this,this.value)" onchange="validate_blank(this,this.value)" data-error="errorUserNameEdit" class="form-control floatlabel" data-class="input-label" placeholder="Full Name" value="{{ user.name }}">
+    <div id="errorUserNameEdit" class="error-icon-container hidden tooltip" title="This field is required." title="This field is required."><i class="material-icons">&#xE001;</i></div>
+</div>
+<div class="input-container whole">
+    <input type="text" id="editUserEmail" onblur="validate_blank(this,this.value)" onchange="validate_blank(this,this.value)" data-error="errorUserEmailEdit" class="form-control floatlabel" data-class="input-label" placeholder="Email" value="{{ user.email }}">
+    <div id="errorUserEmailEdit" class="error-icon-container hidden tooltip" title="This field is required." title="This field is required."><i class="material-icons">&#xE001;</i></div>
+</div>
+<div class="input-container whole">
+    <select class="form-control" id="editUserRole" onblur="validate_blank(this,this.value)" onchange="validate_blank(this,this.value);" data-error="errorUserRoleEdit" class="form-control">
+        {% if user.role == 'Administrator' %}
+        <option value="Administrator" selected>Administrator</option>
+        <option value="Normal User">Normal User</option>
+        {% else %}
+        <option value="Administrator">Administrator</option>
+        <option value="Normal User" selected>Normal User</option>
+        {% endif %}
+    </select>
+    <div id="errorUserRoleEdit" class="error-icon-container hidden tooltip" title="This field is required." title="This field is required."><i class="material-icons">&#xE001;</i></div>
+</div>
+
+<button id="resetUserPasswordBtn" class="btn btn-primary" data-toggle="modal" data-target="#resetPasswordModal">Reset Password</button>
+<button id="deleteUserBtn" class="btn btn-primary" data-toggle="modal" data-target="#deleteUserModal">Delete User</button>
+
+<script type="text/javascript">
+    $('.form-control.floatlabel').floatlabel({
+        labelEndTop:'-2px'
+    });
+
+    $('.form-control').on('keyup', function () {
+      name = $('#editUserName').val();
+      email = $('#editUserEmail').val();
+      role = $('#editUserRole').val();
+
+      if ((name != '') && (email != '') && (role != undefined)) {
+        $('#editUserBtn').attr('disabled',false);
+      }
+      else {
+        $('#editUserBtn').attr('disabled',true);
+      }
+    });
+
+    $('.form-control').on('change', function () {
+      name = $('#editUserName').val();
+      email = $('#editUserEmail').val();
+      role = $('#editUserRole').val();
+
+      if ((name != '') && (email != '') && (role != undefined)) {
+        $('#editUserBtn').attr('disabled',false);
+      }
+      else {
+        $('#editUserBtn').attr('disabled',true);
+      }
+    });
+</script>

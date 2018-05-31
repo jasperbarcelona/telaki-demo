@@ -1,0 +1,3 @@
+{% for group in groups %}
+<div id="{{ group.id }}" class="group-picker-add" onclick="toggle_group_add({{group.id}})">{{ group.name }}</div>
+{% endfor %}

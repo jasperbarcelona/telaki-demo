@@ -28,8 +28,8 @@
     {% if not groups[0] %}
     <span class="no-groups-label">You don't have any groups.</span>
     {% else %}
-    <input type="text" id="searchGroupFromContact" class="form-control" placeholder="Search groups">
-    <div class="contact-group-container">
+    <input type="text" id="searchGroupFromEdit" class="form-control" placeholder="Search groups">
+    <div id="editContactGroupContainer" class="contact-group-container">
         {% for group in groups %}
         {% if group.id in contact_groups %}
         <div id="{{ group.id }}" class="edit-contact-picker group-picker-edit selected" onclick="toggle_group_edit({{group.id}})">{{ group.name }}</div>
@@ -38,6 +38,7 @@
         {% endif %}
         {% endfor %}
     </div>
+    <div id="editGroupSearchLoading" class="group-search-loading hidden">Loading..</div>
     {% endif %}
 </div>
 <div class="modal-footer">
@@ -62,4 +63,10 @@ $('.form-control.floatlabel').floatlabel({
     $(this).toggleClass('selected');
   });
 })();
+
+$('#searchGroupFromEdit').keypress(function(e){
+    if (e.which == 13) {
+      search_groups_from_edit($(this).val());
+    }
+});
 </script>

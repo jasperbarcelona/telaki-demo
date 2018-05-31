@@ -581,6 +581,17 @@ function supply_contact_info() {
     });
 }
 
+function supply_user_info(user_id) {
+  $.get('/user',
+    {
+      user_id:user_id
+    },
+    function(data){
+      $('#editUserModal .modal-body').html(data);
+      $('#editUserModal .form-control').change();
+    });
+}
+
 function supply_info_from_contacts(msisdn) {
   $.get('/contact',
     {
@@ -650,7 +661,8 @@ function send_reply() {
       if (data['status'] == 'success') {
         $('.conversation-container').append(data['template']);
         $('#conversationReply').val('');
-        $('#replyCharacterCounter').val('Remaining: 420');
+        $('#replyCharacterCounter').val('Remaining: 980');
+        $('#replySuccess .snackbar-message').html('Message successfully sent.');
         $('#replySuccess').fadeIn();
         $("html, body").animate({ scrollTop: $(document).height()-$(window).height() });
         setTimeout(function() {
@@ -970,7 +982,7 @@ function send_text_blast() {
       $('.recipient-group').removeClass('disabled');
       $('.recipient-contact').removeClass('disabled');
       $('#recipientCount').html('('+total_recipients+')');
-
+      $('#characterCounter').val('Remaining: 980');
       $('#blastOverlay .blast-overlay-body').html(data['template']);
       $('#blastOverlay').removeClass('hidden');
       $('body').css('overflow-y','hidden');
@@ -1857,6 +1869,60 @@ function validate_password_confirm(element,value) {
   }
 }
 
+function validate_temp_pass(element,value) {
+  error_icon_id = $(element).attr('data-error');
+  password = $('#addUserPassword').val();
+  password_confirm = $('#addUserPasswordConfirm').val();
+  if (password == password_confirm) {
+    $(element).css("border-bottom", "1px solid #999");
+    $('#'+error_icon_id).addClass('hidden');
+    $('#'+error_icon_id).addClass('tooltip');
+  }
+  else {
+    $(element).css("border-bottom", "1px solid #d9534f");
+    $('#'+error_icon_id).removeClass('hidden');
+    $('#'+error_icon_id).removeClass('tooltip');
+  }
+}
+
+function validate_password_reset(element,value) {
+  error_icon_id = $(element).attr('data-error');
+  password = $('#resetPasswordText').val();
+  password_confirm = $('#resetPasswordConfirmText').val();
+  if (password == password_confirm) {
+    $(element).css("border-bottom", "1px solid #999");
+    $('#'+error_icon_id).addClass('hidden');
+    $('#'+error_icon_id).addClass('tooltip');
+  }
+  else {
+    $(element).css("border-bottom", "1px solid #d9534f");
+    $('#'+error_icon_id).removeClass('hidden');
+    $('#'+error_icon_id).removeClass('tooltip');
+  }
+}
+
+function reset_password() {
+  $('#saveResetPasswordBtn').button('complete');
+  password = $('resetPasswordText').val();
+  $.post('/user/password/reset',
+  {
+    password:password
+  },
+  function(data){
+    $('#resetPasswordModal .form-control').change();
+    $('#resetPasswordModal .form-control').val('');
+    $('#resetPasswordModal .error-icon-container').addClass('hidden');
+    $('#resetPasswordModal .form-control').css('border-bottom','1px solid #999');
+    $('#saveResetPasswordBtn').button('complete');
+    $('#resetPasswordModal').modal('hide');
+    $('#replySuccess .snackbar-message').html('Password successfully reset.');
+    $('#replySuccess').fadeIn();
+    setTimeout(function() {
+      $('#replySuccess').fadeOut();
+    }, 4000);
+  });
+}
+
 function save_user() {
   $('#saveUserBtn').button('loading');
   name = $('#addUserName').val();
@@ -1883,6 +1949,50 @@ function save_user() {
   });
 }
 
+function edit_user() {
+  $('#editUserBtn').button('loading');
+  name = $('#editUserName').val();
+  email = $('#editUserEmail').val();
+  role = $('#editUserRole').val();
+
+  $.post('/user/edit',
+  {
+    name:name,
+    email:email,
+    role:role
+  },
+  function(data){
+    $('.content').html(data);
+    $('#editUserModal .form-control').val('');
+    $('#editUserModal .form-control').change();
+    $('#editUserModal .error-icon-container').addClass('hidden');
+    $('#editUserModal .form-control').css('border-bottom','1px solid #999');
+    $('#editUserBtn').button('complete');
+    $('#editUserModal').modal('hide');
+    $('#replySuccess .snackbar-message').html('Changes saved.');
+    $('#replySuccess').fadeIn();
+    setTimeout(function() {
+      $('#replySuccess').fadeOut();
+    }, 4000);
+  });
+}
+
+function delete_user() {
+  $('#deleteUserBtn').button('loading');
+  $.post('/user/delete',
+  function(data){
+    $('.content').html(data);
+    $('#deleteUserBtn').button('complete');
+    $('#editUserModal').modal('hide');
+    $('#deleteUserModal').modal('hide');
+    $('#replySuccess .snackbar-message').html('User successfully deleted.');
+    $('#replySuccess').fadeIn();
+    setTimeout(function() {
+      $('#replySuccess').fadeOut();
+    }, 4000);
+  });
+}
+
 function change_password() {
   $('#changePasswordModal').modal({
     backdrop: 'static',
@@ -1900,5 +2010,41 @@ function save_password() {
   },
   function(data){
     $('#changePasswordModal').modal('hide');
+  });
+}
+
+function search_groups_from_contact(keyword) {
+  $('#contactGroupSearchLoading').removeClass('hidden');
+  $.get('/groups/search/frcontact',
+  {
+    keyword:keyword
+  },
+  function(data){
+    $('#addContactGroupContainer').html(data);
+    $('#contactGroupSearchLoading').addClass('hidden');
+  });
+}
+
+function search_groups_from_edit(keyword) {
+  $('#editGroupSearchLoading').removeClass('hidden');
+  $.get('/groups/search/fredit',
+  {
+    keyword:keyword
+  },
+  function(data){
+    $('#editContactGroupContainer').html(data);
+    $('#editGroupSearchLoading').addClass('hidden');
+  });
+}
+
+function search_groups_from_save(keyword) {
+  $('#saveGroupSearchLoading').removeClass('hidden');
+  $.get('/groups/search/frsave',
+  {
+    keyword:keyword
+  },
+  function(data){
+    $('#saveContactGroupContainer').html(data);
+    $('#saveGroupSearchLoading').addClass('hidden');
   });
 }

@@ -108,6 +108,10 @@ $('#addUserModal').on('shown.bs.modal', function () {
     $('#addUserName').focus();
 });
 
+$('#resetPasswordModal').on('shown.bs.modal', function () {
+    $('#resetPasswordText').focus();
+});
+
 $('#addContactModal').on('shown.bs.modal', function () {
     $('#addContactName').focus();
 });
@@ -136,6 +140,8 @@ $('#groupMembersModal').on('hidden.bs.modal', function () {
 $('#createGroupModal').on('hidden.bs.modal', function () {
   $('#addGroupName').val('');
   $('#addGroupName').change();
+  $('#createGroupModal .error-icon-container').addClass('hidden');
+  $('#createGroupModal .form-control').css('border-bottom','1px solid #999');
   $('#saveGroupBtn').attr('disabled', true);
 });
 
@@ -166,6 +172,18 @@ animate();
 $('.search-conversations').keypress(function(e){
     if (e.which == 13) {
       search_conversations($(this).attr('id'));
+    }
+});
+
+$('#searchGroupFromContact').keypress(function(e){
+    if (e.which == 13) {
+      search_groups_from_contact($(this).val());
+    }
+});
+
+$('#searchGroupFromContactSave').keypress(function(e){
+    if (e.which == 13) {
+      search_groups_from_save($(this).val());
     }
 });
 
@@ -287,9 +305,10 @@ $('#addUserModal .form-control').on('keyup', function () {
   name = $('#addUserName').val();
   email = $('#addUserEmail').val();
   temp_pw = $('#addUserPassword').val();
+  temp_pw_confirm = $('#addUserPasswordConfirm').val();
   role = $('#addUserRole').val();
 
-  if ((name != '') && (email != '') && (temp_pw != '') && (role != undefined)) {
+  if ((name != '') && (email != '') && (temp_pw != '') && (temp_pw_confirm != '') && (temp_pw_confirm == temp_pw) && (role != undefined)) {
     $('#saveUserBtn').attr('disabled',false);
   }
   else {
@@ -311,7 +330,17 @@ $('#addUserModal .form-control').on('change', function () {
   }
 });
 
+$('#resetPasswordModal .form-control').on('keyup', function () {
+  temp_pw = $('#resetPasswordText').val();
+  temp_pw_confirm = $('#resetPasswordConfirmText').val();
+  role = $('#addUserRole').val();
 
-
+  if ((temp_pw != '') && (temp_pw_confirm != '') && (temp_pw_confirm == temp_pw)) {
+    $('#resetPasswordBtn').attr('disabled',false);
+  }
+  else {
+    $('#resetPasswordBtn').attr('disabled',true);
+  }
+});
 
 });

@@ -54,13 +54,13 @@
 			{% for user in users %}
 			<tr>
 				<td class="user-icon-td">
-					<i data-id="{{ user.id }}" class="users-check material-icons">&#xE835;</i>
 				</td>
-				<td class="user-name-td" id="{{ user.id }}" data-toggle="modal" data-target="#userModal" onclick="open_user(this.id)">{{ user.name }}</td>
-				<td class="user-role-td" id="{{ user.id }}" data-toggle="modal" data-target="#userModal" onclick="open_user(this.id)">
+				<td class="user-name-td" id="{{ user.id }}" data-toggle="modal" data-target="#editUserModal" onclick="supply_user_info({{ user.id }})">{{ user.name }}
+				</td>
+				<td class="user-role-td" id="{{ user.id }}" data-toggle="modal" data-target="#editUserModal" onclick="supply_user_info({{ user.id }})">
 					{{ user.role }}
 				</td>
-				<td class="user-email-td">
+				<td class="user-email-td" data-toggle="modal" data-target="#editUserModal" onclick="supply_user_info({{ user.id }})">
 					{{ user.email }}
 				</td>
 			</tr>

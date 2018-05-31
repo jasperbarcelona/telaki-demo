@@ -275,6 +275,13 @@ def authenticate_user():
     return jsonify(status='success', error=''),200
 
 
+@app.route('/user',methods=['GET','POST'])
+def user_info():
+    session['open_user_id'] = flask.request.args.get('user_id')
+    user = AdminUser.query.filter_by(id=session['open_user_id']).first()
+    return flask.render_template('user_info.html',user=user, user_id=session['user_id'])
+
+
 @app.route('/user/add',methods=['GET','POST'])
 def add_user():
     data = flask.request.form.to_dict()
@@ -314,6 +321,88 @@ def add_user():
     return flask.render_template(
         'users.html',
         users=users,
+        user_id=session['user_id'],
+        showing=showing,
+        total_entries=total_entries,
+        prev_btn=prev_btn,
+        next_btn=next_btn,
+    )
+
+
+@app.route('/user/edit',methods=['GET','POST'])
+def edit_user():
+    data = flask.request.form.to_dict()
+
+    user = AdminUser.query.filter_by(id=session['open_user_id']).first()
+    user.name = data['name'].title()
+    user.email = data['email']
+    user.role = data['role']
+
+    db.session.commit()
+
+    total_entries = AdminUser.query.filter_by(client_no=session['client_no']).count()
+    users = AdminUser.query.filter_by(client_no=session['client_no']).order_by(AdminUser.name).slice(session['user_limit'] - 50, session['user_limit'])
+    if total_entries < 50:
+        showing='1 - %s' % total_entries
+        prev_btn = 'disabled'
+        next_btn='disabled'
+    else:
+        diff = total_entries - (session['user_limit'] - 50)
+        if diff > 50:
+            showing = '%s - %s' % (str(session['user_limit'] - 49),str(session['user_limit']))
+            next_btn='enabled'
+        else:
+            showing = '%s - %s' % (str(session['user_limit'] - 49),str((session['user_limit']-50)+diff))
+            prev_btn = 'enabled'
+            next_btn='disabled'
+
+    return flask.render_template(
+        'users.html',
+        users=users,
+        user_id=session['user_id'],
+        showing=showing,
+        total_entries=total_entries,
+        prev_btn=prev_btn,
+        next_btn=next_btn,
+    )
+
+
+@app.route('/user/password/reset',methods=['GET','POST'])
+def reset_user_password():
+    password = flask.request.form.get('password')
+    user = AdminUser.query.filter_by(id=session['open_user_id']).first()
+    user.password = password
+    user.temp_pw = password
+    db.session.commit()
+    return jsonify(status='success', message=''),201
+
+
+@app.route('/user/delete',methods=['GET','POST'])
+def delete_user():
+    user = AdminUser.query.filter_by(id=session['open_user_id']).first()
+    db.session.delete(user)
+    db.session.commit()
+
+    total_entries = AdminUser.query.filter_by(client_no=session['client_no']).count()
+    users = AdminUser.query.filter_by(client_no=session['client_no']).order_by(AdminUser.name).slice(session['user_limit'] - 50, session['user_limit'])
+    if total_entries < 50:
+        showing='1 - %s' % total_entries
+        prev_btn = 'disabled'
+        next_btn='disabled'
+    else:
+        diff = total_entries - (session['user_limit'] - 50)
+        if diff > 50:
+            showing = '%s - %s' % (str(session['user_limit'] - 49),str(session['user_limit']))
+            next_btn='enabled'
+        else:
+            showing = '%s - %s' % (str(session['user_limit'] - 49),str((session['user_limit']-50)+diff))
+            prev_btn = 'enabled'
+            next_btn='disabled'
+
+    return flask.render_template(
+        'users.html',
+        users=users,
+        user_id=session['user_id'],
         showing=showing,
         total_entries=total_entries,
         prev_btn=prev_btn,
@@ -846,6 +935,7 @@ def users():
     return flask.render_template(
         'users.html',
         users=users,
+        user_id=session['user_id'],
         showing=showing,
         total_entries=total_entries,
         prev_btn=prev_btn,
@@ -880,7 +970,9 @@ def next_users():
         next_btn=next_btn,
         template=flask.render_template(
             'users_result.html',
-            users=users)
+            users=users,
+            user_id=session['user_id']
+            )
         )
 
 
@@ -909,7 +1001,9 @@ def prev_users():
         next_btn=next_btn,
         template=flask.render_template(
             'users_result.html',
-            users=users)
+            users=users,
+            user_id=session['user_id']
+            )
         )
 
 
@@ -1213,14 +1307,14 @@ def receive_message():
     if not conversation or conversation == None:
         if contact:
             conversation = Conversation(
-                client_no='at-ic2017',
+                client_no='at-ic2018',
                 contact_name=contact.name,
                 msisdn=contact.msisdn,
                 display_name=contact.name,
                 )
         else:
             conversation = Conversation(
-                client_no='at-ic2017',
+                client_no='at-ic2018',
                 msisdn='0%s'%data['senderAddress'][-10:],
                 display_name='0%s'%data['senderAddress'][-10:],
                 )
@@ -1246,32 +1340,32 @@ def receive_message():
     conversation.created_at=message.created_at
     db.session.commit()
 
-    content = 'Thank you for using our hotline. We will try to get back to you as soon as possible.'
-    message_options = {
-            'app_id': ALSONS_APP_ID,
-            'app_secret': ALSONS_APP_SECRET,
-            'message': content,
-            'address': conversation.msisdn,
-            'passphrase': ALSONS_PASSPHRASE,
-        }
-    r = requests.post(IPP_URL%ALSONS_SHORTCODE,message_options)  
-    if r.status_code != 201:
-        reply = ConversationItem(
-            conversation_id=conversation.id,
-            message_type='outbound',
-            date=datetime.datetime.now().strftime('%B %d, %Y'),
-            time=time.strftime("%I:%M %p"),
-            content=content,
-            outbound_sender_name='System',
-            created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
-            )
-        db.session.add(reply)
-        db.session.commit()
-        conversation.latest_content = content
-        conversation.latest_date = reply.date
-        conversation.latest_time = reply.time
-        conversation.created_at = reply.created_at
-        db.session.commit()
+    # content = 'Thank you for using our hotline. We will try to get back to you as soon as possible.'
+    # message_options = {
+    #         'app_id': ALSONS_APP_ID,
+    #         'app_secret': ALSONS_APP_SECRET,
+    #         'message': content,
+    #         'address': conversation.msisdn,
+    #         'passphrase': ALSONS_PASSPHRASE,
+    #     }
+    # r = requests.post(IPP_URL%ALSONS_SHORTCODE,message_options)  
+    # if r.status_code != 201:
+    #     reply = ConversationItem(
+    #         conversation_id=conversation.id,
+    #         message_type='outbound',
+    #         date=datetime.datetime.now().strftime('%B %d, %Y'),
+    #         time=time.strftime("%I:%M %p"),
+    #         content=content,
+    #         outbound_sender_name='System',
+    #         created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
+    #         )
+    #     db.session.add(reply)
+    #     db.session.commit()
+    #     conversation.latest_content = content
+    #     conversation.latest_date = reply.date
+    #     conversation.latest_time = reply.time
+    #     conversation.created_at = reply.created_at
+    #     db.session.commit()
 
     return jsonify(
         status='success'
@@ -1926,7 +2020,7 @@ def search_from_users():
     count = search_users_count(name=data['name'], role=data['role'],email=data['email'])
     return jsonify(
         count = count,
-        template = flask.render_template('users_result.html',users=result)
+        template = flask.render_template('users_result.html',users=result, user_id=session['user_id'])
         )
 
 
@@ -1939,6 +2033,29 @@ def search_from_groups():
         count = count,
         template = flask.render_template('groups_result.html',groups=result)
         )
+
+
+@app.route('/groups/search/frcontact',methods=['GET','POST'])
+def search_groups_from_contact():
+    data = flask.request.args.to_dict()
+    result = search_groups(name=data['keyword'])
+    return flask.render_template('add_contact_group.html', groups=result)
+
+
+@app.route('/groups/search/fredit',methods=['GET','POST'])
+def search_groups_from_edit():
+    data = flask.request.args.to_dict()
+    result = search_groups(name=data['keyword'])
+    contact = Contact.query.filter_by(msisdn=session['contact_msisdn']).first()
+    contact_groups = [r.group_id for r in db.session.query(ContactGroup.group_id).filter_by(contact_id=contact.id).all()]
+    return flask.render_template('edit_contact_group.html', groups=result, contact_groups=contact_groups)
+
+
+@app.route('/groups/search/frsave',methods=['GET','POST'])
+def search_groups_from_save():
+    data = flask.request.args.to_dict()
+    result = search_groups(name=data['keyword'])
+    return flask.render_template('save_contact_group.html', groups=result)
 
 
 @app.route('/contacts/groups/search',methods=['GET','POST'])
@@ -2092,8 +2209,8 @@ def rebuild_database():
     db.create_all()
 
     client = Client(
-        client_no='qpdc',
-        name='Quezon Province Dental Chapter',
+        client_no='at-ic2018',
+        name='Alson\'s Trading',
         app_id='EGXMuB5eEgCMLTKxExieqkCGeGeGuBon',
         app_secret='f3e1ab30e23ea7a58105f058318785ae236378d1d9ebac58fe8b42e1e239e1c3',
         passphrase='24BUubukMQ',
@@ -2102,7 +2219,7 @@ def rebuild_database():
         )
 
     admin = AdminUser(
-        client_no='qpdc',
+        client_no='at-ic2018',
         email='hello@pisara.tech',
         password='ratmaxi8',
         name='Super Admin',
@@ -2113,10 +2230,10 @@ def rebuild_database():
         )
 
     admin1 = AdminUser(
-        client_no='qpdc',
-        email='cy.lucero@yahoo.com',
-        password='clinic123',
-        name='Cyril Lucero',
+        client_no='at-ic2018',
+        email='ballesteros.alan@gmail.com',
+        password='password123',
+        name='Alan Ballesteros',
         role='Administrator',
         join_date=datetime.datetime.now().strftime('%B %d, %Y'),
         added_by_name='None',
@@ -2124,7 +2241,7 @@ def rebuild_database():
         )
 
     # client = Client(
-    #     client_no='at-ic2017',
+    #     client_no='at-ic2018',
     #     name='Alson\'s Trading',
     #     app_id='MEoztReRyeHzaiXxaecR65HnqE98tz9g',
     #     app_secret='01c5d1f8d3bfa9966786065c5a2d829d7e84cf26fbfb4a47c91552cb7c091608',
@@ -2145,7 +2262,7 @@ def rebuild_database():
 
     # # for _ in range(1000):
     # #     admin = AdminUser(
-    # #         client_no='at-ic2017',
+    # #         client_no='at-ic2018',
     # #         email='hello@pisara.tech',
     # #         password='ratmaxi8',
     # #         name='Admin%s' % _,
@@ -2158,7 +2275,7 @@ def rebuild_database():
     # #     db.session.commit()
 
     # admin = AdminUser(
-    #     client_no='at-ic2017',
+    #     client_no='at-ic2018',
     #     email='hello@pisara.tech',
     #     password='ratmaxi8',
     #     name='Super Admin',
@@ -2180,7 +2297,7 @@ def rebuild_database():
     #     )
 
     # admin2 = AdminUser(
-    #     client_no='at-ic2017',
+    #     client_no='at-ic2018',
     #     email='ballesteros.alan@gmail.com',
     #     password='password',
     #     name='Alan Ballesteros',
@@ -2191,7 +2308,7 @@ def rebuild_database():
     #     )
 
     # contact = Contact(
-    #     client_no='at-ic2017',
+    #     client_no='at-ic2018',
     #     contact_type='Customer',
     #     name='Alan Ballesteros',
     #     msisdn='09176214704',
@@ -2202,7 +2319,7 @@ def rebuild_database():
     #     )
 
     # conversations = Conversation(
-    #     client_no='at-ic2017',
+    #     client_no='at-ic2018',
     #     contact_name='Alan Ballesteros'.title(),
     #     msisdn='09176214704',
     #     display_name='Alan Ballesteros'.title(),
@@ -2213,19 +2330,19 @@ def rebuild_database():
     #     created_at='2017-11-14 11:36:49:270418',
     #     )
 
-    # conversations1 = Conversation(
-    #     client_no='at-ic2017',
-    #     msisdn='09159484200',
-    #     display_name='09159484200',
-    #     status='unread',
-    #     latest_content='This is a sample incoming message. You can try to reply to it',
-    #     latest_date='November 14, 2017',
-    #     latest_time='11:37 AM',
-    #     created_at='2017-11-14 11:37:49:270418',
-    #     )
+    conversations1 = Conversation(
+        client_no='at-ic2018',
+        msisdn='09176214704',
+        display_name='09176214704',
+        status='unread',
+        latest_content='This is a sample incoming message. You can try to reply to it',
+        latest_date='November 14, 2017',
+        latest_time='11:37 AM',
+        created_at='2017-11-14 11:37:49:270418',
+        )
 
     # conversations2 = Conversation(
-    #     client_no='at-ic2017',
+    #     client_no='at-ic2018',
     #     msisdn='09189123948',
     #     display_name='09189123948',
     #     status='unread',
@@ -2236,7 +2353,7 @@ def rebuild_database():
     #     )
 
     # # conversations1 = Conversation(
-    # #     client_no='at-ic2017',
+    # #     client_no='at-ic2018',
     # #     msisdn='09176214704',
     # #     display_name='09176214704',
     # #     status='unread',
@@ -2255,14 +2372,14 @@ def rebuild_database():
     #     created_at='2017-11-14 11:30:49:270418'
     #     )
 
-    # message1 = ConversationItem(
-    #     conversation_id=2,
-    #     message_type='inbound',
-    #     date='November 14, 2017',
-    #     time='11:37 AM',
-    #     content='This is a sample incoming message. You can try to reply to it.',
-    #     created_at='2017-11-14 11:30:49:270418'
-    #     )
+    message1 = ConversationItem(
+        conversation_id=1,
+        message_type='inbound',
+        date='November 14, 2017',
+        time='11:37 AM',
+        content='This is a sample incoming message. You can try to reply to it.',
+        created_at='2017-11-14 11:30:49:270418'
+        )
 
     # message2 = ConversationItem(
     #     conversation_id=3,
@@ -2283,7 +2400,7 @@ def rebuild_database():
     # #     )
 
     # blast = Batch(
-    #     client_no='at-ic2017',
+    #     client_no='at-ic2018',
     #     message_type='custom',
     #     sender_id=1,
     #     batch_size=3,
@@ -2329,7 +2446,7 @@ def rebuild_database():
     #     )
 
     # reminder = ReminderBatch(
-    #     client_no='at-ic2017',
+    #     client_no='at-ic2018',
     #     sender_id=1,
     #     batch_size=3,
     #     sender_name='Super Admin',
@@ -2376,7 +2493,7 @@ def rebuild_database():
     #     )
 
     # # contact = Contact(
-    # #     client_no='at-ic2017',
+    # #     client_no='at-ic2018',
     # #     contact_type='Customer',
     # #     name='ABAC, AILYN-AGN'.title(),
     # #     msisdn='09994282203',
@@ -2387,7 +2504,7 @@ def rebuild_database():
     # #     )
 
     # # contact1 = Contact(
-    # #     client_no='at-ic2017',
+    # #     client_no='at-ic2018',
     # #     contact_type='Customer',
     # #     name='ABAD, LANDELINA ORCIGA-ANB'.title(),
     # #     msisdn='09183132539',
@@ -2398,7 +2515,7 @@ def rebuild_database():
     # #     )
 
     # # contact2 = Contact(
-    # #     client_no='at-ic2017',
+    # #     client_no='at-ic2018',
     # #     contact_type='Customer',
     # #     name='ABAD, NELSON M.-JNC'.title(),
     # #     msisdn='09071755339',
@@ -2410,7 +2527,7 @@ def rebuild_database():
 
     # # for _ in range(1000):
     # #     new_group = Group(
-    # #         client_no='at-ic2017',
+    # #         client_no='at-ic2018',
     # #         name='AGN%s' % _,
     # #         size=0,
     # #         created_by_id=1,
@@ -2421,7 +2538,7 @@ def rebuild_database():
     # #     db.session.commit()
 
     # new_group = Group(
-    #     client_no='at-ic2017',
+    #     client_no='at-ic2018',
     #     name='AGN',
     #     size=0,
     #     created_by_id=1,
@@ -2430,7 +2547,7 @@ def rebuild_database():
     #     )
 
     # new_group1 = Group(
-    #     client_no='at-ic2017',
+    #     client_no='at-ic2018',
     #     name='ANB',
     #     size=0,
     #     created_by_id=1,
@@ -2439,7 +2556,7 @@ def rebuild_database():
     #     )
 
     # new_group2 = Group(
-    #     client_no='at-ic2017',
+    #     client_no='at-ic2018',
     #     name='JNC',
     #     size=0,
     #     created_by_id=1,
@@ -2469,10 +2586,10 @@ def rebuild_database():
     # db.session.add(admin2)
     # db.session.add(contact)
     # db.session.add(conversations)
-    # db.session.add(conversations1)
+    db.session.add(conversations1)
     # db.session.add(conversations2)
     # db.session.add(message)
-    # db.session.add(message1)
+    db.session.add(message1)
     # db.session.add(message2)
 
     # db.session.add(blast)
