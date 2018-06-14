@@ -22,9 +22,11 @@
 			<span class="nav-label">Groups</span>
 		</div>
 		<div class="nav-separator"></div>
+		{% if user_role == 'Administrator' %}
 		<div id="navUsers" class="panel-nav-item" onclick="show_users('reset')">
 			<span class="nav-label">Users</span>
 		</div>
+		{% endif %}
 		<div id="navUsage" class="panel-nav-item" onclick="show_usage('reset')">
 			<span class="nav-label">Usage</span>
 		</div>

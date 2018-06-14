@@ -54,6 +54,24 @@ $('#composeMessage').on('click', function (e) {
     $('#messageBody').focus();
 });
 
+$('#file').on('change', function (e) {
+  if ($(this).get(0).files.length === 0) {
+    $('#sendReminderBtn').attr('disabled', true);
+  }
+  else {
+    $('#sendReminderBtn').attr('disabled', false);
+  }
+});
+
+$('#contactsFile').on('change', function (e) {
+  if ($(this).get(0).files.length === 0) {
+    $('#uploadContactsBtn').attr('disabled', true);
+  }
+  else {
+    $('#uploadContactsBtn').attr('disabled', false);
+  }
+});
+
 $('#minimizeMessage').on('click', function (e) {
     $('#messageContainer').addClass('minimized');
 });
@@ -131,6 +149,14 @@ $('#addUserModal').on('hidden.bs.modal', function () {
   $('#addUserModal .form-control').change();
   $('#addUserModal .error-icon-container').addClass('hidden');
   $('#addUserModal .form-control').css('border-bottom','1px solid #999');
+});
+
+$('#addReminderModal').on('hidden.bs.modal', function () {
+  $('#file').val('');
+});
+
+$('#uploadContactsModal').on('hidden.bs.modal', function () {
+  $('#contactsFile').val('');
 });
 
 $('#groupMembersModal').on('hidden.bs.modal', function () {

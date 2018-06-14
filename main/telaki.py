@@ -228,7 +228,8 @@ def index():
         contact_count=contact_count,
         customers_count=customers_count,
         staff_count=staff_count,
-        change_pw=change_pw
+        change_pw=change_pw,
+        user_role=user.role
     )
     return flask.render_template(
         'index.html',
@@ -244,7 +245,8 @@ def index():
         contact_count=contact_count,
         customers_count=customers_count,
         staff_count=staff_count,
-        change_pw=change_pw
+        change_pw=change_pw,
+        user_role=user.role
     )
 
 
@@ -414,6 +416,8 @@ def delete_user():
 def save_password():
     password = flask.request.form.get('password')
     user = AdminUser.query.filter_by(id=session['user_id']).first()
+    if user.password == password:
+        return jsonify(status='failed', message='The password you entered is the same as your temporary password, please enter a different one.')
     user.password = password
     db.session.commit()
     return jsonify(status='success', message='')
@@ -1098,9 +1102,9 @@ def refresh_individual_recipients():
 def prepare_contacts_upload():
     file = flask.request.files['contactsFile']
     filename = secure_filename(file.filename)
-    file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
     
     if file and allowed_file(file.filename):
+        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
         path = '%s/%s' % (UPLOAD_FOLDER, filename)
         book = xlrd.open_workbook(path)
         sheet = book.sheet_by_index(0)
@@ -1147,6 +1151,12 @@ def prepare_contacts_upload():
             template=flask.render_template('contact_upload_status.html', batch=new_contact_upload)
             )
 
+    if not file or file == None or file == '':
+        return jsonify(
+            status = 'failed',
+            message = 'No file chosen.'
+            )
+
     return jsonify(
         status = 'failed',
         message = 'Invalid file.'
@@ -1157,8 +1167,8 @@ def prepare_contacts_upload():
 def upload_file():
     file = flask.request.files['file']
     filename = secure_filename(file.filename)
-    file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
     if file and allowed_file(file.filename):
+        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
         path = '%s/%s' % (UPLOAD_FOLDER, filename)
         book = xlrd.open_workbook(path)
         sheet = book.sheet_by_index(0)
@@ -1246,6 +1256,12 @@ def upload_file():
         #             next_btn=next_btn
         #         )
         #     )
+
+    if not file or file == None or file == '':
+        return jsonify(
+            status = 'failed',
+            message = 'No file chosen.'
+            )
 
     return jsonify(
         status = 'failed',
@@ -1540,6 +1556,13 @@ def edit_contact():
 def save_contact():
     data = flask.request.form.to_dict()
     groups = flask.request.form.getlist('groups[]')
+
+    existing = Contact.query.filter_by(msisdn='0%s'%data['msisdn'][-10:]).first()
+    if existing or existing != None:
+        return jsonify(
+            status='failed',
+            message='Mobile number already exists.'
+            )
     new_contact = Contact(
         client_no=session['client_no'],
         contact_type=data['contact_type'].title(),
@@ -1581,6 +1604,7 @@ def save_contact():
     if data['type'] == 'save':
         messages = ConversationItem.query.filter_by(conversation_id=conversation.id).order_by(ConversationItem.created_at)
         return jsonify(
+                status='success',
                 template=flask.render_template(
                     'conversation.html',
                     conversation=conversation,
@@ -1618,6 +1642,7 @@ def save_contact():
             next_btn='disabled'
 
     return jsonify(
+        status='success',
         template=flask.render_template(
             'contacts.html',
             contacts=contacts,
@@ -1941,6 +1966,9 @@ def get_reminder_progress():
 def get_contact_upload_progress():
     batch_id = flask.request.form.get('batch_id')
     batch = ContactBatch.query.filter_by(id=int(batch_id)).first()
+    existing = Contact.query.filter_by(batch_id=str(batch.id)).count()
+    batch.pending = batch.batch_size - existing
+    db.session.commit()
     return jsonify(
         batch_id=batch.id,
         pending=batch.pending,
@@ -2121,9 +2149,46 @@ def delete_contacts():
     contact_ids = flask.request.form.getlist('selected_contacts[]')
     for contact_id in contact_ids:
         contact = Contact.query.filter_by(client_no=session['client_no'],id=contact_id).first()
+        conversation = Conversation.query.filter_by(msisdn=contact.msisdn).first()
+        if conversation or conversation != None:
+            conversation.contact_name = None
+            conversation.display_name = contact.msisdn
+            db.session.commit()
         db.session.delete(contact)
+        contact_groups = ContactGroup.query.filter_by(contact_id=contact.id).all()
         db.session.commit()
-    return jsonify(status='success'),201
+
+        for contact_group in contact_groups:
+            group = Group.query.filter_by(id=contact_group.group_id).first()
+            db.session.delete(contact_group)
+            db.session.commit()
+
+            group.size = ContactGroup.query.filter_by(group_id=group.id).count()
+            db.session.commit()
+
+    complete_contacts = Contact.query.filter_by(client_no=session['client_no']).order_by(Contact.name)
+
+    complete_groups = Group.query.filter_by(client_no=session['client_no']).order_by(Group.name)
+    contact_count = Contact.query.filter_by(client_no=session['client_no']).count()
+    customers_count = Contact.query.filter_by(client_no=session['client_no'], contact_type='Customer').count()
+    staff_count = Contact.query.filter_by(client_no=session['client_no'], contact_type='Staff').count()
+
+    return jsonify(
+        status='success',
+        recipient_template=flask.render_template(
+            'individual_recipients_refresh.html',
+            contacts=complete_contacts,
+            selected_contacts=session['individual_recipients']
+            ),
+        group_template=flask.render_template(
+            'group_recipients_refresh.html',
+            groups=complete_groups,
+            contact_count=contact_count,
+            customers_count=customers_count,
+            staff_count=staff_count,
+            selected_groups=session['group_recipients']
+            )
+        )
 
 
 @app.route('/groups/delete',methods=['GET','POST'])

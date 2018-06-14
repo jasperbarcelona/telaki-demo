@@ -517,16 +517,26 @@ function add_contact() {
       contact_type:contact_type
     },
     function(data){
-      $('#addContactModal').modal('hide');
-      $('.content').html(data['template']);
       $('#addContactBtn').button('complete');
-      $('#recipientContactContainer').html(data['recipient_template']);
-      $('#recipientGroupContainer').html(data['group_template']);
-      $('#addContactModal .contact-group-container').html(data['groups_template']);
-      $('#addContactModal .form-control').val('');
-      $('#addContactModal .contact-type-picker').removeClass('selected');
-      $('#addContactModal .group-picker').removeClass('selected');
-      $('#addContactModal .form-control').change();
+      if (data['status'] == 'failed') {
+        $('#replyError .snackbar-message').html(data['message']);
+        $('#replyError').fadeIn();
+        $("html, body").animate({ scrollTop: $(document).height()-$(window).height() });
+        setTimeout(function() {
+          $('#replyError').fadeOut();
+        }, 4000);
+      }
+      else {
+        $('#addContactModal').modal('hide');
+        $('.content').html(data['template']);
+        $('#recipientContactContainer').html(data['recipient_template']);
+        $('#recipientGroupContainer').html(data['group_template']);
+        $('#addContactModal .contact-group-container').html(data['groups_template']);
+        $('#addContactModal .form-control').val('');
+        $('#addContactModal .contact-type-picker').removeClass('selected');
+        $('#addContactModal .group-picker').removeClass('selected');
+        $('#addContactModal .form-control').change();
+      }
     });
 }
 
@@ -673,6 +683,7 @@ function send_reply() {
         }, 4000);
       }
       else {
+        $('#replyError').html('There was an error, please try again.');
         $('#replyError').fadeIn();
         setTimeout(function() {
           $('#replyError').fadeOut();
@@ -1673,6 +1684,8 @@ function delete_contacts() {
   function(data){
     show_contacts('continue');
     $('#deleteContactsModal').modal('hide');
+    $('#recipientContactContainer').html(data['recipient_template']);
+    $('#recipientGroupContainer').html(data['group_template']);
   });
 }
 
@@ -1903,7 +1916,7 @@ function validate_password_reset(element,value) {
 
 function reset_password() {
   $('#saveResetPasswordBtn').button('complete');
-  password = $('resetPasswordText').val();
+  password = $('#resetPasswordText').val();
   $.post('/user/password/reset',
   {
     password:password
@@ -2009,7 +2022,18 @@ function save_password() {
     password:password
   },
   function(data){
-    $('#changePasswordModal').modal('hide');
+    if (data['status'] == 'success') {
+      $('#changePasswordModal').modal('hide');
+    }
+    else {
+      $('#replyError .snackbar-message').html(data['message']);
+      $('#replyError').fadeIn();
+      $("html, body").animate({ scrollTop: $(document).height()-$(window).height() });
+      setTimeout(function() {
+        $('#replyError').fadeOut();
+      }, 4000);
+    }
+    $('#savePasswordBtn').button('complete');
   });
 }
 
