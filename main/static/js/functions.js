@@ -1481,6 +1481,7 @@ function search_users(active_text) {
   var name = $('#searchUsersName').val();
   var role = $('#searchUsersRole').val();
   var email = $('#searchUsersEmail').val();
+  var api_key = $('#searchUsersApi').val();
   if ((name == '') && (role == '') && (email == '')) {
     $.get('/users',
     {
@@ -1499,7 +1500,8 @@ function search_users(active_text) {
     {
       name:name,
       role:role,
-      email:email
+      email:email,
+      api_key:api_key
     },
     function(data){
       $('#usersTbody').html(data['template']);

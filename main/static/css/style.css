@@ -390,6 +390,10 @@ select {
 	width: 20%;
 }
 
+#editUserApi, .user-api-td {
+	cursor: text !important;
+}
+
 #messageContainer {
 	position: fixed;
 	bottom: 0;

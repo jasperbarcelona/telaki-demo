@@ -90,6 +90,16 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+def generate_api_key():
+    unique = False
+    while unique == False:
+        api_key = ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(32))
+        existing = AdminUser.query.filter_by(api_key=api_key).first()
+        if not existing or existing == None:
+            unique = True
+    return api_key
+
+
 def search_conversations(**kwargs):
     query = 'Conversation.query.filter(Conversation.client_no.ilike("'+session['client_no']+'"),'
     for arg_name in kwargs:
@@ -186,6 +196,216 @@ def search_groups_count(**kwargs):
             query += 'Group.' + arg_name + '.ilike("%'+kwargs[arg_name]+'%"),'
     query += ').count()'
     return eval(query)
+
+
+@app.route('/api/sms/outgoing/1/',methods=['GET','POST'])
+def api_outgoing_get():
+    data = flask.request.args.to_dict()
+
+    missing_fields = []
+    if not 'api_key' in data:
+        missing_fields.append('api_key')
+    elif data['api_key'] == '':
+        missing_fields.append('api_key')
+
+    if not 'msisdn' in data:
+        missing_fields.append('msisdn')
+    elif data['msisdn'] == '':
+        missing_fields.append('msisdn')
+
+    if not 'message' in data:
+        missing_fields.append('message')
+    elif data['message'] == '':
+        missing_fields.append('message')
+
+    if not 'client_id' in data:
+        missing_fields.append('client_id')
+    elif data['client_id'] == '':
+        missing_fields.append('client_id')
+
+    if len(missing_fields) != 0:
+        return jsonify(
+            status='failed',
+            message='Missing fields: %s' % ", ".join(missing_fields)
+            ),400
+
+    if len(data['msisdn']) != 11 or not data['msisdn'].isdigit() or data['msisdn'][0:2] != '09':
+        return jsonify(
+            status='failed',
+            message='Invalid msisdn'
+            ),400
+
+    client = Client.query.filter_by(client_no=data['client_id']).first()
+
+    if not client or client == None:
+        return jsonify(
+            status='failed',
+            message='Invalid client_id'
+            ),403
+
+    user = AdminUser.query.filter_by(api_key=data['api_key']).first()
+
+    if not user or user == None:
+        return jsonify(
+            status='failed',
+            message='Invalide api_key'
+            ),401
+
+    message_options = {
+        'app_id': client.app_id,
+        'app_secret': client.app_secret,
+        'message': data['message'],
+        'address': data['msisdn'],
+        'passphrase': client.passphrase,
+    }
+    try:
+        r = requests.post(IPP_URL%client.shortcode,message_options)
+        if r.status_code != 201:
+            return jsonify(status='failed')
+
+        conversation = Conversation.query.filter_by(msisdn=data['msisdn']).first()
+        if not conversation or conversation == None:
+            conversation = Conversation(
+                client_no=data['client_id'],
+                msisdn=data['msisdn'],
+                display_name=data['msisdn'],
+                status='read',
+                created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
+                )
+            db.session.add(conversation)
+            db.session.commit()
+
+        reply = ConversationItem(
+            conversation_id=conversation.id,
+            message_type='outbound',
+            date=datetime.datetime.now().strftime('%B %d, %Y'),
+            time=time.strftime("%I:%M %p"),
+            content=data['message'],
+            outbound_sender_id=user.id,
+            outbound_sender_name=user.name,
+            created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
+            )
+        db.session.add(reply)
+        db.session.commit()
+        conversation.latest_content = data['message']
+        conversation.latest_date = reply.date
+        conversation.latest_time = reply.time
+        conversation.created_at = reply.created_at
+        db.session.commit()
+        return jsonify(
+            status='success',
+            message='Your message to %s has been successfully sent.' % data['msisdn']
+            ),201
+    except requests.exceptions.ConnectionError as e:
+        return jsonify(
+            status='failed',
+            message='Something went wrong, please try again.'
+            ),500
+
+
+@app.route('/api/sms/outgoing/2/',methods=['GET','POST'])
+def api_outgoing_post():
+    data = flask.request.form.to_dict()
+
+    missing_fields = []
+    if not 'api_key' in data:
+        missing_fields.append('api_key')
+    elif data['api_key'] == '':
+        missing_fields.append('api_key')
+
+    if not 'msisdn' in data:
+        missing_fields.append('msisdn')
+    elif data['msisdn'] == '':
+        missing_fields.append('msisdn')
+
+    if not 'message' in data:
+        missing_fields.append('message')
+    elif data['message'] == '':
+        missing_fields.append('message')
+
+    if not 'client_id' in data:
+        missing_fields.append('client_id')
+    elif data['client_id'] == '':
+        missing_fields.append('client_id')
+
+    if len(missing_fields) != 0:
+        return jsonify(
+            status='failed',
+            message='Missing fields: %s' % ", ".join(missing_fields)
+            ),400
+
+    if len(data['msisdn']) != 11 or not data['msisdn'].isdigit() or data['msisdn'][0:2] != '09':
+        return jsonify(
+            status='failed',
+            message='Invalid msisdn'
+            ),400
+
+    client = Client.query.filter_by(client_no=data['client_id']).first()
+
+    if not client or client == None:
+        return jsonify(
+            status='failed',
+            message='Invalid client_id'
+            ),403
+
+    user = AdminUser.query.filter_by(api_key=data['api_key']).first()
+
+    if not user or user == None:
+        return jsonify(
+            status='failed',
+            message='Invalide api_key'
+            ),401
+
+    message_options = {
+        'app_id': client.app_id,
+        'app_secret': client.app_secret,
+        'message': data['message'],
+        'address': data['msisdn'],
+        'passphrase': client.passphrase,
+    }
+    try:
+        r = requests.post(IPP_URL%client.shortcode,message_options)
+        if r.status_code != 201:
+            return jsonify(status='failed')
+
+        conversation = Conversation.query.filter_by(msisdn=data['msisdn']).first()
+        if not conversation or conversation == None:
+            conversation = Conversation(
+                client_no=data['client_id'],
+                msisdn=data['msisdn'],
+                display_name=data['msisdn'],
+                status='read',
+                created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
+                )
+            db.session.add(conversation)
+            db.session.commit()
+
+        reply = ConversationItem(
+            conversation_id=conversation.id,
+            message_type='outbound',
+            date=datetime.datetime.now().strftime('%B %d, %Y'),
+            time=time.strftime("%I:%M %p"),
+            content=data['message'],
+            outbound_sender_id=user.id,
+            outbound_sender_name=user.name,
+            created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
+            )
+        db.session.add(reply)
+        db.session.commit()
+        conversation.latest_content = data['message']
+        conversation.latest_date = reply.date
+        conversation.latest_time = reply.time
+        conversation.created_at = reply.created_at
+        db.session.commit()
+        return jsonify(
+            status='success',
+            message='Your message to %s has been successfully sent.' % data['msisdn']
+            ),201
+    except requests.exceptions.ConnectionError as e:
+        return jsonify(
+            status='failed',
+            message='Something went wrong, please try again.'
+            ),500
 
 
 @app.route('/',methods=['GET','POST'])
@@ -293,6 +513,7 @@ def add_user():
         email=data['email'],
         password=data['temp_pw'],
         temp_pw=data['temp_pw'],
+        api_key=generate_api_key(),
         name=data['name'].title(),
         role=data['role'],
         added_by_id=session['user_id'],
@@ -2287,6 +2508,7 @@ def rebuild_database():
         client_no='at-ic2018',
         email='hello@pisara.tech',
         password='ratmaxi8',
+        api_key=generate_api_key(),
         name='Super Admin',
         role='Administrator',
         join_date=datetime.datetime.now().strftime('%B %d, %Y'),
@@ -2298,6 +2520,7 @@ def rebuild_database():
         client_no='at-ic2018',
         email='ballesteros.alan@gmail.com',
         password='password123',
+        api_key=generate_api_key(),
         name='Alan Ballesteros',
         role='Administrator',
         join_date=datetime.datetime.now().strftime('%B %d, %Y'),

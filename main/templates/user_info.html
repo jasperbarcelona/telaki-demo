@@ -18,6 +18,9 @@
     </select>
     <div id="errorUserRoleEdit" class="error-icon-container hidden tooltip" title="This field is required." title="This field is required."><i class="material-icons">&#xE001;</i></div>
 </div>
+<div class="input-container whole">
+    <input type="text" id="editUserApi" class="form-control floatlabel" data-class="input-label" placeholder="Api Key" value="{{ user.api_key }}" readonly>
+</div>
 
 <button id="resetUserPasswordBtn" class="btn btn-primary" data-toggle="modal" data-target="#resetPasswordModal">Reset Password</button>
 <button id="deleteUserBtn" class="btn btn-primary" data-toggle="modal" data-target="#deleteUserModal">Delete User</button>

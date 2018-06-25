@@ -45,6 +45,7 @@ class AdminUser(db.Model):
     client_no = db.Column(db.String(32))
     email = db.Column(db.String(60))
     password = db.Column(db.String(20))
+    api_key = db.Column(db.String(32))
     temp_pw = db.Column(db.String(20))
     name = db.Column(db.String(100))
     role = db.Column(db.String(30))

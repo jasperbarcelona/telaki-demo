@@ -48,6 +48,9 @@
 				<td class="user-email-td">
 					<input type="text" id="searchUsersEmail" class="form-control search-users search-text" placeholder="Email">
 				</td>
+				<td class="user-api-td">
+					<input type="text" id="searchUsersApi" class="form-control search-users search-text" placeholder="Api Key">
+				</td>
 			</tr>
 		</thead>
 		<tbody id="usersTbody">
@@ -62,6 +65,9 @@
 				</td>
 				<td class="user-email-td" data-toggle="modal" data-target="#editUserModal" onclick="supply_user_info({{ user.id }})">
 					{{ user.email }}
+				</td>
+				<td class="user-api-td" data-toggle="modal">
+					{{ user.api_key }}
 				</td>
 			</tr>
 			{% endfor %}
