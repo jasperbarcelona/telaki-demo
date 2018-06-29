@@ -48,7 +48,7 @@
 		<textarea oninput="replyCounter(this,'replyCharacterCounter',980);" class="form-control" id="conversationReply" placeholder="Write your reply here."></textarea>
 		<div class="reply-footer-container">
 			<div class="reply-footer-left">
-				<button type="button" id="sendReplyBtn" class="btn btn-primary" onclick="send_reply()" data-loading-text="Sending.." data-complete-text="Send">Send</button>
+				<button type="button" id="sendReplyBtn" class="btn btn-primary" onclick="send_reply()" data-loading-text="Sending.." data-complete-text="Send" disabled>Send</button>
 			</div>
 			<div class="reply-footer-right">
 				<div>
@@ -58,3 +58,14 @@
 		</div>
 	</div>
 </div>
+
+<script type="text/javascript">
+	$('#conversationReply').keyup(function(e){
+	  if ($(this).val() != '') {
+	    $('#sendReplyBtn').attr('disabled',false);
+	  }
+	  else {
+	    $('#sendReplyBtn').attr('disabled',true);
+	  }
+	});
+</script>

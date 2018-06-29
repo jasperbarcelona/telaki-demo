@@ -13,6 +13,7 @@ from flask import jsonify
 import random
 import string
 import xlrd
+import math
 
 app = Celery('tasks', broker='amqp://admin:password@rabbitmq/telaki')
 
@@ -47,15 +48,47 @@ def blast_sms(batch_id,date,time,message_content,client_no):
         #     'secret_key': 'c4c461cc5aa5f9f89b701bc016a73e9981713be1bf7bb057c875dbfacff86e1d',
         # }
 
+        bill = Bill.query.filter_by(date=datetime.datetime.now().strftime('%d, %Y')).first()
+
+        if not bill or bill == None:
+            bill = Bill(
+                date=datetime.datetime.now().strftime('%d, %Y'),
+                created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f'),
+                used=0,
+                available=2200,
+                exceed=0
+                )
+            db.session.add(bill)
+            db.session.commit()
 
         try:
             r = requests.post(IPP_URL%client.shortcode,message_options)           
             if r.status_code == 201:
                 message.status = 'success'
                 message.timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
+                message.bill_id = bill.id
+                bill.used = bill.used + int(math.ceil(message.characters/float(160)))
+
+                previous_available = bill.available
+
+                if bill.available < int(math.ceil(message.characters/float(160))):
+                    bill.available = 0
+                else:
+                    bill.available = bill.available - int(math.ceil(message.characters/float(160)))
+                db.session.commit()
+
+                if bill.available == 0:
+                    message.cost = '{0:.2f}'.format(float(math.ceil(message.characters/float(160)) * 0.70))
+                    bill.exceed = int(math.ceil(outbound.characters/float(160))) - previous_available
+                    bill.price = '{0:.2f}'.format(float('{0:.2f}'.format(float(bill.price))) + float(message.cost))
+                else:
+                    message.cost = '0.00'
+         
             else:
                 message.status = 'failed'
                 message.timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
+                message.bill_id = bill.id
+                message.cost = '0.00'
 
             db.session.commit()
 
@@ -167,9 +200,25 @@ def send_reminders(batch_id,date,time,client_no):
             if r.status_code == 201:
                 message.status = 'success'
                 message.timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
+                message.bill_id = bill.id
+                bill.used = bill.used + int(math.ceil(message.characters/float(160)))
+
+                if bill.available < int(math.ceil(message.characters/float(160))):
+                    bill.available = 0
+                else:
+                    bill.available = bill.available - int(math.ceil(message.characters/float(160)))
+                db.session.commit()
+
+                if bill.available == 0:
+                    message.cost = 'PHP %s' % '{0:.2f}'.format(float(math.ceil(message.characters/float(160)) * 0.70))
+                    bill.price = '{0:.2f}'.format(float('{0:.2f}'.format(float(bill.price))) + float(message.cost))
+                else:
+                    message.cost = 'PHP 0.00'
             else:
                 message.status = 'failed'
                 message.timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
+                message.bill_id = bill.id
+                message.cost = 'PHP 0.00'
 
             db.session.commit()
 

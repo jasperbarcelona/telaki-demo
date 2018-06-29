@@ -113,11 +113,23 @@ class Contact(db.Model):
 class OutboundMessage(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     batch_id = db.Column(db.Integer())
+    bill_id = db.Column(db.Integer())
     date = db.Column(db.String(20))
     time = db.Column(db.String(10))
     contact_name = db.Column(db.String(100))
     msisdn = db.Column(db.String(30))
+    content = db.Column(db.Text())
+    characters = db.Column(db.Integer())
+    cost = db.Column(db.String(10))
     status = db.Column(db.String(30),default='pending')
+    created_at = db.Column(db.String(50))
+
+class Bill(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    date = db.Column(db.String(60))
+    used = db.Column(db.Integer())
+    available = db.Column(db.Integer())
+    price = db.Column(db.String(30),default='1299.00')
     created_at = db.Column(db.String(50))
 
 class ReminderMessage(db.Model):

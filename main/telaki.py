@@ -39,6 +39,7 @@ import db_conn
 from db_conn import db, app
 from models import *
 import xlrd
+import math
 
 IPP_URL = 'https://devapi.globelabs.com.ph/smsmessaging/v1/outbound/%s/requests'
 ALSONS_APP_ID = 'MEoztReRyeHzaiXxaecR65HnqE98tz9g'
@@ -74,6 +75,7 @@ admin.add_view(SchoolAdmin(ConversationItem, db.session))
 admin.add_view(SchoolAdmin(Group, db.session))
 admin.add_view(SchoolAdmin(ContactGroup, db.session))
 admin.add_view(SchoolAdmin(ContactBatch, db.session))
+admin.add_view(SchoolAdmin(Bill, db.session))
 
 def nocache(view):
     @wraps(view)
@@ -287,6 +289,45 @@ def api_outgoing_get():
             )
         db.session.add(reply)
         db.session.commit()
+
+        bill = Bill.query.filter_by(date=datetime.datetime.now().strftime('%d, %Y')).first()
+
+        if not bill or bill == None:
+            bill = Bill(
+                date=datetime.datetime.now().strftime('%d, %Y'),
+                created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f'),
+                used=0,
+                available=2200
+                )
+            db.session.add(bill)
+            db.session.commit()
+
+        outbound = OutboundMessage(
+            date=reply.date,
+            time=reply.time,
+            content=reply.content,
+            characters=len(reply.content),
+            msisdn=conversation.msisdn
+            )
+
+        db.session.add(outbound)
+        db.session.commit()
+
+        outbound.bill_id = bill.id
+        bill.used = bill.used + int(math.ceil(outbound.characters/float(160)))
+
+        if bill.available < int(math.ceil(outbound.characters/float(160))):
+            bill.available = 0
+        else:
+            bill.available = bill.available - int(math.ceil(outbound.characters/float(160)))
+        db.session.commit()
+
+        if bill.available == 0:
+            outbound.cost = '{0:.2f}'.format(float(math.ceil(outbound.characters/float(160)) * 0.70))
+            bill.price = '{0:.2f}'.format(float('{0:.2f}'.format(float(bill.price))) + float(outbound.cost))
+        else:
+            outbound.cost = '0.00'
+
         conversation.latest_content = data['message']
         conversation.latest_date = reply.date
         conversation.latest_time = reply.time
@@ -294,7 +335,7 @@ def api_outgoing_get():
         db.session.commit()
         return jsonify(
             status='success',
-            message='Your message to %s has been successfully sent.' % data['msisdn']
+            message='Your message to %s has been successfully sent.' % conversation.display_name
             ),201
     except requests.exceptions.ConnectionError as e:
         return jsonify(
@@ -392,6 +433,45 @@ def api_outgoing_post():
             )
         db.session.add(reply)
         db.session.commit()
+
+        bill = Bill.query.filter_by(date=datetime.datetime.now().strftime('%d, %Y')).first()
+
+        if not bill or bill == None:
+            bill = Bill(
+                date=datetime.datetime.now().strftime('%d, %Y'),
+                created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f'),
+                used=0,
+                available=2200
+                )
+            db.session.add(bill)
+            db.session.commit()
+
+        outbound = OutboundMessage(
+            date=reply.date,
+            time=reply.time,
+            content=reply.content,
+            characters=len(reply.content),
+            msisdn=conversation.msisdn
+            )
+
+        db.session.add(outbound)
+        db.session.commit()
+
+        outbound.bill_id = bill.id
+        bill.used = bill.used + int(math.ceil(outbound.characters/float(160)))
+
+        if bill.available < int(math.ceil(outbound.characters/float(160))):
+            bill.available = 0
+        else:
+            bill.available = bill.available - int(math.ceil(outbound.characters/float(160)))
+        db.session.commit()
+
+        if bill.available == 0:
+            outbound.cost = '{0:.2f}'.format(float(math.ceil(outbound.characters/float(160)) * 0.70))
+            bill.price = '{0:.2f}'.format(float('{0:.2f}'.format(float(bill.price))) + float(outbound.cost))
+        else:
+            outbound.cost = '0.00'
+
         conversation.latest_content = data['message']
         conversation.latest_date = reply.date
         conversation.latest_time = reply.time
@@ -399,7 +479,7 @@ def api_outgoing_post():
         db.session.commit()
         return jsonify(
             status='success',
-            message='Your message to %s has been successfully sent.' % data['msisdn']
+            message='Your message to %s has been successfully sent.' % conversation.display_name
             ),201
     except requests.exceptions.ConnectionError as e:
         return jsonify(
@@ -1638,6 +1718,45 @@ def send_reply():
             )
         db.session.add(reply)
         db.session.commit()
+
+        bill = Bill.query.filter_by(date=datetime.datetime.now().strftime('%d, %Y')).first()
+
+        if not bill or bill == None:
+            bill = Bill(
+                date=datetime.datetime.now().strftime('%d, %Y'),
+                created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f'),
+                used=0,
+                available=2200
+                )
+            db.session.add(bill)
+            db.session.commit()
+
+        outbound = OutboundMessage(
+            date=reply.date,
+            time=reply.time,
+            content=reply.content,
+            characters=len(reply.content),
+            msisdn=conversation.msisdn
+            )
+
+        db.session.add(outbound)
+        db.session.commit()
+
+        outbound.bill_id = bill.id
+        bill.used = bill.used + int(math.ceil(outbound.characters/float(160)))
+
+        if bill.available < int(math.ceil(outbound.characters/float(160))):
+            bill.available = 0
+        else:
+            bill.available = bill.available - int(math.ceil(outbound.characters/float(160)))
+        db.session.commit()
+
+        if bill.available == 0:
+            outbound.cost = '{0:.2f}'.format(float(math.ceil(outbound.characters/float(160)) * 0.70))
+            bill.price = '{0:.2f}'.format(float('{0:.2f}'.format(float(bill.price))) + float(outbound.cost))
+        else:
+            outbound.cost = '0.00'
+
         conversation.latest_content = message_content
         conversation.latest_date = reply.date
         conversation.latest_time = reply.time
@@ -2017,6 +2136,8 @@ def send_text_blast():
                 date=new_batch.date,
                 time=new_batch.time,
                 contact_name=contact.name,
+                content=data['content'],
+                characters=len(data['content']),
                 msisdn=contact.msisdn
                 )
             db.session.add(new_message)
@@ -2027,6 +2148,8 @@ def send_text_blast():
                     batch_id=new_batch.id,
                     date=new_batch.date,
                     time=new_batch.time,
+                    content=data['content'],
+                    characters=len(data['content']),
                     msisdn=msisdn
                     )
                 db.session.add(number_message)
@@ -2090,6 +2213,8 @@ def send_text_blast():
                     date=new_batch.date,
                     time=new_batch.time,
                     contact_name=contact.name,
+                    content=data['content'],
+                    characters=len(data['content']),
                     msisdn=contact.msisdn
                     )
                 db.session.add(new_message)
@@ -2104,6 +2229,8 @@ def send_text_blast():
                 date=new_batch.date,
                 time=new_batch.time,
                 contact_name=contact.name,
+                content=data['content'],
+                characters=len(data['content']),
                 msisdn=contact.msisdn
                 )
             db.session.add(new_message)
@@ -2115,11 +2242,12 @@ def send_text_blast():
                 batch_id=new_batch.id,
                 date=new_batch.date,
                 time=new_batch.time,
+                content=data['content'],
+                characters=len(data['content']),
                 msisdn=msisdn
                 )
             db.session.add(number_message)
         db.session.commit()
-
 
     new_batch.batch_size = OutboundMessage.query.filter_by(batch_id=new_batch.id).count()
     new_batch.pending = OutboundMessage.query.filter_by(batch_id=new_batch.id,status='pending').count()
@@ -2497,10 +2625,20 @@ def rebuild_database():
     client = Client(
         client_no='at-ic2018',
         name='Alson\'s Trading',
-        app_id='EGXMuB5eEgCMLTKxExieqkCGeGeGuBon',
-        app_secret='f3e1ab30e23ea7a58105f058318785ae236378d1d9ebac58fe8b42e1e239e1c3',
-        passphrase='24BUubukMQ',
-        shortcode='21588479',
+        app_id='zykMFbBBEoC7kcRM5ATB8GCdXyneFr5M',
+        app_secret='5d6229c0bda4559fc5e8cd46b846916c9a7a6e017a534773a5fd7101a35aafce',
+        passphrase='OTSGLVHtOl',
+        shortcode='21585037',
+        created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
+        )
+
+    client1 = Client(
+        client_no='jm-ic2018',
+        name='Jayson Marketing',
+        app_id='KexjCRk5zLh5riGx55c5g6hq6eeBCzrA',
+        app_secret='3d273dc09cb97d80dd8090a1119bfb0356215f588c46a2d9375715e9a712710e',
+        passphrase='EPeqdo6gPp',
+        shortcode='21584947',
         created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
         )
 
@@ -2868,6 +3006,7 @@ def rebuild_database():
     # #     )
     
     db.session.add(client)
+    db.session.add(client1)
     # db.session.add(client1)
     db.session.add(admin)
     db.session.add(admin1)
