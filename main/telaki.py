@@ -290,14 +290,16 @@ def api_outgoing_get():
         db.session.add(reply)
         db.session.commit()
 
-        bill = Bill.query.filter_by(date=datetime.datetime.now().strftime('%d, %Y')).first()
+        bill = Bill.query.filter_by(date=datetime.datetime.now().strftime('%d, %Y'), client_no=data['client_id']).first()
 
         if not bill or bill == None:
             bill = Bill(
                 date=datetime.datetime.now().strftime('%d, %Y'),
+                client_no=data['client_id'],
                 created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f'),
                 used=0,
-                available=2200
+                price=client.plan,
+                available=client.max_outgoing
                 )
             db.session.add(bill)
             db.session.commit()
@@ -434,14 +436,16 @@ def api_outgoing_post():
         db.session.add(reply)
         db.session.commit()
 
-        bill = Bill.query.filter_by(date=datetime.datetime.now().strftime('%d, %Y')).first()
+        bill = Bill.query.filter_by(date=datetime.datetime.now().strftime('%d, %Y'), client_no=data['client_id']).first()
 
         if not bill or bill == None:
             bill = Bill(
                 date=datetime.datetime.now().strftime('%d, %Y'),
+                client_no=data['client_id'],
                 created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f'),
                 used=0,
-                available=2200
+                price=client.plan,
+                available=client.max_outgoing
                 )
             db.session.add(bill)
             db.session.commit()
@@ -564,11 +568,9 @@ def authenticate_user():
     client = Client.query.filter_by(client_no=data['client_no']).first()
     if not client or client == None:
         return jsonify(status='failed', error='Invalid client number.')
-    user = AdminUser.query.filter_by(email=data['user_email'],password=data['user_password']).first()
+    user = AdminUser.query.filter_by(email=data['user_email'],password=data['user_password'],client_no=data['client_no']).first()
     if not user or user == None:
         return jsonify(status='failed', error='Invalid email or password.')
-    if user.client_no != client.client_no:
-        return jsonify(status='failed', error='Not authorized.')
     session['user_name'] = user.name
     session['user_id'] = user.id
     session['client_no'] = client.client_no
@@ -1719,14 +1721,16 @@ def send_reply():
         db.session.add(reply)
         db.session.commit()
 
-        bill = Bill.query.filter_by(date=datetime.datetime.now().strftime('%d, %Y')).first()
+        bill = Bill.query.filter_by(date=datetime.datetime.now().strftime('%d, %Y'), client_no=session['client_no']).first()
 
         if not bill or bill == None:
             bill = Bill(
                 date=datetime.datetime.now().strftime('%d, %Y'),
+                client_no=session['client_no'],
                 created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f'),
                 used=0,
-                available=2200
+                price=client.plan,
+                available=client.max_outgoing
                 )
             db.session.add(bill)
             db.session.commit()
@@ -2629,6 +2633,8 @@ def rebuild_database():
         app_secret='5d6229c0bda4559fc5e8cd46b846916c9a7a6e017a534773a5fd7101a35aafce',
         passphrase='OTSGLVHtOl',
         shortcode='21585037',
+        plan='1299.00',
+        max_outgoing=2500,
         created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
         )
 
@@ -2639,6 +2645,8 @@ def rebuild_database():
         app_secret='3d273dc09cb97d80dd8090a1119bfb0356215f588c46a2d9375715e9a712710e',
         passphrase='EPeqdo6gPp',
         shortcode='21584947',
+        plan='799.00',
+        max_outgoing=1500,
         created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
         )
 
@@ -2656,6 +2664,18 @@ def rebuild_database():
 
     admin1 = AdminUser(
         client_no='at-ic2018',
+        email='ballesteros.alan@gmail.com',
+        password='password123',
+        api_key=generate_api_key(),
+        name='Alan Ballesteros',
+        role='Administrator',
+        join_date=datetime.datetime.now().strftime('%B %d, %Y'),
+        added_by_name='None',
+        created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')
+        )
+
+    admin2 = AdminUser(
+        client_no='jm-ic2018',
         email='ballesteros.alan@gmail.com',
         password='password123',
         api_key=generate_api_key(),
@@ -3010,7 +3030,7 @@ def rebuild_database():
     # db.session.add(client1)
     db.session.add(admin)
     db.session.add(admin1)
-    # db.session.add(admin2)
+    db.session.add(admin2)
     # db.session.add(contact)
     # db.session.add(conversations)
     db.session.add(conversations1)

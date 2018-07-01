@@ -37,6 +37,7 @@ class Client(db.Model):
     app_id = db.Column(db.Text())
     app_secret = db.Column(db.Text())
     passphrase = db.Column(db.Text())
+    plan = db.Column(db.String(30))
     shortcode = db.Column(db.String(30))
     created_at = db.Column(db.String(50))
 
@@ -126,10 +127,11 @@ class OutboundMessage(db.Model):
 
 class Bill(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    client_no = db.Column(db.String(32))
     date = db.Column(db.String(60))
     used = db.Column(db.Integer())
     available = db.Column(db.Integer())
-    price = db.Column(db.String(30),default='1299.00')
+    price = db.Column(db.String(30))
     created_at = db.Column(db.String(50))
 
 class ReminderMessage(db.Model):
