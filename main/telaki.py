@@ -1555,6 +1555,7 @@ def upload_file():
                     contact_name=contact.name,
                     msisdn=contact.msisdn,
                     content=vals[1],
+                    characters=len(vals[1]),
                     date=new_reminder.date,
                     time=new_reminder.time,
                     )
@@ -1563,6 +1564,7 @@ def upload_file():
                     batch_id=new_reminder.id,
                     msisdn='0%s'%vals[0][-10:],
                     content=vals[1],
+                    characters=len(vals[1]),
                     date=new_reminder.date,
                     time=new_reminder.time,
                     )

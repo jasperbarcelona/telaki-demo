@@ -143,6 +143,8 @@ class ReminderMessage(db.Model):
     contact_name = db.Column(db.String(100), default='Unknown')
     content = db.Column(db.Text())
     msisdn = db.Column(db.String(30))
+    characters = db.Column(db.Integer())
+    cost = db.Column(db.String(10))
     status = db.Column(db.String(30),default='pending')
     created_at = db.Column(db.String(50))
 
