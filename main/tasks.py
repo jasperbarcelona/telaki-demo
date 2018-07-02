@@ -48,16 +48,16 @@ def blast_sms(batch_id,date,time,message_content,client_no):
         #     'secret_key': 'c4c461cc5aa5f9f89b701bc016a73e9981713be1bf7bb057c875dbfacff86e1d',
         # }
 
-        bill = Bill.query.filter_by(date=datetime.datetime.now().strftime('%d, %Y'), client_no=client_no).first()
+        bill = Bill.query.filter_by(date=datetime.datetime.now().strftime('%B, %Y'), client_no=client_no).first()
 
         if not bill or bill == None:
             bill = Bill(
-                date=datetime.datetime.now().strftime('%d, %Y'),
+                date=datetime.datetime.now().strftime('%B, %Y'),
                 client_no=client_no,
                 created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f'),
                 used=0,
                 price=client.plan,
-                available=2200
+                available=client.max_outgoing
                 )
             db.session.add(bill)
             db.session.commit()
@@ -193,11 +193,11 @@ def send_reminders(batch_id,date,time,client_no):
             'passphrase': client.passphrase,
         }
 
-        bill = Bill.query.filter_by(date=datetime.datetime.now().strftime('%d, %Y'), client_no=client_no).first()
+        bill = Bill.query.filter_by(date=datetime.datetime.now().strftime('%B, %Y'), client_no=client_no).first()
 
         if not bill or bill == None:
             bill = Bill(
-                date=datetime.datetime.now().strftime('%d, %Y'),
+                date=datetime.datetime.now().strftime('%B, %Y'),
                 client_no=client_no,
                 created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f'),
                 used=0,

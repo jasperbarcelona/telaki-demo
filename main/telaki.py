@@ -290,11 +290,11 @@ def api_outgoing_get():
         db.session.add(reply)
         db.session.commit()
 
-        bill = Bill.query.filter_by(date=datetime.datetime.now().strftime('%d, %Y'), client_no=data['client_id']).first()
+        bill = Bill.query.filter_by(date=datetime.datetime.now().strftime('%B, %Y'), client_no=data['client_id']).first()
 
         if not bill or bill == None:
             bill = Bill(
-                date=datetime.datetime.now().strftime('%d, %Y'),
+                date=datetime.datetime.now().strftime('%B, %Y'),
                 client_no=data['client_id'],
                 created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f'),
                 used=0,
@@ -436,11 +436,11 @@ def api_outgoing_post():
         db.session.add(reply)
         db.session.commit()
 
-        bill = Bill.query.filter_by(date=datetime.datetime.now().strftime('%d, %Y'), client_no=data['client_id']).first()
+        bill = Bill.query.filter_by(date=datetime.datetime.now().strftime('%B, %Y'), client_no=data['client_id']).first()
 
         if not bill or bill == None:
             bill = Bill(
-                date=datetime.datetime.now().strftime('%d, %Y'),
+                date=datetime.datetime.now().strftime('%B, %Y'),
                 client_no=data['client_id'],
                 created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f'),
                 used=0,
@@ -516,6 +516,21 @@ def index():
         change_pw = 'yes'
     else:
         change_pw = 'no'
+
+    client = Client.query.filter_by(client_no=session['client_no']).first()
+    bill = Bill.query.filter_by(date=datetime.datetime.now().strftime('%B, %Y'), client_no=session['client_no']).first()
+
+    if not bill or bill == None:
+        bill = Bill(
+            date=datetime.datetime.now().strftime('%B, %Y'),
+            client_no=session['client_no'],
+            created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f'),
+            used=0,
+            price=client.plan,
+            available=client.max_outgoing
+            )
+        db.session.add(bill)
+        db.session.commit()
 
     if total_entries < 50:
         return flask.render_template(
@@ -1250,6 +1265,40 @@ def users():
     )
 
 
+@app.route('/usage',methods=['GET','POST'])
+def usage():
+    slice_from = flask.request.args.get('slice_from')
+    prev_btn = 'enabled'
+    if slice_from == 'reset':
+        session['usage_limit'] = 50
+        prev_btn = 'disabled'
+    total_entries = Bill.query.filter_by(client_no=session['client_no']).count()
+    bills = Bill.query.filter_by(client_no=session['client_no']).order_by(Bill.created_at).slice(session['usage_limit'] - 50, session['usage_limit'])
+    if total_entries < 50:
+        showing='1 - %s' % total_entries
+        prev_btn = 'disabled'
+        next_btn='disabled'
+    else:
+        diff = total_entries - (session['usage_limit'] - 50)
+        if diff > 50:
+            showing = '%s - %s' % (str(session['usage_limit'] - 49),str(session['usage_limit']))
+            next_btn='enabled'
+        else:
+            showing = '%s - %s' % (str(session['usage_limit'] - 49),str((session['usage_limit']-50)+diff))
+            prev_btn = 'enabled'
+            next_btn='disabled'
+
+    return flask.render_template(
+        'usage.html',
+        bills=bills,
+        user_id=session['user_id'],
+        showing=showing,
+        total_entries=total_entries,
+        prev_btn=prev_btn,
+        next_btn=next_btn,
+    )
+
+
 @app.route('/users/next',methods=['GET','POST'])
 def next_users():
     session['user_limit'] += 50
@@ -1721,11 +1770,11 @@ def send_reply():
         db.session.add(reply)
         db.session.commit()
 
-        bill = Bill.query.filter_by(date=datetime.datetime.now().strftime('%d, %Y'), client_no=session['client_no']).first()
+        bill = Bill.query.filter_by(date=datetime.datetime.now().strftime('%B, %Y'), client_no=session['client_no']).first()
 
         if not bill or bill == None:
             bill = Bill(
-                date=datetime.datetime.now().strftime('%d, %Y'),
+                date=datetime.datetime.now().strftime('%B, %Y'),
                 client_no=session['client_no'],
                 created_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f'),
                 used=0,

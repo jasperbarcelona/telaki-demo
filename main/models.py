@@ -39,6 +39,7 @@ class Client(db.Model):
     passphrase = db.Column(db.Text())
     plan = db.Column(db.String(30))
     shortcode = db.Column(db.String(30))
+    max_outgoing = db.Column(db.Integer())
     created_at = db.Column(db.String(50))
 
 class AdminUser(db.Model):

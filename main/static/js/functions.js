@@ -91,7 +91,18 @@ function show_users(slice_from) {
 }
 
 function show_usage(slice_from) {
-  alert('This feature will be available on paid version.');
+  $('.panel-nav-item').removeClass('active');
+  $('#navUsage').addClass('active');
+  $.get('/usage',
+  {
+    slice_from:slice_from
+  },
+    function(data){
+      initialize_selected_entries();
+      $('.content').html(data);
+      $('#searchLoader').addClass('hidden');
+      $('#clearConversationsSearch').addClass('hidden');
+    });
 }
 
 function user_profile() {
