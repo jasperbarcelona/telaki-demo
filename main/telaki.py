@@ -2828,9 +2828,9 @@ def rebuild_database():
     #     )
 
     conversations1 = Conversation(
-        client_no='at-ic2018',
-        msisdn='09176214704',
-        display_name='09176214704',
+        client_no='lcc',
+        msisdn='09175883615',
+        display_name='09175883615',
         status='unread',
         latest_content='This is a sample incoming message. You can try to reply to it',
         latest_date='November 14, 2017',
