@@ -2702,7 +2702,7 @@ def rebuild_database():
         )
 
     admin = AdminUser(
-        client_no='at-ic2018',
+        client_no='lcc',
         email='nvloloy@globe.com.ph',
         password='password123',
         api_key=generate_api_key(),
