@@ -2678,8 +2678,8 @@ def rebuild_database():
     db.create_all()
 
     client = Client(
-        client_no='at-ic2018',
-        name='Alson\'s Trading',
+        client_no='lcc',
+        name='LCC',
         app_id='zykMFbBBEoC7kcRM5ATB8GCdXyneFr5M',
         app_secret='5d6229c0bda4559fc5e8cd46b846916c9a7a6e017a534773a5fd7101a35aafce',
         passphrase='OTSGLVHtOl',
@@ -2703,8 +2703,8 @@ def rebuild_database():
 
     admin = AdminUser(
         client_no='at-ic2018',
-        email='hello@pisara.tech',
-        password='ratmaxi8',
+        email='nvloloy@globe.com.ph',
+        password='password123',
         api_key=generate_api_key(),
         name='Super Admin',
         role='Administrator',
